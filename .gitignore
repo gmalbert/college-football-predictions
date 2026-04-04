@@ -1,2 +1,26 @@
 .env
 venv
+college-football-predictions.code-workspace
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Streamlit / local app state
+.streamlit/
+*.log
+
+# Generated pipeline outputs
+data_files/raw/
+data_files/processed/
+data_files/features/
+data_files/models/
+
+# Keep static assets
+!data_files/logo.png
