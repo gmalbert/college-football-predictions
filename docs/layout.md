@@ -191,7 +191,7 @@ import streamlit as st
 def render_sidebar():
     """Standard sidebar rendered on every page."""
     with st.sidebar:
-        st.image("data_files/logo.png", use_container_width=True)
+        st.image("data_files/logo.png", width=200)
         st.divider()
 
         # Quick stats
@@ -234,7 +234,7 @@ gatherUsageStats = false
 ## 5. Responsive Design Notes
 
 - Use `st.columns()` for desktop multi-column layouts.
-- All images use `use_container_width=True` for mobile scaling.
+- Avoid `use_container_width=True`; use `width="stretch"` for responsive charts/dataframes and `width="content"` for fixed-width widgets.
 - Prefer `st.dataframe()` (scrollable) over `st.table()` for large datasets.
 - Use `st.expander()` to keep pages scannable on mobile.
 - Test on 375px (mobile), 768px (tablet), 1440px (desktop).

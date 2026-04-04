@@ -1,11 +1,15 @@
 # Feature Engineering Roadmap
 
+**Status:** ✅ Completed — implemented in `utils/feature_engine.py` and reflected in model training.
+
 This document defines every feature (and feature family) the models will
 consume, along with code to compute them from raw CFBD / ESPN data.
 
 ---
 
 ## 1. Feature Categories Overview
+
+**Status:** ✅ Completed
 
 | Category | # Features | Source |
 |----------|-----------|--------|
@@ -24,7 +28,11 @@ consume, along with code to compute them from raw CFBD / ESPN data.
 
 ## 2. Detailed Feature Definitions
 
+**Status:** ✅ Completed
+
 ### 2a. Elo & Power Ratings
+
+**Status:** ✅ Completed
 
 | Feature | Description |
 |---------|-------------|
@@ -36,6 +44,8 @@ consume, along with code to compute them from raw CFBD / ESPN data.
 | `sp_plus_diff` | `sp_plus_home - sp_plus_away` |
 
 ### 2b. Offensive Efficiency (rolling 5-game average)
+
+**Status:** ✅ Completed
 
 | Feature | Description |
 |---------|-------------|
@@ -53,6 +63,8 @@ consume, along with code to compute them from raw CFBD / ESPN data.
 | `off_pace` | Plays per game (tempo proxy) |
 
 ### 2c. Defensive Efficiency (rolling 5-game average)
+
+**Status:** ✅ Completed
 
 Mirror of offensive features with `def_` prefix, measured from the
 opponent's perspective:
@@ -74,6 +86,8 @@ opponent's perspective:
 
 ### 2d. Special Teams
 
+**Status:** ✅ Completed
+
 | Feature | Description |
 |---------|-------------|
 | `st_kick_return_avg` | Average kick return yards |
@@ -82,6 +96,8 @@ opponent's perspective:
 | `st_punt_net_avg` | Net punting average |
 
 ### 2e. Turnover & Penalties
+
+**Status:** ✅ Completed
 
 | Feature | Description |
 |---------|-------------|
@@ -92,6 +108,8 @@ opponent's perspective:
 
 ### 2f. Recruiting & Talent
 
+**Status:** ✅ Completed
+
 | Feature | Description |
 |---------|-------------|
 | `recruiting_rank` | Team's composite recruiting rank (3-yr avg) |
@@ -100,6 +118,8 @@ opponent's perspective:
 | `recruiting_diff` | `home_recruiting - away_recruiting` |
 
 ### 2g. Schedule & Context
+
+**Status:** ✅ Completed
 
 | Feature | Description |
 |---------|-------------|
@@ -113,6 +133,8 @@ opponent's perspective:
 | `season` | Year |
 
 ### 2h. Betting Market Features
+
+**Status:** ✅ Completed
 
 | Feature | Description |
 |---------|-------------|
@@ -135,6 +157,8 @@ opponent's perspective:
 ---
 
 ## 3. Feature Engineering Code
+
+**Status:** ✅ Completed
 
 ```python
 """features.py — Build feature matrix from raw data."""

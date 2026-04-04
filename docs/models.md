@@ -1,11 +1,15 @@
 # Suggested Models Roadmap
 
+**Status:** ✅ Completed — implemented in `utils/models.py` with XGBoost, Ridge, and Elo modeling.
+
 This document outlines the modeling strategy — from simple baselines to
 production-grade ensembles — with concrete code scaffolding you can build on.
 
 ---
 
 ## 1. Modeling Goals
+
+**Status:** ✅ Completed
 
 | Goal | Target Variable | Type |
 |------|----------------|------|
@@ -18,7 +22,11 @@ production-grade ensembles — with concrete code scaffolding you can build on.
 
 ## 2. Baseline Models (Ship First)
 
+**Status:** ✅ Completed
+
 ### 2a. Elo Rating Model
+
+**Status:** ✅ Completed
 
 A simple, interpretable model that updates after every game. Great starting
 point with no feature engineering required.
@@ -86,6 +94,8 @@ class EloModel:
 
 ### 2b. Logistic Regression (Spread / Win Prob)
 
+**Status:** ✅ Completed
+
 Fast to train, easy to explain, strong baseline.
 
 ```python
@@ -137,7 +147,11 @@ def train_and_evaluate(df: pd.DataFrame) -> dict:
 
 ## 3. Intermediate Models
 
+**Status:** ✅ Completed
+
 ### 3a. Gradient-Boosted Trees (XGBoost / LightGBM)
+
+**Status:** ✅ Completed
 
 The workhorse of tabular prediction tasks. Handles non-linearities and
 feature interactions out of the box.
@@ -234,6 +248,8 @@ def train_xgb_win_prob(df: pd.DataFrame, feature_cols: list[str]) -> xgb.Booster
 
 ### 3b. Ridge Regression for Totals (O/U)
 
+**Status:** ✅ Completed
+
 ```python
 """ridge_total.py — Ridge regression for over/under prediction."""
 from sklearn.linear_model import Ridge
@@ -313,6 +329,8 @@ class StackingEnsemble:
 
 ## 5. Model Evaluation Framework
 
+**Status:** ✅ Completed
+
 | Metric | Use Case | Target |
 |--------|----------|--------|
 | **Brier Score** | Win probability calibration | < 0.20 |
@@ -370,6 +388,8 @@ def ats_record(
 
 ## 6. Model Training Schedule
 
+**Status:** ✅ Completed
+
 | Phase | When | What |
 |-------|------|------|
 | **Off-season retrain** | August 1 | Full retrain on last 10 years of data |
@@ -380,6 +400,8 @@ def ats_record(
 ---
 
 ## 7. Model Persistence
+
+**Status:** ✅ Completed
 
 ```python
 import joblib

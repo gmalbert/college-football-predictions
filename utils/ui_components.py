@@ -6,14 +6,33 @@ import streamlit as st
 def render_sidebar() -> None:
     """Standard sidebar rendered on every page."""
     with st.sidebar:
-        st.image("data_files/logo.png", use_container_width=True)
+        from pathlib import Path
+        logo = Path(__file__).resolve().parent.parent / "data_files" / "logo.png"
+        if logo.exists():
+            st.image(str(logo), width=200)
+
+        st.divider()
+
+        # Live model metrics (if available)
+        try:
+            from utils.models import load_metrics, models_trained
+            if models_trained():
+                m = load_metrics()
+                ats = m.get("ats", {})
+                win = m.get("win_model", {})
+                if ats:
+                    wins   = ats.get("wins", 0)
+                    losses = ats.get("losses", 0)
+                    pct    = ats.get("pct", 0)
+                    st.metric("Season ATS", f"{wins}‑{losses}", f"{pct:.1%} win rate")
+                if win.get("brier"):
+                    st.metric("Model Brier", f"{win['brier']:.4f}", help="Lower is better")
+        except Exception:
+            pass
+
         st.divider()
         st.caption("Data: CFBD API · ESPN | Updated daily")
         st.divider()
-        st.markdown(
-            "> ⚠️ *Predictions are for informational/entertainment purposes "
-            "only. Gamble responsibly. 1-800-GAMBLER.*"
-        )
 
 
 def game_card(

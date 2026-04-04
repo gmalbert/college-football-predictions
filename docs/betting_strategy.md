@@ -334,14 +334,3 @@ def season_summary(season: int) -> dict:
         "roi": profit / total_wagered if total_wagered > 0 else 0,
     }
 ```
-
----
-
-## 7. Responsible Gambling Notice
-
-Every page should include (in the footer or sidebar):
-
-> ⚠️ **Disclaimer:** This site provides model-based predictions for
-> informational and entertainment purposes only. It is not financial advice.
-> Gamble responsibly. If you or someone you know has a gambling problem,
-> call **1-800-GAMBLER**.

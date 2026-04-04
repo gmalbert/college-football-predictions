@@ -1,11 +1,15 @@
 # Data Pipeline Roadmap
 
+**Status:** ✅ Completed — implemented in `utils/fetch_historical.py`, `utils/feature_engine.py`, and the main app.
+
 This document describes the end-to-end data pipeline — from raw API ingestion
 through feature engineering and model inference.
 
 ---
 
 ## 1. Pipeline Overview
+
+**Status:** ✅ Completed
 
 ```
 ┌──────────┐    ┌───────────┐    ┌────────────┐    ┌────────────┐    ┌──────────┐
@@ -21,7 +25,11 @@ through feature engineering and model inference.
 
 ## 2. Ingestion Layer
 
+**Status:** ✅ Completed
+
 ### 2a. CFBD Client
+
+**Status:** ✅ Completed
 
 ```python
 """utils/cfbd_client.py — Thin wrapper around the CFBD API."""
@@ -137,6 +145,8 @@ def get_teams(conference: str | None = None) -> list:
 
 ### 2b. ESPN Client
 
+**Status:** ✅ Completed
+
 ```python
 """utils/espn_client.py — ESPN public API wrapper."""
 from __future__ import annotations
@@ -219,7 +229,11 @@ def get_rankings() -> list[dict]:
 
 ## 3. Storage Layer
 
+**Status:** ✅ Completed
+
 ### Directory Layout
+
+**Status:** ✅ Completed
 
 ```
 data_files/
@@ -241,6 +255,8 @@ data_files/
 ```
 
 ### Save / Load Utilities
+
+**Status:** ✅ Completed
 
 ```python
 """utils/storage.py — Read/write helpers for the data pipeline."""
@@ -282,6 +298,8 @@ def load_parquet(name: str, layer: str = "processed") -> pd.DataFrame:
 ---
 
 ## 4. Transformation Layer
+
+**Status:** ✅ Completed
 
 ```python
 """scripts/transform.py — Clean raw data and save processed Parquet files."""
@@ -340,6 +358,8 @@ def transform_lines(year: int) -> pd.DataFrame:
 ---
 
 ## 5. Master Refresh Script
+
+**Status:** ✅ Completed
 
 ```python
 """scripts/refresh_data.py — Orchestrate a full data refresh."""
@@ -460,6 +480,8 @@ if __name__ == "__main__":
 ---
 
 ## 8. Pipeline Diagram (Mermaid)
+
+**Status:** ✅ Completed
 
 ```mermaid
 graph LR
