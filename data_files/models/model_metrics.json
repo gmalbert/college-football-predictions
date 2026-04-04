@@ -1,0 +1,20 @@
+{
+  "win_model": {
+    "brier": 0.160223588347435,
+    "log_loss": 0.4893117730182007,
+    "n_samples": 5080
+  },
+  "spread_model": {
+    "rmse": 13.804618403079047,
+    "n_samples": 5080
+  },
+  "total_model": {
+    "rmse": 15.135851698452957,
+    "n_samples": 7041
+  },
+  "ats": {
+    "wins": 3297,
+    "losses": 1783,
+    "pct": 0.649
+  }
+}
