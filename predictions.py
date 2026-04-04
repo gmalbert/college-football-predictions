@@ -163,7 +163,9 @@ except Exception:
 
 if _has_runtime:
     _is_cloud = bool(
-        os.environ.get("IS_STREAMLIT_CLOUD") or os.environ.get("STREAMLIT_SHARING_MODE")
+        os.environ.get("IS_STREAMLIT_CLOUD")
+        or os.environ.get("STREAMLIT_SHARING_MODE")
+        or os.path.exists("/mount/src")          # Streamlit Community Cloud mounts here
     )
 
     nav_sections: dict = {
