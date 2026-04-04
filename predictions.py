@@ -11,7 +11,7 @@ from utils.ui_components import render_sidebar
 # Page configuration — must be top-level, first Streamlit call
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="College Football Predictions",
+    page_title="Tailgate Edge - College Football Predictions",
     page_icon="🏈",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -24,26 +24,26 @@ st.set_page_config(
 def home_page():
     render_sidebar()
 
-    # ── Logo ─────────────────────────────────────────────────────────────────
+    # ── Logo & title ───────────────────────────────────────────────────────────
     logo_path = Path(__file__).parent / "data_files" / "logo.png"
     if logo_path.exists():
-        col1, col2, col3 = st.columns([1, 2, 1])
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.image(str(logo_path), width=120)
         with col2:
-            st.image(str(logo_path), width=300)
-
-    # ── Title & description ───────────────────────────────────────────────────
-    st.markdown(
-        """
-        # 🏈 College Football Predictions & Betting
-
-        Welcome to **College Football Predictions** — a data-driven platform that
-        applies machine-learning to 5 years of historical CFBD data to produce
-        win-probability, spread, and over/under forecasts for every FBS matchup,
-        then surfaces betting edges vs. sportsbook lines.
-
-        ---
-        """
-    )
+            st.markdown(
+                """
+                # 🏈 College Football Predictions
+                ---
+                """
+            )
+    else:
+        st.markdown(
+            """
+            # 🏈 College Football Predictions
+            ---
+            """
+        )
 
     # ── Live summary cards ────────────────────────────────────────────────────
     from utils.models import load_metrics, models_trained
