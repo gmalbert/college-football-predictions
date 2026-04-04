@@ -15,6 +15,7 @@ __pycache__/
 # Streamlit / local app state
 .streamlit/
 *.log
+utils/__init__.py*
 
 # Generated pipeline outputs
 data_files/raw/
