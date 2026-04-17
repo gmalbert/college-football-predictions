@@ -20,3 +20,4 @@ utils/__init__.py*
 # Generated pipeline outputs
 # Keep raw JSON cache out of source control unless explicitly needed
 data_files/raw/
+.DS_Store

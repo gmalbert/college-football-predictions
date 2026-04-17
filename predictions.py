@@ -121,33 +121,33 @@ def home_page():
         else:
             st.caption("No data loaded. Go to ⚙️ Settings to get started.")
 
-    st.divider()
+    # st.divider()
 
-    # ── How it works ──────────────────────────────────────────────────────────
-    st.markdown(
-        """
-        ### How It Works
+    # # ── How it works ──────────────────────────────────────────────────────────
+    # st.markdown(
+    #     """
+    #     ### How It Works
 
-        | Step | What Happens |
-        |------|-------------|
-        | 1. **Collect** | ~46 CFBD API calls pull 5 seasons (2021–2025) of games, lines, EPA stats, Elo, SP+, recruiting, and talent data — cached locally so re-runs are instant. |
-        | 2. **Transform** | Raw JSON → Parquet tables → joined feature matrix with 20+ per-game features (Elo diff, SP+ diff, EPA differentials, recruiting talent, home-field, betting lines). |
-        | 3. **Predict** | Time-series cross-validated XGBoost models predict win probability, point spread, and over/under for every game. |
-        | 4. **Surface edges** | Model lines are compared to sportsbook lines; games with ≥ 2 pt spread edge or ≥ 2.5 pt total edge are flagged as value bets. |
-        | 5. **Present** | Results displayed with confidence tiers, calibration curves, ATS tracking, and a bankroll simulator. |
+    #     | Step | What Happens |
+    #     |------|-------------|
+    #     | 1. **Collect** | ~46 CFBD API calls pull 5 seasons (2021–2025) of games, lines, EPA stats, Elo, SP+, recruiting, and talent data — cached locally so re-runs are instant. |
+    #     | 2. **Transform** | Raw JSON → Parquet tables → joined feature matrix with 20+ per-game features (Elo diff, SP+ diff, EPA differentials, recruiting talent, home-field, betting lines). |
+    #     | 3. **Predict** | Time-series cross-validated XGBoost models predict win probability, point spread, and over/under for every game. |
+    #     | 4. **Surface edges** | Model lines are compared to sportsbook lines; games with ≥ 2 pt spread edge or ≥ 2.5 pt total edge are flagged as value bets. |
+    #     | 5. **Present** | Results displayed with confidence tiers, calibration curves, ATS tracking, and a bankroll simulator. |
 
-        ---
+    #     ---
 
-        ### Data Sources
+    #     ### Data Sources
 
-        | Source | What It Provides |
-        |--------|-----------------|
-        | **[College Football Data API](https://api.collegefootballdata.com/)** | Scores, advanced stats (EPA, success rate, PPA), SP+ ratings, Elo ratings, betting lines, recruiting, talent composite |
-        | **ESPN API** | Live scores, team rosters, current rankings |
+    #     | Source | What It Provides |
+    #     |--------|-----------------|
+    #     | **[College Football Data API](https://api.collegefootballdata.com/)** | Scores, advanced stats (EPA, success rate, PPA), SP+ ratings, Elo ratings, betting lines, recruiting, talent composite |
+    #     | **ESPN API** | Live scores, team rosters, current rankings |
 
-        ---
-        """
-    )
+    #     ---
+    #     """
+    # )
 
     add_betting_oracle_footer()
 
