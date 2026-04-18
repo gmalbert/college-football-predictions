@@ -153,50 +153,46 @@ def home_page():
 
 
 # ---------------------------------------------------------------------------
-# Navigation — only runs when executed by Streamlit (not during imports/tests)
+# Navigation — st.set_page_config() above already ensures we're inside
+# Streamlit, so no runtime guard is needed here.
 # ---------------------------------------------------------------------------
-try:
-    from streamlit.runtime.scriptrunner import get_script_run_ctx as _get_ctx
-    _has_runtime = _get_ctx() is not None
-except Exception:
-    _has_runtime = False
+_is_cloud = bool(
+    os.environ.get("IS_STREAMLIT_CLOUD")
+    or os.environ.get("STREAMLIT_SHARING_MODE")
+    or os.path.exists("/mount/src")          # Streamlit Community Cloud mounts here
+)
 
-if _has_runtime:
-    _is_cloud = bool(
-        os.environ.get("IS_STREAMLIT_CLOUD")
-        or os.environ.get("STREAMLIT_SHARING_MODE")
-        or os.path.exists("/mount/src")          # Streamlit Community Cloud mounts here
+nav_sections: dict = {
+    "": [
+        st.Page(home_page, title="Home", icon="🏈", default=True),
+    ],
+    "Analysis": [
+        st.Page("pages/1_Weekly_Predictions.py",  title="Weekly Predictions",  icon="📊"),
+        st.Page("pages/2_Value_Bets.py",           title="Value Bets",           icon="💰"),
+        st.Page("pages/3_Team_Explorer.py",        title="Team Explorer",        icon="🏟️"),
+        st.Page("pages/4_Historical_Analysis.py",  title="Historical Analysis",  icon="📈"),
+        st.Page("pages/5_Model_Performance.py",    title="Model Performance",    icon="🎯"),
+        st.Page("pages/7_Win_Probability.py",      title="Win Probability",      icon="📉"),
+        st.Page("pages/8_Preseason_Outlook.py",   title="Preseason Outlook",   icon="🔮"),
+    ],
+}
+if not _is_cloud:
+    nav_sections["Config"] = [
+        st.Page("pages/6_Settings.py", title="Settings", icon="⚙️"),
+    ]
+
+pg = st.navigation(nav_sections)
+
+# Hide hamburger / manage-app buttons on Streamlit Cloud
+if _is_cloud:
+    st.markdown(
+        """
+        <style>
+        [data-testid="main-menu-button"]  { display: none !important; }
+        [data-testid="manage-app-button"] { display: none !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
-    nav_sections: dict = {
-        "": [
-            st.Page(home_page, title="Home", icon="🏈", default=True),
-        ],
-        "Analysis": [
-            st.Page("pages/1_Weekly_Predictions.py",  title="Weekly Predictions",  icon="📊"),
-            st.Page("pages/2_Value_Bets.py",           title="Value Bets",           icon="💰"),
-            st.Page("pages/3_Team_Explorer.py",        title="Team Explorer",        icon="🏟️"),
-            st.Page("pages/4_Historical_Analysis.py",  title="Historical Analysis",  icon="📈"),
-            st.Page("pages/5_Model_Performance.py",    title="Model Performance",    icon="🎯"),
-        ],
-    }
-    if not _is_cloud:
-        nav_sections["Config"] = [
-            st.Page("pages/6_Settings.py", title="Settings", icon="⚙️"),
-        ]
-
-    pg = st.navigation(nav_sections)
-
-    # Hide hamburger / manage-app buttons on Streamlit Cloud
-    if _is_cloud:
-        st.markdown(
-            """
-            <style>
-            [data-testid="main-menu-button"]  { display: none !important; }
-            [data-testid="manage-app-button"] { display: none !important; }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    pg.run()
+pg.run()
