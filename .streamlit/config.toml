@@ -1,9 +1,10 @@
 [theme]
-primaryColor = "#C84318"
-backgroundColor = "#F6EEE4"
-secondaryBackgroundColor = "#F2E5D7"
-textColor = "#2B2620"
-font = "sans serif"
+# Frost theme — matches TABLE_STYLE_PRESETS["Frost"]["day"] in ui_components.py
+primaryColor             = "#2B7CB8"
+backgroundColor          = "#EEF4FB"
+secondaryBackgroundColor = "#F7FBFF"
+textColor                = "#1A2B3C"
+font                     = "sans serif"
 
 [browser]
 gatherUsageStats = false

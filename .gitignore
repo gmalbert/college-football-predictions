@@ -14,6 +14,7 @@ __pycache__/
 
 # Streamlit / local app state
 .streamlit/
+!.streamlit/config.toml
 *.log
 utils/__init__.py*
 

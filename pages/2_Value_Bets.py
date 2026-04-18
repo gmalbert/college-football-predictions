@@ -9,7 +9,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from utils.ui_components import render_sidebar
+from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
 from utils.models import predict_batch, models_trained
 from utils.betting import (
@@ -194,7 +194,7 @@ st.divider()
 st.subheader("All Value Bets")
 
 display_cols = ["Week", "Game", "Bet Type", "Model", "Book", "Edge", "Confidence", "Pick", "Result"]
-st.dataframe(
+themed_dataframe(
     df_recs[display_cols].reset_index(drop=True),
     width="stretch",
     hide_index=True,
@@ -245,9 +245,9 @@ if sim_bets:
         title="Cumulative Bankroll",
         xaxis_title="Bet #",
         yaxis_title="Bankroll ($)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#FAFAFA"),
+        paper_bgcolor="#F7FBFF",
+        plot_bgcolor="#F7FBFF",
+        font=dict(color="#1A2B3C"),
     )
     st.plotly_chart(fig, width="stretch")
 

@@ -14,7 +14,7 @@ import plotly.express as px
 from utils.ui_components import render_sidebar
 from utils.storage import load_parquet
 from utils.models import load_metrics, models_trained, load_models, WIN_MODEL_PATH
-from utils.feature_engine import WIN_FEATURES, SPREAD_FEATURES
+from utils.feature_engine import WIN_FEATURES, SPREAD_FEATURES, TOTAL_FEATURES
 from footer import add_betting_oracle_footer
 
 try:
@@ -103,9 +103,9 @@ if not df.empty and HAS_SKLEARN:
         fig_cal.update_layout(
             xaxis_title="Mean Predicted Probability",
             yaxis_title="Fraction of Positives",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#FAFAFA"),
+            paper_bgcolor="#F7FBFF",
+            plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_cal, width="stretch")
     else:
@@ -142,9 +142,9 @@ if not df.empty and "predicted_spread" in df.columns and "market_spread" in df.c
     fig_ats.update_layout(
         yaxis_title="ATS Win %",
         xaxis_title="Week",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#FAFAFA"),
+        paper_bgcolor="#F7FBFF",
+        plot_bgcolor="#F7FBFF",
+        font=dict(color="#1A2B3C"),
     )
     st.plotly_chart(fig_ats, width="stretch")
     st.divider()
@@ -187,15 +187,129 @@ if spread_mod is not None:
         ))
         fig_imp.update_layout(
             xaxis_title="Importance",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#FAFAFA"),
+            paper_bgcolor="#F7FBFF",
+            plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_imp, width="stretch")
+        with st.expander("Spread Model Feature Dictionary", expanded=False):
+            st.markdown(
+                """
+                | Feature | Description | Why helpful |
+                |---|---|---|
+                | elo_diff | Home team Elo rating minus away team Elo rating. | Captures overall team strength and matchup quality. |
+                | sp_plus_diff | SP+ overall rating difference (home minus away). | Adds a modern analytics rating that blends offense, defense, and schedule. |
+                | sp_offense_diff | SP+ offensive efficiency difference. | Highlights which team has the more productive offense. |
+                | sp_defense_diff | SP+ defensive efficiency difference. | Reflects defensive capability to limit opponents. |
+                | off_epa_diff | Offensive EPA per play difference. | Measures efficiency by scoring value per play. |
+                | def_epa_diff | Defensive EPA per play difference. | Captures how well a defense prevents high-value plays. |
+                | off_explosiveness_diff | Explosiveness metric difference. | Shows the team likely to generate big plays. |
+                | def_havoc_diff | Defensive havoc metric difference. | Indicates turnover pressure and disruption ability. |
+                | off_success_diff | Offensive success rate difference. | Represents consistency in gaining needed yardage. |
+                | off_rushing_epa_diff | Rushing EPA per play difference. | Reveals the strength of the run game advantage. |
+                | off_passing_epa_diff | Passing EPA per play difference. | Reveals the strength of the passing game advantage. |
+                | recruiting_diff | Recruiting score/talent difference. | Proxy for roster talent depth and future upside. |
+                | talent_diff | Overall talent rating difference. | General strength gap between home and away rosters. |
+                | recruiting_rank_diff | Recruiting class rank difference. | Indicates relative talent quality by incoming classes. |
+                | home_flag | Indicator for the home team. | Captures home-field advantage effects. |
+                | conference_game | Indicator for conference matchup. | Accounts for rivalry / familiarity effects. |
+                | rest_advantage | Home rest days minus away rest days. | Models fatigue or recovery advantage. |
+                | turnover_margin_l5 | Last 5 games turnover margin difference. | Reflects recent ability to create and avoid turnovers. |
+                | rushing_yards_diff_l5 | Last 5 games rushing yards difference. | Tracks recent ground-game dominance. |
+                | pass_yards_diff_l5 | Last 5 games passing yards difference. | Tracks recent aerial-attack dominance. |
+                | penalty_yards_diff_l5 | Last 5 games penalty yards difference. | Captures discipline and self-inflicted disadvantage. |
+                | fpi_diff | Home minus away FPI rating difference. | Adds a consensus national power-rating signal. |
+                | srs_diff | Home minus away SRS rating difference. | Adds a margin-adjusted, SOS-aware rating signal. |
+                | returning_ppa_diff | Returning production percentage difference. | Captures roster continuity and experience. |
+                | ppa_off_diff | Offensive PPA difference between teams. | Reflects opponent-adjusted offensive efficiency. |
+                | ppa_def_diff | Defensive PPA difference between teams. | Reflects opponent-adjusted defensive efficiency. |
+                | ppa_third_down_off_diff | Third-down offensive PPA difference. | Measures efficiency in critical third-down situations. |
+                | ppa_third_down_def_diff | Third-down defensive PPA difference. | Measures ability to stop opponents on third downs. |
+                | wepa_off_diff | Opponent-adjusted offensive EPA difference. | Accounts for schedule strength and tempo-adjusted offense. |
+                | wepa_def_diff | Opponent-adjusted defensive EPA difference. | Accounts for schedule strength and tempo-adjusted defense. |
+                | cfbd_pregame_wp_diff | CFBD pre-game home win probability minus 0.5. | Provides a consensus probability baseline for the matchup. |
+                | coach_tenure_diff | Home coach tenure minus away coach tenure. | Models coaching experience and first-year coach risk. |
+                | market_spread | Closing market spread, used as the consensus line. | Anchors the model to the betting market and line value. |
+                """
+            )
     else:
         st.info("Feature importance not available for this model type.")
 else:
     st.info("Spread model not loaded.")
+
+st.divider()
+
+st.subheader("Feature Importance — Total Model")
+total_mod = models.get("total")
+
+if total_mod is not None:
+    if HAS_XGB and isinstance(total_mod, xgb.Booster):
+        raw_imp = total_mod.get_score(importance_type="gain")
+        imp_df_total = (
+            pd.DataFrame(
+                [{"Feature": f"f{i}", "Importance": raw_imp.get(f"f{i}", 0)}
+                 for i in range(len(TOTAL_FEATURES))]
+            )
+            .assign(Feature=lambda d: [
+                TOTAL_FEATURES[int(r["Feature"][1:])] if int(r["Feature"][1:]) < len(TOTAL_FEATURES)
+                else r["Feature"]
+                for _, r in d.iterrows()
+            ])
+            .sort_values("Importance", ascending=True)
+        )
+    else:
+        try:
+            coefs = abs(total_mod.named_steps["ridge"].coef_)
+            used_feats = [f for f in TOTAL_FEATURES if f in (df.columns if not df.empty else TOTAL_FEATURES)][:len(coefs)]
+            imp_df_total = pd.DataFrame({"Feature": used_feats, "Importance": coefs}).sort_values("Importance")
+        except Exception:
+            imp_df_total = pd.DataFrame()
+
+    if not imp_df_total.empty:
+        fig_imp_total = go.Figure(go.Bar(
+            x=imp_df_total["Importance"], y=imp_df_total["Feature"],
+            orientation="h",
+            marker_color="#D4001C",
+        ))
+        fig_imp_total.update_layout(
+            xaxis_title="Importance",
+            paper_bgcolor="#F7FBFF",
+            plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
+        )
+        st.plotly_chart(fig_imp_total, width="stretch")
+        with st.expander("Total Model Feature Dictionary", expanded=False):
+            st.markdown(
+                """
+                | Feature | Description | Why helpful |
+                |---|---|---|
+                | home_off_epa | Home offense EPA per play. | Measures home team's scoring efficiency. |
+                | away_off_epa | Away offense EPA per play. | Measures away team's scoring efficiency. |
+                | home_def_epa | Home defense EPA allowed per play. | Indicates how well the home defense limits opponents. |
+                | away_def_epa | Away defense EPA allowed per play. | Indicates how well the away defense limits opponents. |
+                | home_off_explosiveness | Home offensive explosiveness. | Captures big-play scoring upside at home. |
+                | away_off_explosiveness | Away offensive explosiveness. | Captures big-play scoring upside on the road. |
+                | home_off_rushing_epa | Home rushing EPA per play. | Measures home running game scoring value. |
+                | away_off_rushing_epa | Away rushing EPA per play. | Measures away running game scoring value. |
+                | home_off_passing_epa | Home passing EPA per play. | Measures home passing game scoring value. |
+                | away_off_passing_epa | Away passing EPA per play. | Measures away passing game scoring value. |
+                | home_flag | Indicator for the home team. | Captures home-field scoring advantage. |
+                | rest_days_home | Days of rest for home team. | Models freshness and recovery effects. |
+                | rest_days_away | Days of rest for away team. | Models fatigue and travel effects. |
+                | market_total | Betting market total line. | Anchors the model to market scoring expectations. |
+                | is_dome | Indoor/dome game flag. | Adjusts for weather-insulated scoring environments. |
+                | temperature | Forecast temperature. | Cold games usually suppress scoring. |
+                | wind_speed | Forecast wind speed. | High wind reduces passing efficiency and scoring. |
+                | adverse_weather | Bad weather indicator. | Captures rain, snow, wind, or cold impact on scoring. |
+                | high_wind | High-wind indicator. | Highlights games where kicking and passing suffer. |
+                | high_altitude | High elevation venue flag. | Models altitude effects on scoring and endurance. |
+                | is_primetime | Prime-time game flag. | Captures TV/prime-time scoring and officiating effects. |
+                """
+            )
+    else:
+        st.info("Feature importance not available for this model type.")
+else:
+    st.info("Total model not loaded.")
 
 # ─────────────────── sample size summary ───────────────────────────────────────
 st.divider()

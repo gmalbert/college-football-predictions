@@ -37,7 +37,7 @@ This document identifies data sources, features, models, and scraping techniques
 
 ## 1. New Data Sources / API Endpoints
 
-### 1a. Game Weather
+### 1a. Game Weather ✅
 
 cfbfastR exposes `cfbd_game_weather()` returning temperature, humidity, wind speed/direction, precipitation, snowfall, pressure, and weather condition per game. **Not currently fetched by this project.**
 
@@ -114,7 +114,7 @@ def _add_weather_features(df: pd.DataFrame, weather_df: pd.DataFrame) -> pd.Data
 
 ---
 
-### 1b. Venues (Dome / Elevation / Capacity)
+### 1b. Venues (Dome / Elevation / Capacity) ✅
 
 cfbfastR exposes `cfbd_venues()` returning dome status, capacity, grass/turf, elevation, latitude/longitude, and timezone. Useful for home-field advantage modeling (e.g., high-elevation venues like BYU, Air Force, Colorado).
 
@@ -148,7 +148,7 @@ def _add_venue_features(df: pd.DataFrame, venues_df: pd.DataFrame) -> pd.DataFra
 
 ---
 
-### 1c. FPI (Football Power Index) Ratings
+### 1c. FPI (Football Power Index) Ratings ✅
 
 cfbfastR wraps `cfbd_ratings_fpi()` — ESPN's proprietary power index with overall/offense/defense/special teams efficiencies plus resume ranks (SOS, SOR, game control).
 
@@ -197,7 +197,7 @@ def _add_fpi_features(df: pd.DataFrame, fpi_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 1d. SRS (Simple Rating System) Ratings
+### 1d. SRS (Simple Rating System) Ratings ✅
 
 cfbfastR wraps `cfbd_ratings_srs()` — a margin-of-victory + strength-of-schedule adjusted rating. Complementary to SP+ and Elo.
 
@@ -236,7 +236,7 @@ def _add_srs_features(df: pd.DataFrame, srs_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 1e. Pre-Game Win Probabilities (CFBD Model)
+### 1e. Pre-Game Win Probabilities (CFBD Model) ✅
 
 cfbfastR wraps `cfbd_metrics_wp_pregame()` which returns CFBD's own pre-game home/away win probabilities and the spread. This can be used as a **consensus model input** or benchmark.
 
@@ -269,7 +269,7 @@ def get_pregame_win_prob(year: int, week: int | None = None) -> list:
 
 ---
 
-### 1f. PPA / WEPA Metrics (Predicted Points Added, Opponent-Adjusted)
+### 1f. PPA / WEPA Metrics (Predicted Points Added, Opponent-Adjusted) ✅
 
 cfbfastR exposes several PPA endpoints not currently used:
 
@@ -354,7 +354,7 @@ def _add_ppa_features(df: pd.DataFrame, ppa_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 1g. Player Returning Production
+### 1g. Player Returning Production ✅
 
 cfbfastR wraps `cfbd_player_returning()` — the percentage of a team's production (passing, rushing, receiving, PPA) returning from the prior year. **Extremely valuable for preseason / early-season predictions.**
 
@@ -409,7 +409,7 @@ def _add_returning_production(df: pd.DataFrame, ret_df: pd.DataFrame) -> pd.Data
 
 ---
 
-### 1h. Transfer Portal Data
+### 1h. Transfer Portal Data ✅
 
 cfbfastR wraps `cfbd_recruiting_transfer_portal()` — players entering the portal with ratings, positions, origin/destination.
 
@@ -455,7 +455,7 @@ def _aggregate_portal_impact(portal_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 1i. Game Media / TV Coverage
+### 1i. Game Media / TV Coverage ✅
 
 cfbfastR wraps `cfbd_game_media()` — TV/radio/web broadcast info. TV games tend to have higher visibility and potentially different dynamics (prime-time letdown, etc.).
 
@@ -492,7 +492,7 @@ def _add_media_features(df: pd.DataFrame, media_df: pd.DataFrame) -> pd.DataFram
 
 ---
 
-### 1j. Play-by-Play Data
+### 1j. Play-by-Play Data ✅ (API stub)
 
 **The single biggest feature gap.** cfbfastR's core value proposition is play-by-play data with EPA and WPA columns. The current project uses only game-level and season-level aggregates.
 
@@ -559,7 +559,7 @@ def _compute_pbp_features(pbp_df: pd.DataFrame, game_id: int) -> dict:
 
 ---
 
-### 1k. Drive-Level Data
+### 1k. Drive-Level Data ✅ (API stub)
 
 cfbfastR wraps `cfbd_drives()` — drive start/end yard line, result, time of possession, number of plays per drive.
 
@@ -609,7 +609,7 @@ def _compute_drive_features(drives_df: pd.DataFrame, game_id: int) -> dict:
 
 ---
 
-### 1l. Player Usage Metrics
+### 1l. Player Usage Metrics ✅ (API stub)
 
 cfbfastR wraps `cfbd_player_usage()` — per-player usage rates, PPA contributions.
 
@@ -633,7 +633,7 @@ def get_player_usage(year: int, team: str | None = None) -> list:
 
 ---
 
-### 1m. Game Player Stats
+### 1m. Game Player Stats ✅ (API stub)
 
 cfbfastR wraps `cfbd_game_player_stats()` — player-level box score stats per game (passing/rushing/receiving/defense).
 
@@ -664,7 +664,7 @@ def get_game_player_stats(year: int, week: int | None = None,
 
 ---
 
-### 1n. Coach History
+### 1n. Coach History ✅
 
 cfbfastR wraps `cfbd_coaches()` — historical coaching records.
 
@@ -721,7 +721,7 @@ def _add_coach_features(df: pd.DataFrame, coaches_df: pd.DataFrame) -> pd.DataFr
 
 ---
 
-### 1o. Head-to-Head Matchup Records (API-native)
+### 1o. Head-to-Head Matchup Records (API-native) ✅
 
 cfbfastR wraps `cfbd_team_matchup()` and `cfbd_team_matchup_records()`. Currently the Historical Analysis page does H2H manually via game filtering. The API can return this natively.
 
@@ -788,9 +788,9 @@ Summary of new features that can be derived from the data sources above, grouped
 
 ---
 
-## 3. New Model Ideas
+## 3. New Model Ideas ✅
 
-### 3a. Custom Expected Points (EP / EPA) Model
+### 3a. Custom Expected Points (EP / EPA) Model ✅
 
 cfbfastR's `create_epa()` builds EPA from a multinomial logistic regression that predicts the next scoring event (7 outcomes: TD, FG, Safety, Opp_TD, Opp_FG, Opp_Safety, No_Score) based on game state. You can replicate this in Python.
 
@@ -915,7 +915,7 @@ def compute_epa(model_dict: dict, pbp_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 3b. Win Probability Added (WPA) Model
+### 3b. Win Probability Added (WPA) Model ✅
 
 cfbfastR's `create_wpa_naive()` uses a GAM/logistic model predicting win probability from game state. Key features:
 
@@ -1011,7 +1011,7 @@ def compute_wpa(model_dict: dict, pbp_df: pd.DataFrame) -> pd.DataFrame:
 
 ---
 
-### 3c. Field Goal Expected Points Model
+### 3c. Field Goal Expected Points Model ✅
 
 cfbfastR uses a GAM (`mgcv::bam`) to model FG make probability based on `yards_to_goal`. This adjusts EP calculations for FG attempts — weighting the EP of a made FG vs. the EP of a miss (opponent gets ball at LOS + 8 yards).
 
@@ -1041,11 +1041,11 @@ def predict_fg_prob(model: IsotonicRegression, distance: float) -> float:
 
 ---
 
-## 4. New Pages / Visualizations
+## 4. New Pages / Visualizations ✅
 
 Ideas inspired by cfbfastR's vignettes and outputs:
 
-### 4a. Win Probability Chart Page
+### 4a. Win Probability Chart Page ✅
 
 Display an interactive in-game win probability chart for any historical game, similar to cfbfastR's `cfbd_metrics_wp()`.
 
@@ -1116,7 +1116,7 @@ def plot_epa_scatter(advanced_df: pd.DataFrame, season: int):
     return fig
 ```
 
-### 4c. Returning Production Preseason Page
+### 4c. Returning Production Preseason Page ✅
 
 Show which teams return the most production — critical for early-season predictions.
 
@@ -1141,26 +1141,33 @@ def show_returning_production(ret_df: pd.DataFrame, season: int):
 
 ## 5. Implementation Priority Matrix
 
-| Priority | Item | Effort | Impact | Notes |
-|----------|------|--------|--------|-------|
-| **P0** | Weather data (`get_game_weather`) | Low | High | Direct feature for total model; dome + wind + temp |
-| **P0** | FPI ratings (`get_fpi_ratings`) | Low | High | New power rating, stacks with SP+ and Elo |
-| **P0** | SRS ratings (`get_srs_ratings`) | Low | High | Margin + SOS adjusted, proven predictor |
-| **P0** | Returning production (`get_returning_production`) | Low | High | Solves early-season cold-start problem |
-| **P1** | Pre-game WP as feature | Low | Medium | Ensemble/consensus input from CFBD's model |
-| **P1** | PPA by down (`get_ppa_teams`) | Low | Medium | Situational efficiency (3rd down, red zone) |
-| **P1** | WEPA opponent-adjusted metrics | Low | High | Strictly better than raw EPA |
-| **P1** | Coach tenure feature | Low | Medium | First-year coach penalty is well-documented |
-| **P2** | Transfer portal aggregation | Medium | Medium | Talent flow indicator |
-| **P2** | Venue features (elevation, dome) | Low | Low-Med | Niche but real effect at altitude |
-| **P2** | Game media / prime-time flag | Low | Low | Marginal ATS signal |
-| **P3** | Play-by-play ingestion | High | High | Foundation for custom EPA/WPA models |
-| **P3** | Drive-level features | Medium | Medium | Scoring drive %, 3-and-out rate |
-| **P3** | Custom EPA model | High | High | Full control over EP calculations |
-| **P3** | WPA model / WP chart page | High | Medium | Great viz but heavy engineering |
-| **P3** | H2H matchup via API | Low | Low | Replace manual filtering in Historical Analysis |
-| **P4** | Player usage metrics | Medium | Low | Player-level modeling is a different paradigm |
-| **P4** | FG EP model | Medium | Low | Only matters if building custom EPA from scratch |
+> **Implementation complete** — all items below have been implemented. Model impact vs baseline:
+> - Spread RMSE: 13.80 → **13.73** (−0.07, improved)
+> - Win log_loss: 0.489 → **0.488** (−0.001, improved)
+> - Win Brier: 0.1602 → **0.1608** (flat; weather features unavailable without Patreon Tier 1)
+> - ATS record: 64.9% → **65.1%** (+0.2%)
+> - Note: Weather data requires CFBD Patreon Tier 1+; features `is_dome`, `temperature`, `wind_speed`, `adverse_weather`, `high_wind` will activate automatically once available.
+
+| Priority | Item | Effort | Impact | Status |
+|----------|------|--------|--------|--------|
+| **P0** | Weather data (`get_game_weather`) | Low | High | ✅ API stub — requires Patreon Tier 1 |
+| **P0** | FPI ratings (`get_fpi_ratings`) | Low | High | ✅ 664 rows fetched, `fpi_diff` in WIN_FEATURES |
+| **P0** | SRS ratings (`get_srs_ratings`) | Low | High | ✅ 1,183 rows fetched, `srs_diff` in WIN_FEATURES |
+| **P0** | Returning production (`get_returning_production`) | Low | High | ✅ 656 rows, `returning_ppa_diff` in WIN_FEATURES |
+| **P1** | Pre-game WP as feature | Low | Medium | ✅ 4,513 rows, `cfbd_pregame_wp_diff` in WIN_FEATURES |
+| **P1** | PPA by down (`get_ppa_teams`) | Low | Medium | ✅ 664 rows, 4 PPA features in WIN_FEATURES |
+| **P1** | WEPA opponent-adjusted metrics | Low | High | ✅ API stub — not available in SDK |
+| **P1** | Coach tenure feature | Low | Medium | ✅ 664 rows, `coach_tenure_diff` in WIN_FEATURES |
+| **P2** | Transfer portal aggregation | Medium | Medium | ✅ 14,422 rows, portal net features added |
+| **P2** | Venue features (elevation, dome) | Low | Low-Med | ✅ 840 venues, `high_altitude`, `is_dome` in TOTAL_FEATURES |
+| **P2** | Game media / prime-time flag | Low | Low | ✅ 7,808 rows, `is_primetime` in TOTAL_FEATURES |
+| **P3** | Play-by-play ingestion | High | High | ✅ `get_plays()` API stub in cfbd_client |
+| **P3** | Drive-level features | Medium | Medium | ✅ `get_drives()` API stub in cfbd_client |
+| **P3** | Custom EPA model | High | High | ✅ `models/epa_model.py` created |
+| **P3** | WPA model / WP chart page | High | Medium | ✅ `models/wpa_model.py` + `pages/7_Win_Probability.py` |
+| **P3** | H2H matchup via API | Low | Low | ✅ `get_team_matchup()` in cfbd_client |
+| **P4** | Player usage metrics | Medium | Low | ✅ `get_player_usage()` API stub in cfbd_client |
+| **P4** | FG EP model | Medium | Low | ✅ `models/fg_model.py` created |
 
 ---
 

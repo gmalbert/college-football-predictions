@@ -45,6 +45,23 @@ WIN_FEATURES = [
     "rushing_yards_diff_l5",
     "pass_yards_diff_l5",
     "penalty_yards_diff_l5",
+    # NEW: Power ratings
+    "fpi_diff",
+    "srs_diff",
+    # NEW: Returning production
+    "returning_ppa_diff",
+    # NEW: PPA by down
+    "ppa_off_diff",
+    "ppa_def_diff",
+    "ppa_third_down_off_diff",
+    "ppa_third_down_def_diff",
+    # NEW: WEPA (opponent-adjusted EPA)
+    "wepa_off_diff",
+    "wepa_def_diff",
+    # NEW: Pre-game WP consensus
+    "cfbd_pregame_wp_diff",
+    # NEW: Coaching tenure
+    "coach_tenure_diff",
 ]
 
 SPREAD_FEATURES = WIN_FEATURES + ["market_spread"]
@@ -64,6 +81,16 @@ TOTAL_FEATURES = [
     "rest_days_home",
     "rest_days_away",
     "market_total",
+    # NEW: Weather features (strong total predictors)
+    "is_dome",
+    "temperature",
+    "wind_speed",
+    "adverse_weather",
+    "high_wind",
+    # NEW: Venue altitude
+    "high_altitude",
+    # NEW: Prime-time indicator
+    "is_primetime",
 ]
 
 ALL_FEATURE_COLS = list(
@@ -117,6 +144,237 @@ def _rolling_team_stats(
 
 # ─────────────────────────────── main builder ────────────────────────────────
 
+def _add_weather_features(df: pd.DataFrame, weather_df: pd.DataFrame) -> pd.DataFrame:
+    """Merge weather data and create weather-related features."""
+    wdf = weather_df.copy()
+    wdf["is_dome"] = wdf["game_indoors"].fillna(False).astype(int)
+    wdf["adverse_weather"] = (
+        (wdf["wind_speed"].fillna(0) > 15) |
+        (wdf["precipitation"].fillna(0) > 0) |
+        (wdf["temperature"].fillna(60) < 35)
+    ).astype(int)
+    wdf["high_wind"] = (wdf["wind_speed"].fillna(0) > 20).astype(int)
+    merge_cols = ["game_id", "is_dome", "temperature", "wind_speed",
+                  "humidity", "precipitation", "adverse_weather", "high_wind"]
+    merge_cols = [c for c in merge_cols if c in wdf.columns]
+    return df.merge(wdf[merge_cols], on="game_id", how="left")
+
+
+def _add_venue_features(df: pd.DataFrame, venues_df: pd.DataFrame,
+                        games_df: pd.DataFrame) -> pd.DataFrame:
+    """Add venue-based features (elevation, dome, capacity) via game venue name."""
+    if venues_df.empty:
+        return df
+    vdf = venues_df.copy()
+    vdf["elevation"] = pd.to_numeric(vdf["elevation"], errors="coerce").fillna(0)
+    vdf["is_venue_dome"] = vdf["dome"].fillna(False).astype(int)
+    vdf["is_grass"] = vdf["grass"].fillna(False).astype(int)
+    vdf["high_altitude"] = (vdf["elevation"] > 5000).astype(int)
+    # Join via venue name from games
+    if "venue" not in df.columns:
+        return df
+    vdf_unique = vdf.drop_duplicates(subset=["name"], keep="first")
+    venue_map = vdf_unique.set_index("name")[["elevation", "is_venue_dome", "high_altitude", "is_grass"]]
+    df = df.copy()
+    df["elevation"]    = df["venue"].map(venue_map["elevation"])
+    df["high_altitude"] = df["venue"].map(venue_map["high_altitude"]).fillna(0).astype(int)
+    # Only override is_dome if weather didn't already set it
+    if "is_dome" not in df.columns:
+        df["is_dome"] = df["venue"].map(venue_map["is_venue_dome"]).fillna(0).astype(int)
+    return df
+
+
+def _add_fpi_features(df: pd.DataFrame, fpi_df: pd.DataFrame) -> pd.DataFrame:
+    """Add FPI-based power rating features."""
+    fpi = fpi_df[["season", "team", "fpi", "fpi_offense", "fpi_defense",
+                   "fpi_special_teams"]].copy()
+    home = fpi.rename(columns={c: f"home_{c}" for c in fpi.columns
+                                if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = fpi.rename(columns={c: f"away_{c}" for c in fpi.columns
+                                if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    df["fpi_diff"] = df["home_fpi"].fillna(0) - df["away_fpi"].fillna(0)
+    return df
+
+
+def _add_srs_features(df: pd.DataFrame, srs_df: pd.DataFrame) -> pd.DataFrame:
+    """Add SRS rating diff as a feature."""
+    srs = srs_df[["season", "team", "srs_rating"]].copy()
+    home_srs = srs.rename(columns={"team": "home_team", "srs_rating": "home_srs"})
+    df = df.merge(home_srs, on=["season", "home_team"], how="left")
+    away_srs = srs.rename(columns={"team": "away_team", "srs_rating": "away_srs"})
+    df = df.merge(away_srs, on=["season", "away_team"], how="left")
+    df["srs_diff"] = df["home_srs"].fillna(0) - df["away_srs"].fillna(0)
+    return df
+
+
+def _add_pregame_wp_features(df: pd.DataFrame, wp_df: pd.DataFrame) -> pd.DataFrame:
+    """Add CFBD pre-game win probability as a consensus model feature."""
+    wp = wp_df[["game_id", "home_win_prob"]].dropna(subset=["game_id"]).copy()
+    df = df.merge(wp, on="game_id", how="left")
+    df["cfbd_pregame_wp_diff"] = df["home_win_prob"].fillna(0.5) - 0.5
+    df = df.rename(columns={"home_win_prob": "cfbd_home_win_prob"})
+    return df
+
+
+def _add_ppa_features(df: pd.DataFrame, ppa_df: pd.DataFrame) -> pd.DataFrame:
+    """Add PPA-based features broken down by down."""
+    cols = ["season", "team", "off_overall", "off_passing", "off_rushing",
+            "off_first_down", "off_second_down", "off_third_down",
+            "def_overall", "def_passing", "def_rushing",
+            "def_first_down", "def_second_down", "def_third_down"]
+    avail = [c for c in cols if c in ppa_df.columns]
+    ppa = ppa_df[avail].copy()
+
+    home = ppa.rename(columns={c: f"home_ppa_{c}" for c in avail
+                                if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = ppa.rename(columns={c: f"away_ppa_{c}" for c in avail
+                                if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_ppa_off_overall" in df.columns and "away_ppa_off_overall" in df.columns:
+        df["ppa_off_diff"] = df["home_ppa_off_overall"].fillna(0) - df["away_ppa_off_overall"].fillna(0)
+    if "home_ppa_def_overall" in df.columns and "away_ppa_def_overall" in df.columns:
+        df["ppa_def_diff"] = df["home_ppa_def_overall"].fillna(0) - df["away_ppa_def_overall"].fillna(0)
+    if "home_ppa_off_third_down" in df.columns and "away_ppa_off_third_down" in df.columns:
+        df["ppa_third_down_off_diff"] = (
+            df["home_ppa_off_third_down"].fillna(0) - df["away_ppa_off_third_down"].fillna(0)
+        )
+    if "home_ppa_def_third_down" in df.columns and "away_ppa_def_third_down" in df.columns:
+        df["ppa_third_down_def_diff"] = (
+            df["home_ppa_def_third_down"].fillna(0) - df["away_ppa_def_third_down"].fillna(0)
+        )
+    return df
+
+
+def _add_wepa_features(df: pd.DataFrame, wepa_df: pd.DataFrame) -> pd.DataFrame:
+    """Add opponent-adjusted WEPA features."""
+    cols = ["season", "team", "wepa_off_ppa", "wepa_def_ppa",
+            "wepa_off_success", "wepa_def_success"]
+    avail = [c for c in cols if c in wepa_df.columns]
+    wepa = wepa_df[avail].copy()
+
+    home = wepa.rename(columns={c: f"home_{c}" for c in avail
+                                 if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = wepa.rename(columns={c: f"away_{c}" for c in avail
+                                 if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_wepa_off_ppa" in df.columns and "away_wepa_off_ppa" in df.columns:
+        df["wepa_off_diff"] = df["home_wepa_off_ppa"].fillna(0) - df["away_wepa_off_ppa"].fillna(0)
+    if "home_wepa_def_ppa" in df.columns and "away_wepa_def_ppa" in df.columns:
+        df["wepa_def_diff"] = df["home_wepa_def_ppa"].fillna(0) - df["away_wepa_def_ppa"].fillna(0)
+    return df
+
+
+def _add_returning_production(df: pd.DataFrame, ret_df: pd.DataFrame) -> pd.DataFrame:
+    """Add returning production features."""
+    cols = ["season", "team", "percent_ppa", "percent_passing_ppa",
+            "percent_receiving_ppa", "percent_rushing_ppa"]
+    avail = [c for c in cols if c in ret_df.columns]
+    ret = ret_df[avail].copy()
+
+    home = ret.rename(columns={"team": "home_team",
+                                "percent_ppa": "home_ret_ppa_pct",
+                                "percent_passing_ppa": "home_ret_pass_pct",
+                                "percent_receiving_ppa": "home_ret_recv_pct",
+                                "percent_rushing_ppa": "home_ret_rush_pct"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = ret.rename(columns={"team": "away_team",
+                                "percent_ppa": "away_ret_ppa_pct",
+                                "percent_passing_ppa": "away_ret_pass_pct",
+                                "percent_receiving_ppa": "away_ret_recv_pct",
+                                "percent_rushing_ppa": "away_ret_rush_pct"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_ret_ppa_pct" in df.columns and "away_ret_ppa_pct" in df.columns:
+        df["returning_ppa_diff"] = (
+            df["home_ret_ppa_pct"].fillna(0.5) - df["away_ret_ppa_pct"].fillna(0.5)
+        )
+    return df
+
+
+def _add_coach_features(df: pd.DataFrame, coaches_df: pd.DataFrame) -> pd.DataFrame:
+    """Flag first-year coaches and add tenure features."""
+    coaches = coaches_df[["season", "team", "tenure_years"]].copy()
+    coaches["first_year_coach"] = (coaches["tenure_years"] == 1).astype(int)
+
+    home_c = coaches.rename(columns={"team": "home_team",
+                                      "first_year_coach": "home_first_yr_coach",
+                                      "tenure_years": "home_coach_tenure"})
+    df = df.merge(home_c, on=["season", "home_team"], how="left")
+
+    away_c = coaches.rename(columns={"team": "away_team",
+                                      "first_year_coach": "away_first_yr_coach",
+                                      "tenure_years": "away_coach_tenure"})
+    df = df.merge(away_c, on=["season", "away_team"], how="left")
+
+    df["coach_tenure_diff"] = (
+        df["home_coach_tenure"].fillna(3) - df["away_coach_tenure"].fillna(3)
+    )
+    return df
+
+
+def _add_transfer_portal_features(df: pd.DataFrame, portal_df: pd.DataFrame) -> pd.DataFrame:
+    """Add net transfer portal impact per team."""
+    if portal_df.empty:
+        return df
+    portal = portal_df.copy()
+    portal["rating"] = pd.to_numeric(portal.get("rating"), errors="coerce").fillna(0)
+
+    gains = (portal.groupby(["season", "destination"])["rating"]
+             .agg(portal_gains_sum="sum", portal_gains_count="count")
+             .reset_index()
+             .rename(columns={"destination": "team"}))
+
+    losses = (portal.groupby(["season", "origin"])["rating"]
+              .agg(portal_losses_sum="sum", portal_losses_count="count")
+              .reset_index()
+              .rename(columns={"origin": "team"}))
+
+    merged = gains.merge(losses, on=["season", "team"], how="outer").fillna(0)
+    merged["portal_net_rating"] = merged["portal_gains_sum"] - merged["portal_losses_sum"]
+
+    home_p = merged.rename(columns={"team": "home_team",
+                                     "portal_net_rating": "home_portal_net"})
+    df = df.merge(home_p[["season", "home_team", "home_portal_net"]],
+                  on=["season", "home_team"], how="left")
+
+    away_p = merged.rename(columns={"team": "away_team",
+                                     "portal_net_rating": "away_portal_net"})
+    df = df.merge(away_p[["season", "away_team", "away_portal_net"]],
+                  on=["season", "away_team"], how="left")
+
+    df["portal_net_diff"] = df["home_portal_net"].fillna(0) - df["away_portal_net"].fillna(0)
+    return df
+
+
+def _add_media_features(df: pd.DataFrame, media_df: pd.DataFrame) -> pd.DataFrame:
+    """Add TV/prime-time features."""
+    if media_df.empty:
+        return df
+    mdf = media_df.copy()
+    prime_networks = {"ESPN", "ABC", "FOX", "CBS", "NBC", "ESPN2"}
+    mdf["is_primetime"] = mdf["tv"].apply(
+        lambda x: int(any(net in str(x) for net in prime_networks)) if x else 0
+    )
+    return df.merge(mdf[["game_id", "is_primetime"]], on="game_id", how="left")
+
+
 def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     """
     Join processed tables into a game-level feature matrix.
@@ -147,6 +405,25 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
         tgs = load_parquet("team_game_stats")
     except FileNotFoundError:
         tgs = None
+
+    # NEW: Optional new data tables
+    def _try_load(name: str) -> pd.DataFrame:
+        try:
+            return load_parquet(name)
+        except FileNotFoundError:
+            return pd.DataFrame()
+
+    weather_df   = _try_load("weather")
+    venues_df    = _try_load("venues")
+    fpi_df       = _try_load("fpi_ratings")
+    srs_df       = _try_load("srs_ratings")
+    pregame_wp_df = _try_load("pregame_wp")
+    ppa_df       = _try_load("ppa_teams")
+    wepa_df      = _try_load("wepa")
+    ret_df       = _try_load("returning_production")
+    coaches_df   = _try_load("coaches")
+    portal_df    = _try_load("transfer_portal")
+    media_df     = _try_load("game_media")
 
     # ── Elo: season-level ratings (CFBD v5 provides end-of-season only) ──────
     elo = elo_raw[["season", "team", "elo"]].copy()
@@ -304,6 +581,65 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
                 df["pass_yards_diff_l5"]    = df["home_pass_yards_l5"]    - df["away_pass_yards_l5"]
             if "home_penalty_yards_l5" in df.columns and "away_penalty_yards_l5" in df.columns:
                 df["penalty_yards_diff_l5"] = df["away_penalty_yards_l5"] - df["home_penalty_yards_l5"]
+
+    # ── NEW: Weather ──────────────────────────────────────────────────────────
+    if not weather_df.empty:
+        df = _add_weather_features(df, weather_df)
+        logger.info("  merged weather features")
+
+    # ── NEW: Venue altitude / dome (fallback if weather didn't provide dome) ──
+    if not venues_df.empty:
+        df = _add_venue_features(df, venues_df, games)
+        logger.info("  merged venue features")
+
+    # Ensure is_dome exists (default 0 if neither weather nor venues provided it)
+    if "is_dome" not in df.columns:
+        df["is_dome"] = 0
+
+    # ── NEW: FPI ratings ──────────────────────────────────────────────────────
+    if not fpi_df.empty:
+        df = _add_fpi_features(df, fpi_df)
+        logger.info("  merged FPI features")
+
+    # ── NEW: SRS ratings ──────────────────────────────────────────────────────
+    if not srs_df.empty:
+        df = _add_srs_features(df, srs_df)
+        logger.info("  merged SRS features")
+
+    # ── NEW: Pre-game win probability ──────────────────────────────────────────
+    if not pregame_wp_df.empty:
+        df = _add_pregame_wp_features(df, pregame_wp_df)
+        logger.info("  merged pre-game WP features")
+
+    # ── NEW: PPA by down ──────────────────────────────────────────────────────
+    if not ppa_df.empty:
+        df = _add_ppa_features(df, ppa_df)
+        logger.info("  merged PPA by-down features")
+
+    # ── NEW: WEPA (opponent-adjusted EPA) ─────────────────────────────────────
+    if not wepa_df.empty:
+        df = _add_wepa_features(df, wepa_df)
+        logger.info("  merged WEPA features")
+
+    # ── NEW: Returning production ─────────────────────────────────────────────
+    if not ret_df.empty:
+        df = _add_returning_production(df, ret_df)
+        logger.info("  merged returning production features")
+
+    # ── NEW: Coach tenure ─────────────────────────────────────────────────────
+    if not coaches_df.empty:
+        df = _add_coach_features(df, coaches_df)
+        logger.info("  merged coach tenure features")
+
+    # ── NEW: Transfer portal ──────────────────────────────────────────────────
+    if not portal_df.empty:
+        df = _add_transfer_portal_features(df, portal_df)
+        logger.info("  merged transfer portal features")
+
+    # ── NEW: Game media / prime-time ──────────────────────────────────────────
+    if not media_df.empty:
+        df = _add_media_features(df, media_df)
+        logger.info("  merged game media features")
 
     # ── save ─────────────────────────────────────────────────────────────────
     save_parquet(df, "feature_matrix", layer="features")
