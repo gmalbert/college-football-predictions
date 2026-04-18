@@ -234,14 +234,24 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
         if f not in df.columns:
             df[f] = 0.0
 
-    X = df[WIN_FEATURES].fillna(0).values
-    df["win_prob"] = _clf_predict_proba(win_m, X)
+    try:
+        X = df[WIN_FEATURES].fillna(0)
+        df["win_prob"] = _clf_predict_proba(win_m, X)
+    except Exception:
+        df["win_prob"] = float("nan")
 
-    X = df[SPREAD_FEATURES].fillna(0).values
-    df["predicted_spread"] = _reg_predict(spread_m, X)
+    try:
+        X = df[SPREAD_FEATURES].fillna(0)
+        df["predicted_spread"] = _reg_predict(spread_m, X)
+    except Exception:
+        df["predicted_spread"] = float("nan")
 
-    X = df[TOTAL_FEATURES].fillna(0).values
-    df["predicted_total"] = _reg_predict(total_m, X)
+    try:
+        X = df[TOTAL_FEATURES].fillna(0)
+        df["predicted_total"] = _reg_predict(total_m, X)
+    except Exception:
+        df["predicted_total"] = float("nan")
+
     return df
 
 
@@ -291,14 +301,24 @@ def _predict_row(row: pd.Series) -> Prediction:
 
 def _clf_predict_proba(model, X):
     if HAS_XGB and isinstance(model, xgb.Booster):
-        return model.predict(xgb.DMatrix(X))
-    return model.predict_proba(X)[:, 1]
+        if hasattr(X, "columns"):
+            dmat = xgb.DMatrix(X.values, feature_names=[str(c) for c in X.columns])
+        else:
+            dmat = xgb.DMatrix(X)
+        return model.predict(dmat)
+    arr = X.values if hasattr(X, "values") else X
+    return model.predict_proba(arr)[:, 1]
 
 
 def _reg_predict(model, X):
     if HAS_XGB and isinstance(model, xgb.Booster):
-        return model.predict(xgb.DMatrix(X))
-    return model.predict(X)
+        if hasattr(X, "columns"):
+            dmat = xgb.DMatrix(X.values, feature_names=[str(c) for c in X.columns])
+        else:
+            dmat = xgb.DMatrix(X)
+        return model.predict(dmat)
+    arr = X.values if hasattr(X, "values") else X
+    return model.predict(arr)
 
 
 def _tscv(X, y, n_splits: int = 5):
