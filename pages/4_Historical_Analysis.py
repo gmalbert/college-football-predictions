@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from utils.ui_components import render_sidebar
+from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
 from utils.models import predict_batch, models_trained
 from footer import add_betting_oracle_footer
@@ -71,8 +71,8 @@ with tab_trends:
         markers=True, color_discrete_sequence=["#D4001C"],
     )
     fig_score.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#FAFAFA"),
+        paper_bgcolor="#F7FBFF", plot_bgcolor="#F7FBFF",
+        font=dict(color="#1A2B3C"),
     )
     st.plotly_chart(fig_score, width="stretch")
 
@@ -84,8 +84,8 @@ with tab_trends:
     )
     fig_hfa.add_hline(y=0, line_dash="dash", line_color="gray")
     fig_hfa.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#FAFAFA"),
+        paper_bgcolor="#F7FBFF", plot_bgcolor="#F7FBFF",
+        font=dict(color="#1A2B3C"),
     )
     st.plotly_chart(fig_hfa, width="stretch")
 
@@ -104,7 +104,7 @@ with tab_trends:
             .sort_values("ATS Win %", ascending=False)
         )
         st.subheader("Model ATS Win % by Conference")
-        st.dataframe(
+        themed_dataframe(
             ats_by_conf.assign(**{"ATS Win %": lambda d: (d["ATS Win %"] * 100).round(1)}),
             width="stretch", hide_index=True,
         )
@@ -159,7 +159,7 @@ with tab_h2h:
                 "Result": result,
                 "Spread": f"{g.get('market_spread', float('nan')):+.1f}" if pd.notna(g.get("market_spread")) else "—",
             })
-        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+        themed_dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -190,8 +190,8 @@ with tab_conf:
             range_color=[30, 70],
         )
         fig_bar.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#FAFAFA"),
+            paper_bgcolor="#F7FBFF", plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_bar, width="stretch")
 
@@ -209,7 +209,7 @@ with tab_conf:
             .sort_values("Avg Home Score", ascending=False)
         )
         st.subheader("Average Scoring by Conference")
-        st.dataframe(
+        themed_dataframe(
             conf_scoring.round(1),
             width="stretch", hide_index=True,
         )

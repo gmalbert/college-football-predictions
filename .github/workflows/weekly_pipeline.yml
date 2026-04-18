@@ -1,0 +1,78 @@
+name: Weekly Data Pipeline
+
+on:
+  schedule:
+    # Every Tuesday at 6 AM UTC (after Monday night games settle)
+    - cron: "0 6 * * 2"
+  workflow_dispatch:
+    inputs:
+      force_repull:
+        description: "Re-pull all data even if cached (--force)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      years:
+        description: "Comma-separated years to pull (leave blank for default 2021-2025)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  data-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      # ── checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ── Python setup ────────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── pull data ────────────────────────────────────────────────────────────
+      - name: Fetch historical data
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ github.event.inputs.force_repull }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python -m utils.fetch_historical $FORCE_FLAG
+
+      # ── build features ───────────────────────────────────────────────────────
+      - name: Build feature matrix
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python -m utils.feature_engine --force
+
+      # ── retrain models ───────────────────────────────────────────────────────
+      - name: Train prediction models
+        run: python -m utils.models --force
+
+      # ── commit artifacts ─────────────────────────────────────────────────────
+      - name: Commit updated data files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data_files/raw/ \
+            data_files/processed/ \
+            data_files/features/ \
+            data_files/models/
+          git diff --staged --quiet || \
+            git commit -m "chore: weekly data pipeline $(date -u '+%Y-%m-%d')"
+          git push

@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-from utils.ui_components import render_sidebar
+from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
 from utils.models import predict_batch, models_trained
 from footer import add_betting_oracle_footer
@@ -111,9 +111,9 @@ if not elo_df.empty:
         fig_elo.update_layout(
             title=f"{team} End-of-Season Elo Rating",
             xaxis_title="Season", yaxis_title="Elo",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#FAFAFA"),
+            paper_bgcolor="#F7FBFF",
+            plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_elo, width="stretch")
     else:
@@ -162,8 +162,8 @@ if not adv.empty:
             fig_radar.update_layout(
                 polar=dict(radialaxis=dict(range=[0, 100])),
                 title=f"{team} Advanced Stats Percentile Rank — {season}",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#FAFAFA"),
+                paper_bgcolor="#F7FBFF",
+                font=dict(color="#1A2B3C"),
             )
             st.plotly_chart(fig_radar, width="stretch")
 
@@ -207,8 +207,8 @@ for _, g in df_team.iterrows():
     })
 
 if rows:
-    st.dataframe(pd.DataFrame(rows).reset_index(drop=True),
-                 width="stretch", hide_index=True)
+    themed_dataframe(pd.DataFrame(rows).reset_index(drop=True),
+                    width="stretch", hide_index=True)
 else:
     st.info("No schedule data for this team and season.")
 

@@ -114,8 +114,18 @@ def train_all(force: bool = False) -> dict:
 
     metrics: dict = {}
 
+    # Ensure every declared feature column exists in the DataFrame.
+    # Columns missing entirely (e.g. weather on free tier) are zeroed out so
+    # the saved models always see a fixed-width vector at inference time too.
+    all_feats = list(dict.fromkeys(WIN_FEATURES + SPREAD_FEATURES + TOTAL_FEATURES))
+    for f in all_feats:
+        if f not in df.columns:
+            df[f] = 0.0
+
     # ── Win probability ──────────────────────────────────────────────────────
-    win_feats = [f for f in WIN_FEATURES if f in df.columns]
+    # Only train on rows that have real values for every win feature
+    # (dropna preserves data quality; zero-fill above handles absent columns).
+    win_feats = WIN_FEATURES
     df_win = df.dropna(subset=win_feats + ["home_win"])
     X_win  = df_win[win_feats].values
     y_win  = df_win["home_win"].values.astype(int)
@@ -130,7 +140,7 @@ def train_all(force: bool = False) -> dict:
     logger.info(f"  win model  — brier={win_m.get('brier', '?'):.4f}{_ll_str}   n={len(y_win):,}")
 
     # ── Spread ───────────────────────────────────────────────────────────────
-    sp_feats = [f for f in SPREAD_FEATURES if f in df.columns]
+    sp_feats = SPREAD_FEATURES
     df_sp    = df.dropna(subset=sp_feats + ["home_margin"])
     X_sp     = df_sp[sp_feats].values
     y_sp     = df_sp["home_margin"].values
@@ -144,7 +154,7 @@ def train_all(force: bool = False) -> dict:
     logger.info(f"  spread model — rmse={sp_m.get('rmse', '?'):.2f}   n={len(y_sp):,}")
 
     # ── Total ────────────────────────────────────────────────────────────────
-    tot_feats = [f for f in TOTAL_FEATURES if f in df.columns]
+    tot_feats = TOTAL_FEATURES
     df_tot    = df.dropna(subset=tot_feats + ["total_points"])
     X_tot     = df_tot[tot_feats].values
     y_tot     = df_tot["total_points"].values
@@ -217,20 +227,21 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     spread_m = joblib.load(SPREAD_MODEL_PATH)
     total_m  = joblib.load(TOTAL_MODEL_PATH)
 
-    win_feats    = [f for f in WIN_FEATURES    if f in df.columns]
-    spread_feats = [f for f in SPREAD_FEATURES if f in df.columns]
-    total_feats  = [f for f in TOTAL_FEATURES  if f in df.columns]
-
+    # Add any missing feature columns as 0 so inference always sends the full
+    # fixed-width vector that the models were trained on.
     df = df.copy()
-    if win_feats:
-        X = df[win_feats].fillna(0).values
-        df["win_prob"] = _clf_predict_proba(win_m, X)
-    if spread_feats:
-        X = df[spread_feats].fillna(0).values
-        df["predicted_spread"] = _reg_predict(spread_m, X)
-    if total_feats:
-        X = df[total_feats].fillna(0).values
-        df["predicted_total"] = _reg_predict(total_m, X)
+    for f in list(dict.fromkeys(WIN_FEATURES + SPREAD_FEATURES + TOTAL_FEATURES)):
+        if f not in df.columns:
+            df[f] = 0.0
+
+    X = df[WIN_FEATURES].fillna(0).values
+    df["win_prob"] = _clf_predict_proba(win_m, X)
+
+    X = df[SPREAD_FEATURES].fillna(0).values
+    df["predicted_spread"] = _reg_predict(spread_m, X)
+
+    X = df[TOTAL_FEATURES].fillna(0).values
+    df["predicted_total"] = _reg_predict(total_m, X)
     return df
 
 

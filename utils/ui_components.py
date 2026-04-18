@@ -13,6 +13,7 @@ THEMES: dict[str, dict] = {
         "border": "#AECDE6", "link": "#1A5F96",
         "header": "#EEF4FB", "nav_active_bg": "#2B7CB8", "nav_active_text": "#FFFFFF",
         "metric_label": "#4A6E8A", "metric_value": "#1A2B3C",
+        "table_bg": "#FFFFFF", "table_alt_bg": "#F5F8FC", "table_header_bg": "#E3EFFB",
     },
     "night": {
         "background": "#0F172A", "sidebar": "#111827", "card": "#1E293B",
@@ -20,6 +21,90 @@ THEMES: dict[str, dict] = {
         "border": "#334155", "link": "#FBBF24",
         "header": "#0F172A", "nav_active_bg": "#1E3A5F", "nav_active_text": "#F1F5F9",
         "metric_label": "#CBD5E1", "metric_value": "#F1F5F9",
+        "table_bg": "#1E293B", "table_alt_bg": "#16202F", "table_header_bg": "#172A3A",
+    },
+}
+
+TABLE_STYLE_PRESETS: dict[str, dict[str, dict[str, str]]] = {
+    "Default": {
+        "day": {
+            "table_bg": "#FFFFFF", "table_alt_bg": "#F5F8FC", "table_header_bg": "#E3EFFB"
+        },
+        "night": {
+            "table_bg": "#1E293B", "table_alt_bg": "#16202F", "table_header_bg": "#172A3A"
+        },
+    },
+    "Clean White": {
+        "day": {
+            "table_bg": "#FFFFFF", "table_alt_bg": "#F3F5F8", "table_header_bg": "#E7EDF6"
+        },
+        "night": {
+            "table_bg": "#1E293B", "table_alt_bg": "#16202F", "table_header_bg": "#1F2F45"
+        },
+    },
+    "Soft Gray": {
+        "day": {
+            "table_bg": "#F9FAFB", "table_alt_bg": "#EFF2F7", "table_header_bg": "#D9E4EF"
+        },
+        "night": {
+            "table_bg": "#1B2430", "table_alt_bg": "#161E2A", "table_header_bg": "#21304A"
+        },
+    },
+    "Cool Blue": {
+        "day": {
+            "table_bg": "#F3F8FF", "table_alt_bg": "#E7F0FF", "table_header_bg": "#D5E7FF"
+        },
+        "night": {
+            "table_bg": "#1A2639", "table_alt_bg": "#162030", "table_header_bg": "#203554"
+        },
+    },
+    "Minimal": {
+        "day": {
+            "table_bg": "#FFFFFF", "table_alt_bg": "#FFFFFF", "table_header_bg": "#F0F4F8"
+        },
+        "night": {
+            "table_bg": "#1F2937", "table_alt_bg": "#1F2937", "table_header_bg": "#111827"
+        },
+    },
+    "Ivory Lace": {
+        "day": {
+            "table_bg": "#FEFEFC", "table_alt_bg": "#F8F7F2", "table_header_bg": "#EDEBE4"
+        },
+        "night": {
+            "table_bg": "#1E293B", "table_alt_bg": "#192238", "table_header_bg": "#1A2540"
+        },
+    },
+    "Frost": {
+        "day": {
+            "table_bg": "#F7FBFF", "table_alt_bg": "#EDF4FF", "table_header_bg": "#D7E7FC"
+        },
+        "night": {
+            "table_bg": "#16202B", "table_alt_bg": "#111A25", "table_header_bg": "#1C3046"
+        },
+    },
+    "Slate": {
+        "day": {
+            "table_bg": "#F4F6F8", "table_alt_bg": "#E8EBEF", "table_header_bg": "#D1D9E0"
+        },
+        "night": {
+            "table_bg": "#1F2937", "table_alt_bg": "#17202D", "table_header_bg": "#202B3C"
+        },
+    },
+    "Sea Glass": {
+        "day": {
+            "table_bg": "#F4FEFF", "table_alt_bg": "#E8F8F9", "table_header_bg": "#D2EEF0"
+        },
+        "night": {
+            "table_bg": "#1D2E35", "table_alt_bg": "#162128", "table_header_bg": "#1F3940"
+        },
+    },
+    "Cloud": {
+        "day": {
+            "table_bg": "#F7F9FB", "table_alt_bg": "#EEF1F5", "table_header_bg": "#DDE4EC"
+        },
+        "night": {
+            "table_bg": "#1E2737", "table_alt_bg": "#172034", "table_header_bg": "#1A2A40"
+        },
     },
 }
 
@@ -30,11 +115,19 @@ def _auto_theme_name() -> str:
     return "day" if 6 <= hour < 22 else "night"
 
 
-def apply_theme(name: str | None = None) -> None:
+def apply_theme(name: str | None = None, table_style: str | None = None) -> None:
     """Inject CSS for the given theme key ('day'/'night'). Defaults to auto."""
     if name is None:
         name = _auto_theme_name()
-    theme = THEMES.get(name, THEMES["day"])
+    theme = THEMES.get(name, THEMES["day"]).copy()
+
+    if table_style is None:
+        table_style = st.session_state.get("table_style", "Default")
+
+    preset = TABLE_STYLE_PRESETS.get(table_style, {}).get(name)
+    if preset:
+        theme.update(preset)
+
     bg   = theme["background"]
     sb   = theme["sidebar"]
     card = theme["card"]
@@ -43,6 +136,9 @@ def apply_theme(name: str | None = None) -> None:
     acc  = theme["accent"]
     bdr  = theme["border"]
     lnk  = theme["link"]
+    tbl  = theme.get("table_bg", card)
+    tbl_alt = theme.get("table_alt_bg", card)
+    th_bg   = theme.get("table_header_bg", card)
     # header bar and nav active colours — fall back gracefully for light themes
     hdr  = theme.get("header", bg)
     nav_bg   = theme.get("nav_active_bg",   acc)
@@ -102,7 +198,7 @@ def apply_theme(name: str | None = None) -> None:
 
         # ── Card / inner containers ───────────────────────────────────────
         ".css-1d391kg, .css-18e3th9, .css-1v0mbdj, .css-10trblm, .css-1wrcr25, .css-1lcbmhc {"
-        f"background-color: {card} !important;"
+        "background-color: transparent !important;"
         f"color: {tx} !important;"
         f"border-color: {bdr} !important;"
         "}"
@@ -140,16 +236,57 @@ def apply_theme(name: str | None = None) -> None:
 
         # ── Buttons ───────────────────────────────────────────────────────
         ".stButton>button, button {"
-        f"background-color: {acc} !important;"
-        "color: #FFFFFF !important;"
-        f"border-color: {acc} !important;"
-        "}"
-
-        # ── Form inputs ───────────────────────────────────────────────────
-        ".stTextInput>div>div>input, .stSelectbox>div>div>div, .stNumberInput>div>div>input {"
-        f"background-color: {card} !important;"
+        f"background-color: {bg} !important;"
         f"color: {tx} !important;"
         f"border-color: {bdr} !important;"
+        "}"
+        ".stButton>button:hover, button:hover {"
+        f"background-color: {sb} !important;"
+        f"border-color: {acc} !important;"
+        f"color: {acc} !important;"
+        "}"
+
+        # ── Form inputs (data-baseweb selectors for modern Streamlit) ────
+        # Number / text input: outer container
+        "[data-testid=\"stNumberInput\"] [data-baseweb=\"input\"],"
+        "[data-testid=\"stTextInput\"] [data-baseweb=\"input\"] {"
+        "background-color: transparent !important;"
+        f"border-color: {bdr} !important;"
+        "}"
+        # Number / text input: inner InputContainer div (this is where Streamlit sets the bg)
+        "[data-testid=\"stNumberInput\"] [data-baseweb=\"input\"] > div,"
+        "[data-testid=\"stTextInput\"] [data-baseweb=\"input\"] > div {"
+        "background-color: transparent !important;"
+        f"color: {tx} !important;"
+        "}"
+        # The actual <input> element
+        "[data-testid=\"stNumberInput\"] input,"
+        "[data-testid=\"stTextInput\"] input {"
+        "background-color: transparent !important;"
+        f"color: {tx} !important;"
+        "}"
+        # Selectbox
+        "[data-baseweb=\"select\"] > div, [data-baseweb=\"select\"] > div > div {"
+        "background-color: transparent !important;"
+        f"color: {tx} !important;"
+        f"border-color: {bdr} !important;"
+        "}"
+        "[data-baseweb=\"popover\"] [role=\"listbox\"] {"
+        "background-color: transparent !important;"
+        f"color: {tx} !important;"
+        "}"
+
+        # ── Plotly charts ───────────────────────────────────────────────────
+        "div[data-testid=\"stPlotlyChart\"] > div {"
+        "background-color: transparent !important;"
+        "border-color: transparent !important;"
+        "}"
+        ".plotly, .js-plotly-plot, .plotly .svg-container, .plotly .main-svg {"
+        "background-color: transparent !important;"
+        "}"
+        ".plotly .paperbg, .plotly .bg, .plotly .cartesianlayer > rect {"
+        "fill: transparent !important;"
+        "stroke: transparent !important;"
         "}"
 
         # ── Dividers ─────────────────────────────────────────────────────
@@ -157,10 +294,23 @@ def apply_theme(name: str | None = None) -> None:
         f"border-color: {bdr} !important;"
         "}"
 
-        # ── Tables ────────────────────────────────────────────────────────
-        "table, th, td {"
+        # ── Tables / dataframes ───────────────────────────────────────────
+        # Markdown-rendered HTML tables (.stMarkdown table)
+        ".stMarkdown table, .stMarkdown th, .stMarkdown td {"
         f"color: {tx} !important;"
         f"border-color: {bdr} !important;"
+        "}"
+        ".stMarkdown table {"
+        "background-color: transparent !important;"
+        "}"
+        ".stMarkdown th {"
+        "background-color: transparent !important;"
+        "}"
+        ".stMarkdown td {"
+        "background-color: transparent !important;"
+        "}"
+        ".stMarkdown tbody tr:nth-child(odd) td {"
+        "background-color: transparent !important;"
         "}"
 
         # ── Tabs ──────────────────────────────────────────────────────────
@@ -210,7 +360,8 @@ def apply_theme(name: str | None = None) -> None:
 
 def render_sidebar() -> None:
     """Standard sidebar rendered on every page."""
-    apply_theme()  # auto day/night based on server clock
+    if "table_style" not in st.session_state:
+        st.session_state.table_style = "Frost"
 
     with st.sidebar:
         from pathlib import Path
@@ -237,10 +388,37 @@ def render_sidebar() -> None:
         except Exception:
             pass
 
-
         st.divider()
         st.caption("Data: CFBD API · ESPN | Updated daily")
         st.divider()
+
+    apply_theme(table_style=st.session_state.table_style)
+
+
+def themed_dataframe(df, **kwargs) -> None:
+    """Render a pandas DataFrame styled with the current table color preset."""
+    theme_name  = _auto_theme_name()
+    table_style = st.session_state.get("table_style", "Frost")
+    preset      = TABLE_STYLE_PRESETS.get(table_style, {}).get(theme_name, {})
+    theme       = THEMES.get(theme_name, THEMES["day"])
+
+    tbl     = "transparent"
+    tbl_alt = "transparent"
+    th_bg   = "transparent"
+    tx      = theme["text"]
+
+    def _row_style(row):
+        return [f"background-color: transparent; color: {tx}"] * len(row)
+
+    styled = (
+        df.style
+        .apply(_row_style, axis=1)
+        .set_table_styles([
+            {"selector": "th", "props": f"background-color: {th_bg}; color: {tx};"},
+            {"selector": "td", "props": f"color: {tx};"},
+        ])
+    )
+    st.dataframe(styled, **kwargs)
 
 
 def game_card(
