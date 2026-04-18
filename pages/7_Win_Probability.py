@@ -38,8 +38,14 @@ def _load_games(year: int, wk: int, stype: str) -> list:
     return get_games(year, season_type=stype, week=wk)
 
 
-with st.spinner("Loading games…"):
-    games = _load_games(season, week, season_type)
+try:
+    with st.spinner("Loading games…"):
+        games = _load_games(season, week, season_type)
+except Exception as exc:
+    st.warning(
+        f"Could not load games — check that the CFBD API key is configured in Streamlit secrets.  \n`{exc}`"
+    )
+    st.stop()
 
 if not games:
     st.info("No games found for the selected week.")
