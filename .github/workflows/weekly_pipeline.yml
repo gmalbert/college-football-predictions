@@ -2,8 +2,13 @@ name: Weekly Data Pipeline
 
 on:
   schedule:
-    # Every Tuesday at 6 AM UTC (after Monday night games settle)
-    - cron: "0 6 * * 2"
+    # Every Tuesday at 6 AM UTC — football season only (Aug–Jan)
+    - cron: "0 6 * 8 2"   # August   (week 0 / preseason)
+    - cron: "0 6 * 9 2"   # September
+    - cron: "0 6 * 10 2"  # October
+    - cron: "0 6 * 11 2"  # November
+    - cron: "0 6 * 12 2"  # December (conference championships / early bowls)
+    - cron: "0 6 * 1 2"   # January  (bowl games / CFP)
   workflow_dispatch:
     inputs:
       force_repull:
@@ -28,13 +33,13 @@ jobs:
     steps:
       # ── checkout ────────────────────────────────────────────────────────────
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 1
 
       # ── Python setup ────────────────────────────────────────────────────────
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -68,7 +73,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add \
+          git add -f \
             data_files/raw/ \
             data_files/processed/ \
             data_files/features/ \
