@@ -1,6 +1,7 @@
 """utils/cfbd_client.py — Thin wrapper around the College Football Data API (v5)."""
 from __future__ import annotations
 import cfbd
+import requests
 from functools import lru_cache
 from utils.config import get_secret
 from utils.logger import get_logger
@@ -224,18 +225,90 @@ def get_ppa_teams(year: int, team: str | None = None,
         return []
 
 
-def get_wepa_team_season(year: int, team: str | None = None) -> list:
-    """Get opponent-adjusted (WEPA) team season stats."""
-    api = cfbd.MetricsApi(_client())
+_CFBD_BASE = "https://api.collegefootballdata.com"
+
+
+def _cfbd_headers() -> dict[str, str]:
+    """Return Bearer auth headers for direct REST calls (bypasses Python SDK)."""
+    return {"Authorization": f"Bearer {get_secret('cfbd', 'api_key')}"}
+
+
+def _cfbd_get(path: str, params: dict) -> list:
+    """
+    GET a CFBD endpoint that is not wrapped by the Python SDK
+    (e.g. Patreon-gated /wepa/* routes).
+
+    Returns the parsed JSON list on success, [] on any error.
+    Logs a clear message when the endpoint requires a Patreon subscription.
+    """
     try:
-        kwargs: dict = {"year": year}
-        if team:
-            kwargs["team"] = team
-        # WEPA (adjusted team season stats) not available in this cfbd SDK version
-        return []
+        r = requests.get(
+            f"{_CFBD_BASE}{path}",
+            params={k: v for k, v in params.items() if v is not None},
+            headers=_cfbd_headers(),
+            timeout=30,
+        )
+        if r.status_code == 401:
+            msg = r.json().get("message", "Unauthorized")
+            if "Patreon" in msg:
+                logger.warning(f"CFBD {path} requires Patreon Tier 1+: {msg}")
+            else:
+                logger.error(f"CFBD {path} 401: {msg}")
+            return []
+        r.raise_for_status()
+        return r.json()
     except Exception as e:
-        logger.error(f"CFBD get_wepa_team_season error: {e}")
+        logger.error(f"CFBD {path} error: {e}")
         return []
+
+
+def get_wepa_team_season(year: int, team: str | None = None,
+                         conference: str | None = None) -> list:
+    """
+    Get opponent-adjusted (WEPA) team season stats.
+    Endpoint: GET /wepa/team/season
+    Requires: CFBD Patreon Tier 1+
+    Returns 26 columns including epa_total, success_rate_total, rushing_line_yards, etc.
+    """
+    return _cfbd_get("/wepa/team/season", {"year": year, "team": team, "conference": conference})
+
+
+def get_wepa_players_passing(year: int, team: str | None = None,
+                             conference: str | None = None,
+                             position: str | None = None) -> list:
+    """
+    Get opponent-adjusted player passing WEPA stats.
+    Endpoint: GET /wepa/players/passing
+    Requires: CFBD Patreon Tier 1+
+    Returns: year, athlete_id, athlete_name, position, team, conference, wepa, plays
+    """
+    return _cfbd_get("/wepa/players/passing",
+                     {"year": year, "team": team, "conference": conference, "position": position})
+
+
+def get_wepa_players_rushing(year: int, team: str | None = None,
+                             conference: str | None = None,
+                             position: str | None = None) -> list:
+    """
+    Get opponent-adjusted player rushing WEPA stats.
+    Endpoint: GET /wepa/players/rushing
+    Requires: CFBD Patreon Tier 1+
+    Returns: year, athlete_id, athlete_name, position, team, conference, wepa, plays
+    """
+    return _cfbd_get("/wepa/players/rushing",
+                     {"year": year, "team": team, "conference": conference, "position": position})
+
+
+def get_wepa_players_kicking(year: int, team: str | None = None,
+                             conference: str | None = None) -> list:
+    """
+    Get Points Added Above Replacement (PAAR) ratings for kickers.
+    Endpoint: GET /wepa/players/kicking
+    Requires: CFBD Patreon Tier 1+
+    Returns: year, athlete_id, athlete_name, team, conference, paar, attempts
+    """
+    return _cfbd_get("/wepa/players/kicking",
+                     {"year": year, "team": team, "conference": conference})
 
 
 # ── Returning Production ──────────────────────────────────────────

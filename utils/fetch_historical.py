@@ -37,6 +37,9 @@ from utils.cfbd_client import (
     get_transfer_portal,
     get_game_media,
     get_coaches,
+    get_plays,
+    get_drives,
+    get_player_usage,
 )
 from utils.storage import RAW_DIR, PROCESSED_DIR, save_parquet
 from utils.logger import get_logger
@@ -110,6 +113,52 @@ def _pull_team_game_stats(year: int, force: bool = False) -> list:
     return serialized
 
 
+def _pull_plays_year(year: int, force: bool = False) -> list:
+    """Fetch plays week-by-week for a full season (regular + postseason)."""
+    path = RAW_DIR / f"plays_{year}.json"
+    if not force and path.exists():
+        logger.info(f"  cached    — plays_{year}")
+        with open(path) as fh:
+            return json.load(fh)
+    logger.info(f"  pulling   — plays_{year} (weeks 1-16 + postseason) …")
+    combined: list = []
+    for week in range(1, 17):
+        rows = get_plays(year, week=week, season_type="regular")
+        combined.extend(rows)
+        time.sleep(API_DELAY)
+    for week in range(1, 6):
+        rows = get_plays(year, week=week, season_type="postseason")
+        combined.extend(rows)
+        time.sleep(API_DELAY)
+    serialized = _to_serializable(combined)
+    with open(path, "w") as fh:
+        json.dump(serialized, fh, default=str)
+    return serialized
+
+
+def _pull_drives_year(year: int, force: bool = False) -> list:
+    """Fetch drives week-by-week for a full season (regular + postseason)."""
+    path = RAW_DIR / f"drives_{year}.json"
+    if not force and path.exists():
+        logger.info(f"  cached    — drives_{year}")
+        with open(path) as fh:
+            return json.load(fh)
+    logger.info(f"  pulling   — drives_{year} (weeks 1-16 + postseason) …")
+    combined: list = []
+    for week in range(1, 17):
+        rows = get_drives(year, week=week, season_type="regular")
+        combined.extend(rows)
+        time.sleep(API_DELAY)
+    for week in range(1, 6):
+        rows = get_drives(year, week=week, season_type="postseason")
+        combined.extend(rows)
+        time.sleep(API_DELAY)
+    serialized = _to_serializable(combined)
+    with open(path, "w") as fh:
+        json.dump(serialized, fh, default=str)
+    return serialized
+
+
 # ─────────────────────────────── ingestion ────────────────────────────────────
 
 def run(force: bool = False) -> None:
@@ -151,6 +200,10 @@ def run(force: bool = False) -> None:
         # NEW: P2 — Transfer portal, game media
         _pull(f"transfer_portal_{year}",  get_transfer_portal, year,      force=force)
         _pull(f"game_media_{year}",       get_game_media, year,           force=force)
+        # P3: Play-by-play, drives, player usage
+        _pull_plays_year(year, force=force)
+        _pull_drives_year(year, force=force)
+        _pull(f"player_usage_{year}",      get_player_usage, year=year,     force=force)
 
     logger.info("=== Building processed Parquet tables ===")
     build_processed_tables(force=force)
@@ -180,6 +233,10 @@ def build_processed_tables(force: bool = False) -> None:
     _build_transfer_portal(force)
     _build_game_media(force)
     _build_coaches(force)
+    # P3: Play-by-play, drives, player usage
+    _build_plays(force)
+    _build_drives(force)
+    _build_player_usage(force)
 
 
 def _build_games(force: bool) -> None:
@@ -914,6 +971,195 @@ def _build_coaches(force: bool) -> None:
     )
     save_parquet(df, "coaches")
     logger.info(f"  coaches.parquet: {len(df):,} rows")
+
+
+def _build_plays(force: bool) -> None:
+    """Aggregate raw PBP data to team-season offensive metrics."""
+    dst = PROCESSED_DIR / "plays_agg.parquet"
+    if not force and dst.exists():
+        logger.info("  processed/plays_agg.parquet — already exists")
+        return
+    rows = []
+    for year in HISTORICAL_YEARS:
+        raw = _load_raw(f"plays_{year}")
+        if not raw:
+            continue
+        df = pd.DataFrame(raw)
+        if df.empty:
+            continue
+
+        def _pick(*names):
+            for n in names:
+                if n in df.columns:
+                    return df[n]
+            return pd.Series(dtype=object, index=df.index)
+
+        df["_offense"]      = _pick("offense", "offenseTeam", "offense_team")
+        df["_play_type"]    = _pick("play_type", "playType").fillna("").astype(str)
+        df["_yards_gained"] = pd.to_numeric(_pick("yards_gained", "yardsGained"), errors="coerce")
+        df["_yards_to_goal"] = pd.to_numeric(_pick("yards_to_goal", "yardsToGoal"), errors="coerce")
+
+        _SKIP = {
+            "Kickoff", "Kickoff Return", "Kickoff Return Touchdown",
+            "Punt", "Punt Return", "Punt Return Touchdown",
+            "Timeout", "End of Period", "End Period", "End of Game",
+        }
+        df = df[~df["_play_type"].isin(_SKIP) & df["_offense"].notna()].copy()
+        if df.empty:
+            continue
+
+        is_pass      = df["_play_type"].str.contains(r"Pass|Sack|Interception", na=False)
+        is_rush      = df["_play_type"].str.contains(r"Rush", na=False)
+        is_explosive = df["_yards_gained"] >= 20
+        is_rz        = df["_yards_to_goal"].fillna(100) <= 20
+
+        for team, grp in df.groupby("_offense"):
+            n = len(grp)
+            if n == 0:
+                continue
+            pass_n = is_pass.reindex(grp.index, fill_value=False).sum()
+            rush_grp = grp[is_rush.reindex(grp.index, fill_value=False)]
+            exp_n    = is_explosive.reindex(grp.index, fill_value=False).sum()
+            rz_n     = is_rz.reindex(grp.index, fill_value=False).sum()
+            rows.append({
+                "season":               year,
+                "team":                 team,
+                "off_total_plays":      n,
+                "off_pass_rate":        pass_n / n,
+                "off_explosive_rate_pbp": exp_n / n,
+                "off_stuff_rate_pbp":   float((rush_grp["_yards_gained"].fillna(0) <= 0).mean())
+                                        if len(rush_grp) > 0 else None,
+                "off_rz_rate":          rz_n / n,
+            })
+    if not rows:
+        logger.warning("  No plays data — skipping plays_agg.parquet")
+        return
+    df_out = pd.DataFrame(rows)
+    for col in [c for c in df_out.columns if c not in ("season", "team")]:
+        df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
+    save_parquet(df_out, "plays_agg")
+    logger.info(f"  plays_agg.parquet: {len(df_out):,} rows")
+
+
+def _build_drives(force: bool) -> None:
+    """Aggregate drive-level data to team-season offensive efficiency metrics."""
+    dst = PROCESSED_DIR / "drives_agg.parquet"
+    if not force and dst.exists():
+        logger.info("  processed/drives_agg.parquet — already exists")
+        return
+    rows = []
+    for year in HISTORICAL_YEARS:
+        raw = _load_raw(f"drives_{year}")
+        if not raw:
+            continue
+        df = pd.DataFrame(raw)
+        if df.empty:
+            continue
+
+        def _pick(*names):
+            for n in names:
+                if n in df.columns:
+                    return df[n]
+            return pd.Series(dtype=object, index=df.index)
+
+        df["_offense"] = _pick("offense", "offenseTeam", "offense_team")
+        df["_result"]  = _pick("drive_result", "driveResult", "result").fillna("").astype(str)
+        df["_plays"]   = pd.to_numeric(_pick("plays", "numPlays", "num_plays"), errors="coerce")
+        df["_yards"]   = pd.to_numeric(_pick("yards"), errors="coerce")
+        df["_scoring"] = _pick("scoring").fillna(False)
+
+        df = df[df["_offense"].notna()].copy()
+        if df.empty:
+            continue
+
+        for team, grp in df.groupby("_offense"):
+            n = len(grp)
+            if n == 0:
+                continue
+            scoring_n = pd.to_numeric(grp["_scoring"], errors="coerce").fillna(0).sum()
+            three_out_n = (
+                (grp["_plays"].fillna(0) <= 3) &
+                grp["_result"].str.contains("Punt", na=False)
+            ).sum()
+            turnover_n = grp["_result"].apply(
+                lambda r: any(t in r.lower() for t in ["fumble", "interception"])
+            ).sum()
+            rows.append({
+                "season":               year,
+                "team":                 team,
+                "off_total_drives":     n,
+                "scoring_drive_pct":    float(scoring_n) / n,
+                "three_and_out_pct":    float(three_out_n) / n,
+                "off_turnover_drive_pct": float(turnover_n) / n,
+                "off_avg_drive_plays":  grp["_plays"].mean(),
+                "off_avg_drive_yards":  grp["_yards"].mean(),
+            })
+    if not rows:
+        logger.warning("  No drives data — skipping drives_agg.parquet")
+        return
+    df_out = pd.DataFrame(rows)
+    for col in [c for c in df_out.columns if c not in ("season", "team")]:
+        df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
+    save_parquet(df_out, "drives_agg")
+    logger.info(f"  drives_agg.parquet: {len(df_out):,} rows")
+
+
+def _build_player_usage(force: bool) -> None:
+    """Aggregate player usage metrics to team-season level."""
+    dst = PROCESSED_DIR / "player_usage_agg.parquet"
+    if not force and dst.exists():
+        logger.info("  processed/player_usage_agg.parquet — already exists")
+        return
+    rows = []
+    for year in HISTORICAL_YEARS:
+        raw = _load_raw(f"player_usage_{year}")
+        if not raw:
+            continue
+        df = pd.DataFrame(raw)
+        if df.empty:
+            continue
+
+        # Normalise field names
+        for src, dst_col in [
+            (("team", "teamName", "team_name"), "team"),
+            (("position", "pos"), "position"),
+        ]:
+            for s in src:
+                if s in df.columns:
+                    df[dst_col] = df[s]
+                    break
+
+        if "team" not in df.columns:
+            continue
+
+        usage_raw = next(
+            (df[c] for c in ("total", "usage", "total_usage") if c in df.columns), None
+        )
+        df["_usage"] = pd.to_numeric(usage_raw, errors="coerce") if usage_raw is not None else float("nan")
+        df = df[df["team"].notna() & df["_usage"].notna()].copy()
+        if df.empty:
+            continue
+
+        for team, grp in df.groupby("team"):
+            skill = grp[grp["position"].isin(["QB", "RB", "WR", "TE"])] if "position" in grp.columns else grp
+            rb = grp[grp["position"] == "RB"] if "position" in grp.columns else pd.DataFrame()
+            wr = grp[grp["position"] == "WR"] if "position" in grp.columns else pd.DataFrame()
+            top3 = skill.nlargest(3, "_usage")["_usage"] if not skill.empty else pd.Series(dtype=float)
+            rows.append({
+                "season":             year,
+                "team":               team,
+                "top_rb_usage":       float(rb["_usage"].max()) if not rb.empty else None,
+                "top_wr_usage":       float(wr["_usage"].max()) if not wr.empty else None,
+                "top_skill_usage":    float(top3.mean()) if not top3.empty else None,
+            })
+    if not rows:
+        logger.warning("  No player usage data — skipping player_usage_agg.parquet")
+        return
+    df_out = pd.DataFrame(rows)
+    for col in [c for c in df_out.columns if c not in ("season", "team")]:
+        df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
+    save_parquet(df_out, "player_usage_agg")
+    logger.info(f"  player_usage_agg.parquet: {len(df_out):,} rows")
 
 
 if __name__ == "__main__":

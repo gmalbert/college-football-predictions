@@ -169,6 +169,63 @@ if not adv.empty:
 
 st.divider()
 
+# ── EPA Efficiency Quadrant ───────────────────────────────────────────────────
+adv_all = data["advanced_stats"]
+if not adv_all.empty:
+    df_quad = adv_all[adv_all["season"] == season].copy()
+    for col in ["off_epa", "def_epa"]:
+        if col in df_quad.columns:
+            df_quad[col] = pd.to_numeric(df_quad[col], errors="coerce")
+    df_quad = df_quad.dropna(subset=["off_epa", "def_epa"]) if "off_epa" in df_quad.columns and "def_epa" in df_quad.columns else pd.DataFrame()
+    if not df_quad.empty:
+        st.subheader("Team Efficiency Quadrant")
+        st.caption("Offense EPA/play vs Defense EPA/play across all teams. Selected team highlighted in red.")
+        df_quad["_highlight"] = df_quad["team"] == team
+        fig_quad = px.scatter(
+            df_quad,
+            x="off_epa",
+            y="def_epa",
+            text="team",
+            color="_highlight",
+            color_discrete_map={True: "#D4001C", False: "#9ABBE0"},
+            title=f"{season} — Team Efficiency Quadrant",
+            labels={
+                "off_epa": "Offensive EPA/Play (higher = better)",
+                "def_epa": "Defensive EPA/Play (lower = better)",
+            },
+            height=500,
+        )
+        fig_quad.update_traces(textposition="top center", marker_size=8)
+        fig_quad.update_traces(
+            selector=dict(name="True"), marker_size=14, marker_symbol="star"
+        )
+        fig_quad.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.4)
+        fig_quad.add_vline(x=0, line_dash="dash", line_color="gray", opacity=0.4)
+        x_hi = float(df_quad["off_epa"].quantile(0.88))
+        y_lo = float(df_quad["def_epa"].quantile(0.12))
+        x_lo = float(df_quad["off_epa"].quantile(0.12))
+        y_hi = float(df_quad["def_epa"].quantile(0.88))
+        for ann_txt, xx, yy in [
+            ("ELITE", x_hi, y_lo),
+            ("OFF ONLY", x_hi, y_hi),
+            ("DEF ONLY", x_lo, y_lo),
+            ("REBUILDING", x_lo, y_hi),
+        ]:
+            fig_quad.add_annotation(
+                x=xx, y=yy, text=ann_txt, showarrow=False,
+                font=dict(size=12, color="rgba(100,100,100,0.55)"),
+            )
+        fig_quad.update_layout(
+            showlegend=False,
+            paper_bgcolor="#F7FBFF",
+            plot_bgcolor="#F7FBFF",
+            font=dict(color="#1A2B3C"),
+            margin=dict(l=40, r=40, t=50, b=40),
+        )
+        st.plotly_chart(fig_quad, width="stretch")
+
+st.divider()
+
 # ── Schedule & results table ───────────────────────────────────────────────────
 st.subheader("Schedule & Results")
 if models_trained():

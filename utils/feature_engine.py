@@ -62,6 +62,13 @@ WIN_FEATURES = [
     "cfbd_pregame_wp_diff",
     # NEW: Coaching tenure
     "coach_tenure_diff",
+    # P3: Drive-level efficiency
+    "scoring_drive_pct_diff",
+    "three_and_out_pct_diff",
+    # P3: Play-by-play tendency
+    "off_pass_rate_diff",
+    # P3: Player usage
+    "top_rb_usage_diff",
 ]
 
 SPREAD_FEATURES = WIN_FEATURES + ["market_spread"]
@@ -375,6 +382,81 @@ def _add_media_features(df: pd.DataFrame, media_df: pd.DataFrame) -> pd.DataFram
     return df.merge(mdf[["game_id", "is_primetime"]], on="game_id", how="left")
 
 
+def _add_pbp_features(df: pd.DataFrame, plays_df: pd.DataFrame) -> pd.DataFrame:
+    """Add play-by-play aggregated features (pass tendency, explosive rate)."""
+    if plays_df.empty:
+        return df
+    cols = ["season", "team", "off_pass_rate", "off_explosive_rate_pbp", "off_rz_rate"]
+    avail = [c for c in cols if c in plays_df.columns]
+    plays = plays_df[avail].copy()
+
+    home = plays.rename(columns={c: f"home_{c}" for c in avail if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = plays.rename(columns={c: f"away_{c}" for c in avail if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_off_pass_rate" in df.columns and "away_off_pass_rate" in df.columns:
+        df["off_pass_rate_diff"] = (
+            df["home_off_pass_rate"].fillna(0.5) - df["away_off_pass_rate"].fillna(0.5)
+        )
+    return df
+
+
+def _add_drive_features(df: pd.DataFrame, drives_df: pd.DataFrame) -> pd.DataFrame:
+    """Add drive-level efficiency features."""
+    if drives_df.empty:
+        return df
+    cols = ["season", "team", "scoring_drive_pct", "three_and_out_pct",
+            "off_avg_drive_yards", "off_turnover_drive_pct"]
+    avail = [c for c in cols if c in drives_df.columns]
+    drives = drives_df[avail].copy()
+
+    home = drives.rename(columns={c: f"home_{c}" for c in avail if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = drives.rename(columns={c: f"away_{c}" for c in avail if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_scoring_drive_pct" in df.columns and "away_scoring_drive_pct" in df.columns:
+        df["scoring_drive_pct_diff"] = (
+            df["home_scoring_drive_pct"].fillna(0) - df["away_scoring_drive_pct"].fillna(0)
+        )
+    if "home_three_and_out_pct" in df.columns and "away_three_and_out_pct" in df.columns:
+        # Away minus home: lower three-and-out = better offense, so positive = home advantage
+        df["three_and_out_pct_diff"] = (
+            df["away_three_and_out_pct"].fillna(0) - df["home_three_and_out_pct"].fillna(0)
+        )
+    return df
+
+
+def _add_player_usage_features(df: pd.DataFrame, usage_df: pd.DataFrame) -> pd.DataFrame:
+    """Add player usage concentration features."""
+    if usage_df.empty:
+        return df
+    cols = ["season", "team", "top_rb_usage", "top_wr_usage", "top_skill_usage"]
+    avail = [c for c in cols if c in usage_df.columns]
+    usage = usage_df[avail].copy()
+
+    home = usage.rename(columns={c: f"home_{c}" for c in avail if c not in ("season", "team")})
+    home = home.rename(columns={"team": "home_team"})
+    df = df.merge(home, on=["season", "home_team"], how="left")
+
+    away = usage.rename(columns={c: f"away_{c}" for c in avail if c not in ("season", "team")})
+    away = away.rename(columns={"team": "away_team"})
+    df = df.merge(away, on=["season", "away_team"], how="left")
+
+    if "home_top_rb_usage" in df.columns and "away_top_rb_usage" in df.columns:
+        df["top_rb_usage_diff"] = (
+            df["home_top_rb_usage"].fillna(0) - df["away_top_rb_usage"].fillna(0)
+        )
+    return df
+
+
 def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     """
     Join processed tables into a game-level feature matrix.
@@ -424,6 +506,9 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     coaches_df   = _try_load("coaches")
     portal_df    = _try_load("transfer_portal")
     media_df     = _try_load("game_media")
+    plays_df     = _try_load("plays_agg")
+    drives_df    = _try_load("drives_agg")
+    usage_df     = _try_load("player_usage_agg")
 
     # ── Elo: season-level ratings (CFBD v5 provides end-of-season only) ──────
     elo = elo_raw[["season", "team", "elo"]].copy()
@@ -640,7 +725,20 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     if not media_df.empty:
         df = _add_media_features(df, media_df)
         logger.info("  merged game media features")
+    # ── P3: Play-by-play features ──────────────────────────────────────────────
+    if not plays_df.empty:
+        df = _add_pbp_features(df, plays_df)
+        logger.info("  merged play-by-play features")
 
+    # ── P3: Drive-level features ──────────────────────────────────────────────────
+    if not drives_df.empty:
+        df = _add_drive_features(df, drives_df)
+        logger.info("  merged drive-level features")
+
+    # ── P3: Player usage features ──────────────────────────────────────────────
+    if not usage_df.empty:
+        df = _add_player_usage_features(df, usage_df)
+        logger.info("  merged player usage features")
     # ── save ─────────────────────────────────────────────────────────────────
     save_parquet(df, "feature_matrix", layer="features")
     logger.info(
