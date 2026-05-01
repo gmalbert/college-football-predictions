@@ -68,6 +68,13 @@ jobs:
       - name: Train prediction models
         run: python -m utils.models --force
 
+      # ── export best bets ─────────────────────────────────────────────────────
+      - name: Export best bets for Sports Picks Grid
+        run: python scripts/export_best_bets.py
+        continue-on-error: true
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
       # ── commit artifacts ─────────────────────────────────────────────────────
       - name: Commit updated data files
         run: |
@@ -77,7 +84,8 @@ jobs:
             data_files/raw/ \
             data_files/processed/ \
             data_files/features/ \
-            data_files/models/
+            data_files/models/ \
+            data_files/best_bets_today.json
           git diff --staged --quiet || \
             git commit -m "chore: weekly data pipeline $(date -u '+%Y-%m-%d')"
           git push
