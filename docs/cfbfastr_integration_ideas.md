@@ -1083,7 +1083,7 @@ if wp_data:
         xaxis_title="Play Number",
         yaxis=dict(range=[0, 1])
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 ```
 
 ### 4b. EPA Scatter / Efficiency Dashboard
@@ -1133,7 +1133,7 @@ def show_returning_production(ret_df: pd.DataFrame, season: int):
                                                             min_value=0, max_value=1,
                                                             format="%.0f%%"),
         },
-        use_container_width=True
+        width='stretch'
     )
 ```
 
