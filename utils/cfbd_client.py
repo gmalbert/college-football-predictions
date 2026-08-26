@@ -9,10 +9,28 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+def _api_key() -> str:
+    """Return one raw CFBD token, accepting a legacy ``Bearer <token>`` value.
+
+    The current CFBD SDK adds the Bearer scheme itself. GitHub Actions renders a
+    missing secret as an empty environment value, so reject that configuration
+    locally instead of issuing a misleading stream of 401 responses.
+    """
+    raw = get_secret("cfbd", "api_key").strip()
+    if raw.lower().startswith("bearer "):
+        raw = raw[7:].strip()
+    if not raw:
+        raise ValueError(
+            "CFBD_API_KEY is empty. Configure the GitHub Actions repository secret "
+            "with the raw token only (without 'Bearer ')."
+        )
+    return raw
+
+
 def _get_config() -> cfbd.Configuration:
     """Build configuration using Bearer access_token (cfbd SDK v5+)."""
     config = cfbd.Configuration()
-    config.access_token = get_secret("cfbd", "api_key")
+    config.access_token = _api_key()
     return config
 
 
@@ -230,7 +248,7 @@ _CFBD_BASE = "https://api.collegefootballdata.com"
 
 def _cfbd_headers() -> dict[str, str]:
     """Return Bearer auth headers for direct REST calls (bypasses Python SDK)."""
-    return {"Authorization": f"Bearer {get_secret('cfbd', 'api_key')}"}
+    return {"Authorization": f"Bearer {_api_key()}"}
 
 
 def _cfbd_get(path: str, params: dict) -> list:

@@ -79,7 +79,7 @@ data_files/
    python -m pip install -r requirements.txt
    ```
 
-2. Set `CFBD_API_KEY` or add it under `[cfbd]` in `.streamlit/secrets.toml`.
+2. Set `CFBD_API_KEY` or add it under `[cfbd]` in `.streamlit/secrets.toml`. Use the raw token only—do not include `Bearer `; the client adds that scheme automatically. For GitHub Actions, create a repository secret named `CFBD_API_KEY` with that same raw token.
 
 3. Run the pipeline:
 

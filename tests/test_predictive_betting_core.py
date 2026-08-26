@@ -46,6 +46,7 @@ from utils.temporal import (
 )
 from utils.challenger_models import MarketBaselineClassifier, MarketBaselineRegressor
 import utils.fetch_historical as fetch_historical
+import utils.cfbd_client as cfbd_client
 
 
 class _ConstantClassifier:
@@ -59,6 +60,13 @@ class _ConstantRegressor:
 
 
 class IngestionTests(unittest.TestCase):
+    def test_cfbd_key_normalizes_bearer_prefix_and_rejects_empty(self):
+        with patch.object(cfbd_client, "get_secret", return_value="Bearer token-value"):
+            self.assertEqual(cfbd_client._api_key(), "token-value")
+        with patch.object(cfbd_client, "get_secret", return_value="   "):
+            with self.assertRaisesRegex(ValueError, "CFBD_API_KEY is empty"):
+                cfbd_client._api_key()
+
     def test_partial_partition_upsert_preserves_history(self):
         with tempfile.TemporaryDirectory() as directory:
             processed = Path(directory)
