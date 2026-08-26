@@ -140,14 +140,18 @@ def _pull_team_game_stats(year: int, force: bool = False) -> list:
             return cached
     logger.info(f"  pulling   — team_game_stats_{year} (weeks 1-16) …")
     combined: list = []
+    empty_weeks = 0
     for week in range(1, 17):
         rows = get_game_team_stats(year, week=week)
         combined.extend(rows)
+        empty_weeks = empty_weeks + 1 if not rows else 0
         time.sleep(API_DELAY)
-    # Postseason (bowls / playoffs)
-    ps = get_game_team_stats(year, week=1, season_type="postseason")
-    combined.extend(ps)
-    time.sleep(API_DELAY)
+        if empty_weeks >= 2:
+            break
+    if combined:
+        ps = get_game_team_stats(year, week=1, season_type="postseason")
+        combined.extend(ps)
+        time.sleep(API_DELAY)
     serialized = _to_serializable(combined)
     if not serialized:
         logger.warning(f"  empty response — team_game_stats_{year}; cache not updated")
@@ -168,14 +172,23 @@ def _pull_plays_year(year: int, force: bool = False) -> list:
             return cached
     logger.info(f"  pulling   — plays_{year} (weeks 1-16 + postseason) …")
     combined: list = []
+    empty_weeks = 0
     for week in range(1, 17):
         rows = get_plays(year, week=week, season_type="regular")
         combined.extend(rows)
+        empty_weeks = empty_weeks + 1 if not rows else 0
         time.sleep(API_DELAY)
-    for week in range(1, 6):
-        rows = get_plays(year, week=week, season_type="postseason")
-        combined.extend(rows)
-        time.sleep(API_DELAY)
+        if empty_weeks >= 2:
+            break
+    if combined:
+        postseason_empty = 0
+        for week in range(1, 6):
+            rows = get_plays(year, week=week, season_type="postseason")
+            combined.extend(rows)
+            postseason_empty = postseason_empty + 1 if not rows else 0
+            time.sleep(API_DELAY)
+            if postseason_empty >= 1:
+                break
     serialized = _to_serializable(combined)
     if not serialized:
         logger.warning(f"  empty response — plays_{year}; cache not updated")
@@ -196,14 +209,23 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
             return cached
     logger.info(f"  pulling   — drives_{year} (weeks 1-16 + postseason) …")
     combined: list = []
+    empty_weeks = 0
     for week in range(1, 17):
         rows = get_drives(year, week=week, season_type="regular")
         combined.extend(rows)
+        empty_weeks = empty_weeks + 1 if not rows else 0
         time.sleep(API_DELAY)
-    for week in range(1, 6):
-        rows = get_drives(year, week=week, season_type="postseason")
-        combined.extend(rows)
-        time.sleep(API_DELAY)
+        if empty_weeks >= 2:
+            break
+    if combined:
+        postseason_empty = 0
+        for week in range(1, 6):
+            rows = get_drives(year, week=week, season_type="postseason")
+            combined.extend(rows)
+            postseason_empty = postseason_empty + 1 if not rows else 0
+            time.sleep(API_DELAY)
+            if postseason_empty >= 1:
+                break
     serialized = _to_serializable(combined)
     if not serialized:
         logger.warning(f"  empty response — drives_{year}; cache not updated")
@@ -601,7 +623,8 @@ def _build_weather(force: bool) -> None:
     For each outdoor game, fetches hourly weather at the venue location on the
     game date, then picks the slot closest to kickoff UTC time.
     Dome games are recorded with game_indoors=True and wind_speed=0.
-    Responses are in-process cached by (date, lat, lon) to minimise API calls.
+    Requests are batched by venue coordinate across the full game-date range,
+    and completed game rows are retained from the existing parquet artifact.
     """
     import urllib.parse
     import requests as _req
@@ -627,18 +650,41 @@ def _build_weather(force: bool) -> None:
     merged = games_df.merge(vdf, left_on="venue", right_on="name", how="left")
     merged["_dt"] = pd.to_datetime(merged["start_date"], utc=True, errors="coerce")
 
-    # In-process cache: (date_str, lat_rounded, lon_rounded) -> hourly dict
+    existing = pd.read_parquet(dst) if dst.exists() else pd.DataFrame()
+    existing = (
+        existing.drop_duplicates(subset=["game_id"], keep="last")
+        if "game_id" in existing.columns
+        else pd.DataFrame()
+    )
+    existing_by_game = {
+        row["game_id"]: row.to_dict()
+        for _, row in existing.iterrows()
+        if pd.notna(row.get("game_id"))
+    }
+
     _cache: dict = {}
 
-    def _fetch(lat: float, lon: float, date_str: str) -> dict:
-        key = (date_str, round(lat, 2), round(lon, 2))
+    valid_outdoor = merged.loc[
+        (~merged["dome"].fillna(False).astype(bool))
+        & merged["latitude"].notna()
+        & merged["longitude"].notna()
+        & merged["_dt"].notna()
+    ].copy()
+    valid_outdoor["_location_key"] = list(zip(
+        valid_outdoor["latitude"].round(2),
+        valid_outdoor["longitude"].round(2),
+    ))
+    ranges = valid_outdoor.groupby("_location_key")["_dt"].agg(["min", "max"])
+
+    def _fetch(lat: float, lon: float, start_date: str, end_date: str) -> dict:
+        key = (start_date, end_date, round(lat, 2), round(lon, 2))
         if key in _cache:
             return _cache[key]
         params = {
             "latitude":         round(lat, 4),
             "longitude":        round(lon, 4),
-            "start_date":       date_str,
-            "end_date":         date_str,
+            "start_date":       start_date,
+            "end_date":         end_date,
             "hourly":           "temperature_2m,wind_speed_10m,precipitation,weathercode,relativehumidity_2m",
             "temperature_unit": "fahrenheit",
             "wind_speed_unit":  "mph",
@@ -650,7 +696,10 @@ def _build_weather(force: bool) -> None:
             resp.raise_for_status()
             _cache[key] = resp.json().get("hourly", {})
         except Exception as exc:
-            logger.debug(f"  Open-Meteo: {date_str} lat={lat:.2f} lon={lon:.2f} — {exc}")
+            logger.debug(
+                f"  Open-Meteo: {start_date}..{end_date} "
+                f"lat={lat:.2f} lon={lon:.2f} — {exc}"
+            )
             _cache[key] = {}
         time.sleep(0.05)
         return _cache[key]
@@ -659,6 +708,9 @@ def _build_weather(force: bool) -> None:
     total = len(merged)
     for i, row in merged.iterrows():
         game_id = row.get("game_id")
+        if game_id in existing_by_game:
+            rows.append(existing_by_game[game_id])
+            continue
         season  = row.get("season")
         week    = row.get("week")
         venue   = row.get("venue")
@@ -687,7 +739,14 @@ def _build_weather(force: bool) -> None:
             continue
 
         date_str = pd.Timestamp(dt).strftime("%Y-%m-%d")
-        hourly   = _fetch(float(lat), float(lon), date_str)
+        location_key = (round(float(lat), 2), round(float(lon), 2))
+        location_range = ranges.loc[[location_key]].iloc[0]
+        hourly = _fetch(
+            float(lat),
+            float(lon),
+            pd.Timestamp(location_range["min"]).strftime("%Y-%m-%d"),
+            pd.Timestamp(location_range["max"]).strftime("%Y-%m-%d"),
+        )
 
         times  = hourly.get("time", [])
         temps  = hourly.get("temperature_2m", [])
