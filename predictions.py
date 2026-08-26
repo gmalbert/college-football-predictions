@@ -46,15 +46,40 @@ def home_page():
         )
 
     # ── Live summary cards ────────────────────────────────────────────────────
-    from utils.models import load_metrics, models_trained
     from utils.storage import load_parquet
-    from utils.models import predict_batch
+    from utils.release import load_current_release
+    try:
+        from utils.models import load_metrics, models_trained, predict_batch
+        model_runtime_available = True
+    except Exception:
+        # Keep the read-only dashboard available when a local Windows policy
+        # blocks native ML extensions. The CI/production runtime still loads them.
+        model_runtime_available = False
+
+        def load_metrics():
+            import json
+            metrics_path = Path(__file__).parent / "data_files" / "models" / "model_metrics.json"
+            return json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else {}
+
+        def models_trained():
+            return False
+
+        def predict_batch(frame):
+            return frame
 
     @st.cache_data(ttl=3600)
     def _load_summary():
         try:
             df = load_parquet("feature_matrix", layer="features")
-            if models_trained():
+            if "home_margin" in df.columns:
+                df = df[pd.to_numeric(df["home_margin"], errors="coerce").isna()].copy()
+            elif {"home_score", "away_score"}.issubset(df.columns):
+                df = df[df["home_score"].isna() | df["away_score"].isna()].copy()
+            if "start_date" in df.columns:
+                starts = pd.to_datetime(df["start_date"], utc=True, errors="coerce")
+                now = pd.Timestamp.now(tz="UTC")
+                df = df[starts.isna() | (starts >= now - pd.Timedelta(hours=6))].copy()
+            if models_trained() and not df.empty:
                 df = predict_batch(df)
             return df
         except FileNotFoundError:
@@ -69,16 +94,32 @@ def home_page():
     ats_m    = metrics.get("ats", {})
     win_m    = metrics.get("win_model", {})
     spread_m = metrics.get("spread_model", {})
+    release  = metrics.get("release_decision", {})
+    release_metadata = load_current_release()
+
+    if metrics and release.get("decision") != "promote":
+        failed = ", ".join(release.get("failed_gates", [])) or "release gates unavailable"
+        st.warning(
+            f"Model release status: HOLD ({failed}). Forecasts are shown for research; "
+            "automated bet export is disabled."
+        )
+    if not model_runtime_available:
+        st.info("Native model inference is unavailable in this local runtime; saved evaluation evidence remains available.")
+    if release_metadata:
+        st.caption(
+            f"Artifact release {release_metadata.get('release_id', 'unknown')[:12]} · "
+            f"{release_metadata.get('generated_at', 'unknown')}"
+        )
 
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
-        st.subheader("🔥 Top Picks (Latest Season)")
+        st.subheader("Upcoming Model Deltas")
         if not df_all.empty and "predicted_spread" in df_all.columns and "market_spread" in df_all.columns:
-            latest_s = df_all["season"].max()
             top = (
-                df_all[df_all["season"] == latest_s]
-                .assign(edge=lambda d: (d["predicted_spread"] - d["market_spread"]).abs())
+                df_all
+                .assign(edge=lambda d: (d["predicted_spread"] + d["market_spread"]).abs())
+                .dropna(subset=["predicted_spread", "market_spread"])
                 .nlargest(3, "edge")
             )
             for _, row in top.iterrows():
@@ -86,7 +127,7 @@ def home_page():
                 bs = row.get("market_spread",    float("nan"))
                 wp = row.get("win_prob",         float("nan"))
                 if pd.notna(ms) and pd.notna(bs):
-                    edge = abs(ms - bs)
+                    edge = abs(ms + bs)
                     st.markdown(
                         f"**{row['away_team']} @ {row['home_team']}**  \n"
                         f"Wk {int(row['week'])} · Edge **{edge:.1f} pts** · "
@@ -94,7 +135,7 @@ def home_page():
                         f"Wk {int(row['week'])} · Edge **{edge:.1f} pts**"
                     )
             if top.empty:
-                st.caption("No prediction data yet — go to Settings to pull data.")
+                st.caption("No upcoming games with both model and market lines are available.")
         else:
             st.caption("No data yet. Go to ⚙️ Settings to pull historical data.")
 
@@ -103,7 +144,7 @@ def home_page():
         if metrics:
             st.metric("Brier Score",   f"{win_m.get('brier', 0):.4f}",   help="Lower is better; < 0.20 is solid")
             st.metric("Spread RMSE",   f"{spread_m.get('rmse', 0):.2f} pts")
-            st.metric("ATS Win %",     f"{ats_m.get('pct', 0):.1%}",    help="52.4% breaks even at -110")
+            st.metric("OOS ATS Win %", f"{ats_m.get('pct', 0):.1%}",    help="Walk-forward only; 52.4% breaks even at -110")
             st.metric("ATS Record",    f"{ats_m.get('wins',0)}‑{ats_m.get('losses',0)}")
         else:
             st.caption("Models not yet trained — go to ⚙️ Settings → Train Models.")
@@ -174,6 +215,7 @@ nav_sections: dict = {
         st.Page("pages/5_Model_Performance.py",    title="Model Performance",    icon="🎯"),
         st.Page("pages/7_Win_Probability.py",      title="Win Probability",      icon="📉"),
         st.Page("pages/8_Preseason_Outlook.py",   title="Preseason Outlook",   icon="🔮"),
+        st.Page("pages/9_Data_Quality.py",        title="Data & Model Quality", icon="🛡️"),
     ],
 }
 if not _is_cloud:

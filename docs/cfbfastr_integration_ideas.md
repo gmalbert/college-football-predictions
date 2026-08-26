@@ -1,5 +1,7 @@
 # cfbfastR Integration Ideas for Tailgate Edge
 
+> **Legacy ideation:** performance figures below predate the corrected grain, spread convention, and walk-forward evaluator. See [COMPREHENSIVE_REPOSITORY_REVIEW_2026.md](COMPREHENSIVE_REPOSITORY_REVIEW_2026.md) for the current assessment.
+
 > **Source reviewed:** [cfbfastR](https://cfbfastr.sportsdataverse.org/) — an R package wrapping the [CollegeFootballData.com](https://collegefootballdata.com/) and ESPN APIs.  
 > **GitHub:** [sportsdataverse/cfbfastR](https://github.com/sportsdataverse/cfbfastR)
 

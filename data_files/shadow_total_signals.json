@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "generated_at": "2026-08-11T19:11:24.823719+00:00",
+    "deployment_status": "shadow_not_actionable",
+    "prediction_contract": "final eligible pre-kickoff snapshot",
+    "maximum_hours_to_kickoff": 12,
+    "note": "No priced games are within the closing-time window"
+  },
+  "signals": []
+}

@@ -10,95 +10,91 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from utils.advanced_features import build_context_features
+from utils.contracts import safe_merge, validate_feature_matrix
+from utils.feature_observations import attach_game_observations
+from utils.elo import build_pregame_elo_features
 from utils.storage import FEATURES_DIR, load_parquet, save_parquet
+from utils.temporal import (
+    add_rest_features,
+    attach_team_features,
+    rolling_team_features,
+    to_team_game_long,
+)
 from utils.logger import get_logger
+from utils.market import remove_vig
 
 logger = get_logger(__name__)
 
 # ─────────────────────────────── feature column lists ─────────────────────────
 
 WIN_FEATURES = [
-    # Ratings & power
+    # Consensus no-vig market prior (missing before a market is posted)
+    "market_home_prob",
+    # Point-in-time ratings
     "elo_diff",
-    "sp_plus_diff",
-    "sp_offense_diff",
-    "sp_defense_diff",
-    # Season-level efficiency diffs
-    "off_epa_diff",
-    "def_epa_diff",
-    "off_explosiveness_diff",
-    "def_havoc_diff",
-    "off_success_diff",
-    # Rushing / passing diffs
-    "off_rushing_epa_diff",
-    "off_passing_epa_diff",
-    # Recruiting & talent
+    "elo_home_win_prob",
+    # Pregame/preseason priors
     "recruiting_diff",
-    "talent_diff",
     "recruiting_rank_diff",
-    # Schedule & context
+    "returning_ppa_diff",
+    "coach_tenure_diff",
+    "portal_net_diff",
+    # Schedule and context
     "home_flag",
     "conference_game",
     "rest_advantage",
-    # Rolling 5-game stats (populated after team_game_stats.parquet is built)
+    "early_season",
+    # Strictly shifted rolling game/team stats
+    "points_for_diff_l5",
+    "points_against_diff_l5",
+    "margin_diff_l5",
     "turnover_margin_l5",
     "rushing_yards_diff_l5",
     "pass_yards_diff_l5",
     "penalty_yards_diff_l5",
-    # NEW: Power ratings
-    "fpi_diff",
-    "srs_diff",
-    # NEW: Returning production
-    "returning_ppa_diff",
-    # NEW: PPA by down
-    "ppa_off_diff",
-    "ppa_def_diff",
-    "ppa_third_down_off_diff",
-    "ppa_third_down_def_diff",
-    # NEW: WEPA (opponent-adjusted EPA)
-    "wepa_off_diff",
-    "wepa_def_diff",
-    # NEW: Pre-game WP consensus
-    "cfbd_pregame_wp_diff",
-    # NEW: Coaching tenure
-    "coach_tenure_diff",
-    # P3: Drive-level efficiency
-    "scoring_drive_pct_diff",
-    "three_and_out_pct_diff",
-    # P3: Play-by-play tendency
-    "off_pass_rate_diff",
-    # P3: Player usage
-    "top_rb_usage_diff",
+    "total_yards_diff_l5",
+    "third_down_eff_diff_l5",
+    "red_zone_eff_diff_l5",
+    "sacks_diff_l5",
 ]
 
 SPREAD_FEATURES = WIN_FEATURES + ["market_spread"]
 
 TOTAL_FEATURES = [
-    "home_off_epa",
-    "away_off_epa",
-    "home_def_epa",
-    "away_def_epa",
-    "home_off_explosiveness",
-    "away_off_explosiveness",
-    "home_off_rushing_epa",
-    "away_off_rushing_epa",
-    "home_off_passing_epa",
-    "away_off_passing_epa",
+    "home_points_for_l5",
+    "away_points_for_l5",
+    "home_points_against_l5",
+    "away_points_against_l5",
+    "home_total_yards_l5",
+    "away_total_yards_l5",
+    "home_rushing_yards_l5",
+    "away_rushing_yards_l5",
+    "home_pass_yards_l5",
+    "away_pass_yards_l5",
+    "home_turnovers_l5",
+    "away_turnovers_l5",
+    "home_third_down_eff_l5",
+    "away_third_down_eff_l5",
+    "home_possession_minutes_l5",
+    "away_possession_minutes_l5",
     "home_flag",
     "rest_days_home",
     "rest_days_away",
     "market_total",
-    # NEW: Weather features (strong total predictors)
-    "is_dome",
-    "temperature",
-    "wind_speed",
-    "adverse_weather",
-    "high_wind",
-    # NEW: Venue altitude
-    "high_altitude",
-    # NEW: Prime-time indicator
-    "is_primetime",
+    # Market state known at the closing-time prediction contract
+    "market_total_open",
+    "market_total_move",
+    "market_total_dispersion",
+    "market_total_book_count",
+    "market_spread",
+    "market_spread_open",
+    "market_spread_move",
+    "market_spread_dispersion",
+    "market_spread_book_count",
 ]
+
+TOTAL_COVER_FEATURES = list(TOTAL_FEATURES)
 
 ALL_FEATURE_COLS = list(
     dict.fromkeys(WIN_FEATURES + SPREAD_FEATURES + TOTAL_FEATURES)
@@ -107,15 +103,8 @@ ALL_FEATURE_COLS = list(
 # ───────────────────────────────── helpers ─────────────────────────────────
 
 def _rest_days(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute days of rest for home and away teams from start_date."""
-    df = df.copy()
-    df["_dt"] = pd.to_datetime(df["start_date"], errors="coerce", utc=True).dt.tz_localize(None)
-    df = df.sort_values(["season", "week"])
-    for side in ("home", "away"):
-        prev = df.groupby(f"{side}_team")["_dt"].shift(1)
-        df[f"rest_days_{side}"] = (df["_dt"] - prev).dt.days
-    df["rest_advantage"] = df["rest_days_home"] - df["rest_days_away"]
-    return df.drop(columns=["_dt"])
+    """Compute rest from each team's previous game across home and away roles."""
+    return add_rest_features(df)
 
 
 def _rolling_team_stats(
@@ -128,13 +117,14 @@ def _rolling_team_stats(
     Returns (team, season, week, {stat}_l{window}) with no data leakage —
     the current game is excluded via .shift(1).
     """
-    gw = games[["game_id", "week"]].drop_duplicates()
-    tgs = tgs.merge(gw, on="game_id", how="left").dropna(subset=["week"])
+    gw = games[["game_id", "week", "start_date"]].drop_duplicates("game_id")
+    tgs = tgs.drop_duplicates(["game_id", "team"], keep="last")
+    tgs = tgs.merge(gw, on="game_id", how="left", validate="many_to_one").dropna(subset=["week"])
     stat_cols = [c for c in tgs.columns
-                 if c not in ("game_id", "season", "week", "team", "home_away")]
+                 if c not in ("game_id", "season", "week", "start_date", "team", "home_away")]
     parts: list[pd.DataFrame] = []
     for (team, season), grp in tgs.groupby(["team", "season"]):
-        grp = grp.sort_values("week").reset_index(drop=True)
+        grp = grp.sort_values(["start_date", "game_id"]).reset_index(drop=True)
         rolled = (
             grp[stat_cols]
             .apply(pd.to_numeric, errors="coerce")
@@ -143,6 +133,7 @@ def _rolling_team_stats(
             .mean()
         )
         rolled.columns = [f"{c}_l{window}" for c in stat_cols]
+        rolled["game_id"] = grp["game_id"].values
         rolled["team"]   = team
         rolled["season"] = int(season)
         rolled["week"]   = grp["week"].values
@@ -211,7 +202,9 @@ def _add_fpi_features(df: pd.DataFrame, fpi_df: pd.DataFrame) -> pd.DataFrame:
 
 def _add_srs_features(df: pd.DataFrame, srs_df: pd.DataFrame) -> pd.DataFrame:
     """Add SRS rating diff as a feature."""
-    srs = srs_df[["season", "team", "srs_rating"]].copy()
+    srs = srs_df[["season", "team", "srs_rating"]].drop_duplicates(
+        ["season", "team"], keep="last"
+    ).copy()
     home_srs = srs.rename(columns={"team": "home_team", "srs_rating": "home_srs"})
     df = df.merge(home_srs, on=["season", "home_team"], how="left")
     away_srs = srs.rename(columns={"team": "away_team", "srs_rating": "away_srs"})
@@ -510,7 +503,8 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     drives_df    = _try_load("drives_agg")
     usage_df     = _try_load("player_usage_agg")
 
-    # ── Elo: season-level ratings (CFBD v5 provides end-of-season only) ──────
+    # CFBD season-level Elo remains in processed data for exploration only.
+    # Training uses a result-by-result pregame Elo generated below.
     elo = elo_raw[["season", "team", "elo"]].copy()
 
     # ── Recruiting: 3-year rolling talent average ────────────────────────────
@@ -526,7 +520,24 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     df = games.copy()
 
     # Lines
-    df = df.merge(lines, on="game_id", how="left")
+    df = df.merge(
+        lines.drop(columns=["season"], errors="ignore"), on="game_id", how="left"
+    )
+    if "market_home_prob" not in df.columns:
+        df["market_home_prob"] = np.nan
+    if {"home_moneyline", "away_moneyline"}.issubset(df.columns):
+        for position, (home_odds, away_odds) in enumerate(
+            zip(df["home_moneyline"], df["away_moneyline"])
+        ):
+            if pd.isna(home_odds) or pd.isna(away_odds):
+                continue
+            try:
+                if pd.isna(df.iloc[position]["market_home_prob"]):
+                    df.iat[position, df.columns.get_loc("market_home_prob")] = remove_vig(
+                        [float(home_odds), float(away_odds)]
+                    )[0]
+            except (TypeError, ValueError):
+                continue
 
     # SP+ / talent (home)
     sp_cols = [c for c in ["season", "team", "sp_overall", "sp_offense", "sp_defense", "talent"]
@@ -591,16 +602,11 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
         on=["season", "away_team"], how="left",
     )
 
-    # Elo (home)
-    df = df.merge(
-        elo.rename(columns={"team": "home_team", "elo": "home_elo"}),
-        on=["season", "home_team"], how="left",
-    )
-    # Elo (away)
-    df = df.merge(
-        elo.rename(columns={"team": "away_team", "elo": "away_elo"}),
-        on=["season", "away_team"], how="left",
-    )
+    # Point-in-time Elo is generated from prior results only.
+    pregame_elo = build_pregame_elo_features(games)
+    df = safe_merge(df, pregame_elo, on="game_id", validate="one_to_one")
+    df["home_elo"] = df["home_elo_pregame"]
+    df["away_elo"] = df["away_elo_pregame"]
 
     # Recruiting (home)
     df = df.merge(
@@ -616,7 +622,6 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     )
 
     # ── derived features ─────────────────────────────────────────────────────
-    df["elo_diff"]               = df["home_elo"].fillna(1500) - df["away_elo"].fillna(1500)
     df["sp_plus_diff"]           = df["home_sp_plus"]          - df["away_sp_plus"]
     df["sp_offense_diff"]        = df["home_sp_offense"]       - df["away_sp_offense"]
     # sp_defense: lower = better → away−home positive = home defense advantage
@@ -638,17 +643,35 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     # home_flag: 1 = home, 0.5 = neutral site
     df["home_flag"]       = np.where(df["neutral_site"].fillna(False), 0.5, 1.0)
     df["conference_game"] = df["conference_game"].fillna(False).astype(float)
+    df["early_season"]    = (pd.to_numeric(df["week"], errors="coerce") <= 3).astype(float)
 
     # ── Rest days ─────────────────────────────────────────────────────────────
     if "start_date" in df.columns:
         df = _rest_days(df)
 
+    # Rolling outcome form, shifted one game so current scores never enter.
+    outcomes = to_team_game_long(games)
+    outcome_rolling = rolling_team_features(
+        outcomes,
+        value_columns=["points_for", "points_against", "margin", "game_total"],
+        windows=(5,),
+    )
+    df = attach_team_features(df, outcome_rolling)
+    df["points_for_diff_l5"] = df["home_points_for_l5"] - df["away_points_for_l5"]
+    df["points_against_diff_l5"] = df["away_points_against_l5"] - df["home_points_against_l5"]
+    df["margin_diff_l5"] = df["home_margin_l5"] - df["away_margin_l5"]
+
     # ── Rolling team game stats (optional) ────────────────────────────────────
     if tgs is not None and not tgs.empty:
         rolling = _rolling_team_stats(df, tgs, window=5)
         if not rolling.empty:
-            want = ["turnovers", "rushing_yards", "pass_yards", "penalty_yards"]
-            keep = ["team", "season", "week"] + [
+            want = [
+                "turnovers", "rushing_yards", "pass_yards", "penalty_yards",
+                "total_yards", "third_down_eff", "red_zone_attempts",
+                "red_zone_conversions", "sacks",
+                "possession_minutes",
+            ]
+            keep = ["game_id", "team"] + [
                 f"{s}_l5" for s in want if f"{s}_l5" in rolling.columns
             ]
             rolling = rolling[[c for c in keep if c in rolling.columns]]
@@ -656,8 +679,8 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
                 f"{s}_l5": f"home_{s}_l5" for s in want}})
             away_r = rolling.rename(columns={"team": "away_team", **{
                 f"{s}_l5": f"away_{s}_l5" for s in want}})
-            df = df.merge(home_r, on=["home_team", "season", "week"], how="left")
-            df = df.merge(away_r, on=["away_team", "season", "week"], how="left")
+            df = safe_merge(df, home_r, on=["game_id", "home_team"], validate="one_to_one")
+            df = safe_merge(df, away_r, on=["game_id", "away_team"], validate="one_to_one")
             if "home_turnovers_l5"     in df.columns and "away_turnovers_l5"     in df.columns:
                 df["turnover_margin_l5"]    = df["away_turnovers_l5"]    - df["home_turnovers_l5"]
             if "home_rushing_yards_l5" in df.columns and "away_rushing_yards_l5" in df.columns:
@@ -666,6 +689,19 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
                 df["pass_yards_diff_l5"]    = df["home_pass_yards_l5"]    - df["away_pass_yards_l5"]
             if "home_penalty_yards_l5" in df.columns and "away_penalty_yards_l5" in df.columns:
                 df["penalty_yards_diff_l5"] = df["away_penalty_yards_l5"] - df["home_penalty_yards_l5"]
+            for stat in ("total_yards", "third_down_eff", "red_zone_conversions", "sacks"):
+                home_col, away_col = f"home_{stat}_l5", f"away_{stat}_l5"
+                if home_col in df.columns and away_col in df.columns:
+                    df[f"{stat}_diff_l5"] = df[home_col] - df[away_col]
+            for side in ("home", "away"):
+                attempts = f"{side}_red_zone_attempts_l5"
+                conversions = f"{side}_red_zone_conversions_l5"
+                if attempts in df.columns and conversions in df.columns:
+                    df[f"{side}_red_zone_eff_l5"] = df[conversions] / df[attempts].replace(0, np.nan)
+            if {"home_red_zone_eff_l5", "away_red_zone_eff_l5"}.issubset(df.columns):
+                df["red_zone_eff_diff_l5"] = (
+                    df["home_red_zone_eff_l5"] - df["away_red_zone_eff_l5"]
+                )
 
     # ── NEW: Weather ──────────────────────────────────────────────────────────
     if not weather_df.empty:
@@ -739,7 +775,21 @@ def build_feature_matrix(force: bool = False) -> pd.DataFrame:
     if not usage_df.empty:
         df = _add_player_usage_features(df, usage_df)
         logger.info("  merged player usage features")
+
+    # Attach only observations available at or before the game's prediction time.
+    df = attach_game_observations(df)
+
+    # Materialize the broader v2 context library even when optional providers
+    # are absent. Such inputs remain NaN and context_coverage records that fact;
+    # none enter the active production allowlist without a timing-safe source.
+    df = build_context_features(df)
+    logger.info("  materialized contextual feature library")
     # ── save ─────────────────────────────────────────────────────────────────
+    for feature in ALL_FEATURE_COLS:
+        if feature not in df.columns:
+            df[feature] = np.nan
+    report = validate_feature_matrix(df)
+    report.raise_for_errors()
     save_parquet(df, "feature_matrix", layer="features")
     logger.info(
         f"feature_matrix.parquet: {len(df):,} rows × {len(df.columns)} columns"

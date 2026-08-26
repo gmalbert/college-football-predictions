@@ -431,7 +431,9 @@ def game_card(
     book_total: float | None = None,
 ) -> None:
     """Render a single game prediction card."""
-    edge = abs(model_spread - book_spread)
+    # Model spread is a home scoring margin; sportsbook home favorites are
+    # quoted with a negative number. Home -7 and model +10 is a 3-point edge.
+    edge = abs(model_spread + book_spread)
     edge_color = "🟢" if edge >= 2 else "🟡" if edge >= 1 else "⚪"
 
     with st.container():

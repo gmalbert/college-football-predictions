@@ -1,0 +1,112 @@
+{
+  "model_name": "win_probability",
+  "version": "2.2.0",
+  "created_at": "2026-08-11T19:11:21.061439+00:00",
+  "git_sha": null,
+  "training_start": "2021-08-28T17:20:00+00:00",
+  "training_end": "2026-01-20T00:30:00+00:00",
+  "feature_names": [
+    "market_home_prob",
+    "elo_diff",
+    "elo_home_win_prob",
+    "recruiting_diff",
+    "recruiting_rank_diff",
+    "returning_ppa_diff",
+    "coach_tenure_diff",
+    "portal_net_diff",
+    "home_flag",
+    "conference_game",
+    "rest_advantage",
+    "early_season",
+    "points_for_diff_l5",
+    "points_against_diff_l5",
+    "margin_diff_l5",
+    "turnover_margin_l5",
+    "rushing_yards_diff_l5",
+    "pass_yards_diff_l5",
+    "penalty_yards_diff_l5",
+    "total_yards_diff_l5",
+    "third_down_eff_diff_l5",
+    "red_zone_eff_diff_l5",
+    "sacks_diff_l5"
+  ],
+  "feature_schema_hash": "0d3f6ab5ba3effe8730dbac008b3f10ecb3c3b50b80930a2f032c2ea6928cca5",
+  "data_fingerprint": "d0c2a006c6804e8b8fc686aab36ecbf6fd599b16fe6369093bbe759526f4e06e",
+  "parameters": {
+    "validation": "expanding-season-walk-forward",
+    "min_train_seasons": 2,
+    "imputation": "native_missing"
+  },
+  "metrics": {
+    "n": 11358,
+    "brier": 0.16238262940675408,
+    "log_loss": 0.4878338784848145,
+    "ece": 0.010794687591307979,
+    "accuracy": 0.7547983799964783,
+    "baseline_n": 2492,
+    "baseline_brier": 0.17361035163432176,
+    "model_brier_on_baseline_subset": 0.17361035163432176,
+    "brier_skill": 0.0,
+    "folds": [
+      {
+        "fold": 0,
+        "train_seasons": [
+          2021,
+          2022
+        ],
+        "test_season": 2023,
+        "n": 3730,
+        "brier": 0.16146799895458896,
+        "log_loss": 0.48572010181418745,
+        "ece": 0.015861971213194805,
+        "accuracy": 0.7563002680965147,
+        "baseline_n": 794,
+        "baseline_brier": 0.17321716258656453,
+        "model_brier_on_baseline_subset": 0.17321716258656453,
+        "brier_skill": 0.0
+      },
+      {
+        "fold": 1,
+        "train_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "test_season": 2024,
+        "n": 3799,
+        "brier": 0.16433336591260753,
+        "log_loss": 0.4925707016091974,
+        "ece": 0.02419133039732743,
+        "accuracy": 0.7459857857330876,
+        "baseline_n": 831,
+        "baseline_brier": 0.17882171374915815,
+        "model_brier_on_baseline_subset": 0.17882171374915815,
+        "brier_skill": 0.0
+      },
+      {
+        "fold": 2,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "test_season": 2025,
+        "n": 3829,
+        "brier": 0.16133815920587627,
+        "log_loss": 0.4851932924132314,
+        "ece": 0.014356328848791088,
+        "accuracy": 0.7620788717680856,
+        "baseline_n": 867,
+        "baseline_brier": 0.16897546142266104,
+        "model_brier_on_baseline_subset": 0.16897546142266104,
+        "brier_skill": 0.0
+      }
+    ],
+    "n_samples": 11358,
+    "strategy": "no_vig_market_when_available_structural_fallback",
+    "market_anchored_n": 2492
+  },
+  "prediction_contract": "P(home win), calibrated probability in [0,1]",
+  "status": "challenger"
+}

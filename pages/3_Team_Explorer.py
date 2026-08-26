@@ -11,7 +11,7 @@ import plotly.express as px
 
 from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
-from utils.models import predict_batch, models_trained
+from utils.models import predict_for_display, models_trained
 from footer import add_betting_oracle_footer
 
 
@@ -229,7 +229,7 @@ st.divider()
 # ── Schedule & results table ───────────────────────────────────────────────────
 st.subheader("Schedule & Results")
 if models_trained():
-    df_team = predict_batch(df_team)
+    df_team = predict_for_display(df_team)
 
 rows = []
 for _, g in df_team.iterrows():
@@ -247,7 +247,9 @@ for _, g in df_team.iterrows():
 
     book_spread = g.get("market_spread")
     if pd.notna(book_spread) and pd.notna(margin):
-        ats = "✅" if (is_home and margin > -book_spread) or (not is_home and -margin > book_spread) else "❌"
+        team_spread = book_spread if is_home else -book_spread
+        settled = margin + team_spread
+        ats = "✅" if settled > 0 else ("➡️" if settled == 0 else "❌")
     else:
         ats = "—"
 

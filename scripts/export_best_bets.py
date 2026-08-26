@@ -1,183 +1,184 @@
-﻿"""
-scripts/export_best_bets.py — College Football (college-football-predictions)
-Reads data_files/processed/games.parquet + lines.parquet, runs recommendation logic,
-and writes data_files/best_bets_today.json.
-LOOKAHEAD_DAYS = 6 because pipeline runs weekly on Tuesdays.
-"""
+"""Export upcoming, model-scored NCAAF bets for the Sports Picks Grid."""
+from __future__ import annotations
+
 import json
 import sys
 from datetime import date, datetime, timedelta, timezone
+from statistics import NormalDist
 from pathlib import Path
+
+import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from utils.betting import (  # noqa: E402
+    Confidence,
+    generate_moneyline_pick,
+    generate_spread_pick,
+    generate_total_pick,
+)
+from utils.market import expected_value, normal_cover_probability  # noqa: E402
+from utils.models import MODEL_VERSION, load_metrics, models_trained, predict_batch  # noqa: E402
+from utils.seasons import current_cfb_season  # noqa: E402
+
 SPORT = "NCAAF"
-MODEL_VERSION = "1.0.0"
-SEASON = str(date.today().year)
 OUT_PATH = ROOT / "data_files" / "best_bets_today.json"
-LOOKAHEAD_DAYS = 6  # Weekly pipeline — cover the upcoming weekend
+LOOKAHEAD_DAYS = 6
 
 
-def _write(bets: list, notes: str = "") -> None:
+def _write(bets: list[dict], notes: str = "") -> None:
     payload: dict = {
         "meta": {
             "sport": SPORT,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "model_version": MODEL_VERSION,
-            "season": SEASON,
+            "season": str(current_cfb_season(date.today())),
+            "prediction_contract": "latest available line snapshot at export time",
         },
         "bets": bets,
     }
     if notes:
         payload["meta"]["notes"] = notes
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    temporary = OUT_PATH.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    temporary.replace(OUT_PATH)
     print(f"[{SPORT}] Wrote {len(bets)} bets -> {OUT_PATH}")
 
 
-def _tier_from_confidence(conf_label: str) -> str:
-    label_map = {
-        "Strong":   "Elite",
-        "Moderate": "Strong",
-        "Lean":     "Good",
-        "Elite":    "Elite",
-        "High":     "Elite",
-        "Medium":   "Strong",
+def _tier(confidence: Confidence) -> str:
+    return {
+        Confidence.STRONG: "Elite",
+        Confidence.MODERATE: "Strong",
+        Confidence.LEAN: "Good",
+        Confidence.NONE: "No Bet",
+    }[confidence]
+
+
+def _record(
+    row: pd.Series,
+    recommendation,
+    *,
+    line: float | None,
+    odds: float,
+    probability: float,
+) -> dict:
+    start = pd.to_datetime(row["start_date"], errors="coerce", utc=True)
+    return {
+        "game_id": int(row["game_id"]) if pd.notna(row.get("game_id")) else None,
+        "game_date": start.date().isoformat(),
+        "game_time": start.isoformat(),
+        "game": f"{row['away_team']} @ {row['home_team']}",
+        "home_team": row["home_team"],
+        "away_team": row["away_team"],
+        "bet_type": recommendation.bet_type.title(),
+        "pick": recommendation.pick,
+        "probability": round(float(probability), 6),
+        "edge": round(float(recommendation.edge), 4),
+        "tier": _tier(recommendation.confidence),
+        "odds": odds,
+        "line": line,
+        "league": SPORT,
     }
-    return label_map.get(str(conf_label), "Good")
-
-
-def _safe_float(val) -> float | None:
-    try:
-        return float(val)
-    except (TypeError, ValueError):
-        return None
 
 
 def main() -> None:
     today = date.today()
-    end_date = today + timedelta(days=LOOKAHEAD_DAYS)
-
-    # NCAAF season: August–January
-    month = today.month
-    if not (8 <= month or month <= 1):
+    if today.month not in {8, 9, 10, 11, 12, 1}:
         _write([], "NCAAF off-season")
         return
-
-    try:
-        import pandas as pd
-    except ImportError:
-        _write([], "pandas not available")
+    feature_path = ROOT / "data_files" / "features" / "feature_matrix.parquet"
+    if not feature_path.exists() or not models_trained():
+        _write([], "Feature matrix or trained models are unavailable")
         return
 
-    games_path = ROOT / "data_files" / "processed" / "games.parquet"
-    lines_path = ROOT / "data_files" / "processed" / "lines.parquet"
-    picks_path = ROOT / "data_files" / "picks_today.json"
-
-    # Prefer pre-computed picks_today.json if available
-    if picks_path.exists():
-        try:
-            with open(picks_path) as f:
-                raw = json.load(f)
-            bets_raw = raw if isinstance(raw, list) else raw.get("bets", [])
-            bets = []
-            for b in bets_raw:
-                game_date = str(b.get("game_date", ""))
-                try:
-                    gd = date.fromisoformat(game_date)
-                except ValueError:
-                    continue
-                if not (today <= gd <= end_date):
-                    continue
-                tier_raw = str(b.get("tier", b.get("confidence", "Good")))
-                bets.append({
-                    "game_date": game_date,
-                    "game_time": b.get("game_time"),
-                    "game": b.get("game", ""),
-                    "home_team": b.get("home_team", ""),
-                    "away_team": b.get("away_team", ""),
-                    "bet_type": b.get("bet_type", "Spread"),
-                    "pick": b.get("pick", ""),
-                    "confidence": _safe_float(b.get("confidence", b.get("win_prob"))),
-                    "edge": _safe_float(b.get("edge")),
-                    "tier": _tier_from_confidence(tier_raw),
-                    "odds": b.get("odds"),
-                    "line": _safe_float(b.get("line")),
-                    "league": "NCAAF",
-                })
-            _write(bets, "" if bets else f"No NCAAF picks in next {LOOKAHEAD_DAYS} days")
-            return
-        except Exception:
-            pass
-
-    # Fall back to raw parquets
-    if not games_path.exists() or not lines_path.exists():
-        _write([], "No NCAAF parquet data found — run weekly pipeline first")
+    metrics = load_metrics()
+    decision = metrics.get("release_decision", {})
+    if decision.get("decision") != "promote":
+        failed = ", ".join(decision.get("failed_gates", [])) or "release gates unavailable"
+        _write([], f"Model release is on hold: {failed}")
         return
 
-    try:
-        games = pd.read_parquet(games_path)
-        lines = pd.read_parquet(lines_path)
-    except Exception as e:
-        _write([], f"Failed to read parquet: {e}")
+    frame = pd.read_parquet(feature_path).drop_duplicates("game_id", keep="last")
+    if "start_date" not in frame.columns:
+        _write([], "Feature matrix has no start_date")
         return
-
-    # Filter to upcoming window
-    date_col = next((c for c in ["start_date", "game_date", "date"] if c in games.columns), None)
-    if not date_col:
-        _write([], "No date column in games.parquet")
-        return
-
-    games[date_col] = pd.to_datetime(games[date_col], errors="coerce").dt.date
-    upcoming = games[(games[date_col] >= today) & (games[date_col] <= end_date)]
-
+    frame["start_date"] = pd.to_datetime(frame["start_date"], errors="coerce", utc=True)
+    end = today + timedelta(days=LOOKAHEAD_DAYS)
+    game_dates = frame["start_date"].dt.date
+    upcoming = frame[(game_dates >= today) & (game_dates <= end)].copy()
     if upcoming.empty:
         _write([], f"No NCAAF games in next {LOOKAHEAD_DAYS} days")
         return
+    upcoming = predict_batch(upcoming)
 
-    # Try to join lines
-    merge_cols = [c for c in ["game_id", "id"] if c in upcoming.columns and c in lines.columns]
-    if merge_cols:
-        try:
-            upcoming = upcoming.merge(lines, on=merge_cols[:1], how="left", suffixes=("", "_line"))
-        except Exception:
-            pass
+    spread_std = float(metrics.get("spread_model", {}).get("residual_std", 0) or 0)
+    total_std = float(metrics.get("total_model", {}).get("residual_std", 0) or 0)
 
-    bets = []
+    bets: list[dict] = []
     for _, row in upcoming.iterrows():
-        home = str(row.get("home_team", row.get("home", "")))
-        away = str(row.get("away_team", row.get("away", "")))
-        game = f"{away} @ {home}"
-        game_date = str(row[date_col])
-
-        conf = _safe_float(row.get("win_prob", row.get("home_win_prob")))
-        edge = _safe_float(row.get("edge"))
-        spread = _safe_float(row.get("spread", row.get("line")))
-
-        if conf is None or conf < 0.52:
-            continue
-        if edge is not None and edge < 0:
-            continue
-
-        bet: dict = {
-            "game_date": game_date,
-            "game_time": str(row.get("start_time", "")) or None,
-            "game": game,
-            "home_team": home,
-            "away_team": away,
-            "bet_type": "Spread",
-            "pick": home if (conf or 0) >= 0.5 else away,
-            "confidence": round(conf, 4) if conf else None,
-            "edge": round(edge, 4) if edge else None,
-            "tier": "Strong" if (conf or 0) >= 0.65 else "Good",
-            "odds": -110,  # standard spread odds
-            "line": spread,
-            "league": "NCAAF",
-        }
-        bets.append(bet)
-
-    _write(bets, "" if bets else f"No qualifying NCAAF picks in next {LOOKAHEAD_DAYS} days")
+        home, away = str(row["home_team"]), str(row["away_team"])
+        if pd.notna(row.get("predicted_spread")) and pd.notna(row.get("market_spread")):
+            recommendation = generate_spread_pick(
+                home, away, float(row["predicted_spread"]), float(row["market_spread"]),
+                game_id=int(row["game_id"]),
+            )
+            home_cover = normal_cover_probability(
+                float(row["predicted_spread"]), float(row["market_spread"]), spread_std
+            ) if spread_std > 0 else 0.5
+            probability = home_cover if recommendation.pick.startswith(f"Take {home} ") else 1 - home_cover
+            if (
+                recommendation.confidence in {Confidence.MODERATE, Confidence.STRONG}
+                and expected_value(probability, -110) >= 0.02
+            ):
+                bets.append(
+                    _record(
+                        row, recommendation, line=float(row["market_spread"]), odds=-110.0,
+                        probability=probability,
+                    )
+                )
+        if pd.notna(row.get("predicted_total")) and pd.notna(row.get("market_total")):
+            over_probability = (
+                1 - NormalDist(float(row["predicted_total"]), total_std).cdf(float(row["market_total"]))
+                if total_std > 0 else 0.5
+            )
+            model_over = float(row["predicted_total"]) > float(row["market_total"])
+            probability = over_probability if model_over else 1 - over_probability
+            recommendation = generate_total_pick(
+                home, away, float(row["predicted_total"]), float(row["market_total"]),
+                game_id=int(row["game_id"]), win_prob=probability,
+            )
+            if (
+                recommendation.confidence in {Confidence.MODERATE, Confidence.STRONG}
+                and expected_value(probability, -110) >= 0.02
+            ):
+                bets.append(
+                    _record(
+                        row, recommendation, line=float(row["market_total"]), odds=-110.0,
+                        probability=probability,
+                    )
+                )
+        if all(pd.notna(row.get(column)) for column in ("win_prob", "home_moneyline", "away_moneyline")):
+            recommendation = generate_moneyline_pick(
+                home,
+                away,
+                float(row["win_prob"]),
+                float(row["home_moneyline"]),
+                float(row["away_moneyline"]),
+                game_id=int(row["game_id"]),
+            )
+            if recommendation is not None:
+                odds = float(row["home_moneyline"]) if home in recommendation.pick else float(row["away_moneyline"])
+                if expected_value(recommendation.win_prob, odds) >= 0.02:
+                    bets.append(
+                        _record(
+                            row, recommendation, line=None, odds=odds,
+                            probability=recommendation.win_prob,
+                        )
+                    )
+    bets.sort(key=lambda bet: (bet["tier"] != "Elite", -float(bet["edge"])))
+    _write(bets, "" if bets else "No bets met release thresholds")
 
 
 if __name__ == "__main__":

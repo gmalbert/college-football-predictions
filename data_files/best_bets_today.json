@@ -1,10 +1,11 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-08-26T01:26:23.914416+00:00",
-    "model_version": "1.0.0",
+    "generated_at": "2026-08-11T19:11:28.022563+00:00",
+    "model_version": "2.2.0",
     "season": "2026",
-    "notes": "No NCAAF games in next 6 days"
+    "prediction_contract": "latest available line snapshot at export time",
+    "notes": "Model release is on hold: win_market_baseline, spread_market_baseline, closing_line_value"
   },
   "bets": []
 }

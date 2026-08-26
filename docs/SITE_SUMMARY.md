@@ -1,4 +1,8 @@
 > **AI Onboarding Guide** — See also the project docs folder for detailed data and model documentation.
+>
+> **Historical snapshot:** the metrics and feature counts below are superseded by the leakage-safe August 2026 baseline in the repository [README](../README.md) and must not be used for model or betting decisions.
+
+> **Implementation review — 2026-08-24:** This page is retained as an onboarding/history document, not a current system specification. The current stack includes market-anchored v2.2 artifacts, a total-side shadow model, data-quality UI, OOS historical display, manifests, and scheduled market snapshots. The old in-sample 64.9% ATS claim, 86-feature description, 8-page count, and weekly-only refresh statement are superseded. See [IMPLEMENTATION_PRIORITIES_2026.md](IMPLEMENTATION_PRIORITIES_2026.md) for current work.
 
 # College Football Predictions — Site Summary
 
@@ -39,6 +43,7 @@ Data is refreshed weekly by GitHub Actions (`weekly_pipeline.yml`). For local da
 | `pages/2_Value_Bets.py` | Value-bet table sorted by edge, bankroll simulator |
 | `pages/3_Team_Explorer.py` | Team card, ELO history, radar chart, schedule |
 | `pages/5_Model_Performance.py` | Brier score, calibration curve, feature importance |
+| `pages/10_Total_Market_Signals.py` | Total-side OOS validation, side gates and prospective shadow signals |
 | `pages/6_Settings.py` | API status, data refresh controls, model retraining triggers |
 | `utils/cfbd_client.py` | CFBD v5 API client — fetches games, advanced stats, recruiting |
 | `utils/feature_engine.py` | Feature matrix builder (86 features: EPA, turnovers, recruiting, form) |

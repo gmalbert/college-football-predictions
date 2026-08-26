@@ -1,6 +1,6 @@
 """utils/fetch_historical.py
 
-Pull 5 years of CFBD historical data (2021-2025) with minimal API calls.
+Pull the five most recent completed seasons plus the current season.
 One call per endpoint per year; caches raw JSON so re-runs hit disk only.
 Then processes raw JSON into Parquet tables for fast downstream access.
 
@@ -11,10 +11,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from utils.cfbd_client import (
@@ -42,10 +44,14 @@ from utils.cfbd_client import (
     get_player_usage,
 )
 from utils.storage import RAW_DIR, PROCESSED_DIR, save_parquet
+from utils.odds_ingestion import build_market_consensus
+from utils.seasons import current_cfb_season, rolling_season_window
 from utils.logger import get_logger
 
-# 5 most-recent complete seasons (as of April 2026)
-HISTORICAL_YEARS = list(range(2021, 2026))
+# Five completed seasons plus the live season. This avoids a hard-coded year
+# silently freezing the production pipeline every January/August.
+_CURRENT_SEASON = current_cfb_season(datetime.now(timezone.utc))
+HISTORICAL_YEARS = rolling_season_window(at=datetime.now(timezone.utc))
 
 # Polite delay between API calls to stay well within rate limits
 API_DELAY = 0.75
@@ -70,12 +76,18 @@ def _pull(name: str, fn, *args, force: bool = False, **kwargs) -> list:
     """Fetch data via *fn*, cache as JSON, return deserialized list."""
     path = RAW_DIR / f"{name}.json"
     if not force and path.exists():
-        logger.info(f"  cached    — {name}")
         with open(path) as fh:
-            return json.load(fh)
+            cached = json.load(fh)
+        if cached:
+            logger.info(f"  cached    — {name}")
+            return cached
+        logger.warning(f"  ignoring empty cache — {name}")
     logger.info(f"  pulling   — {name} …")
     data = fn(*args, **kwargs)
     serialized = _to_serializable(data)
+    if not serialized:
+        logger.warning(f"  empty response — {name}; cache not updated")
+        return []
     with open(path, "w") as fh:
         json.dump(serialized, fh, default=str)
     time.sleep(API_DELAY)
@@ -90,13 +102,42 @@ def _load_raw(name: str) -> list:
         return json.load(fh)
 
 
+def _save_processed_upsert(
+    frame: pd.DataFrame,
+    name: str,
+    *,
+    keys: list[str],
+    partition_column: str | None = "season",
+) -> pd.DataFrame:
+    """Upsert refreshed partitions without erasing seasons lacking raw caches."""
+    destination = PROCESSED_DIR / f"{name}.parquet"
+    combined = frame.copy()
+    if destination.exists():
+        existing = pd.read_parquet(destination)
+        if (
+            partition_column
+            and partition_column in combined.columns
+            and partition_column in existing.columns
+        ):
+            refreshed = set(combined[partition_column].dropna().tolist())
+            existing = existing[~existing[partition_column].isin(refreshed)]
+        combined = pd.concat([existing, combined], ignore_index=True, sort=False)
+    usable_keys = [column for column in keys if column in combined.columns]
+    if usable_keys:
+        combined = combined.drop_duplicates(usable_keys, keep="last")
+    save_parquet(combined, name)
+    return combined
+
+
 def _pull_team_game_stats(year: int, force: bool = False) -> list:
     """Fetch team game stats week-by-week (CFBD v5 requires week/team/conference)."""
     path = RAW_DIR / f"team_game_stats_{year}.json"
     if not force and path.exists():
-        logger.info(f"  cached    — team_game_stats_{year}")
         with open(path) as fh:
-            return json.load(fh)
+            cached = json.load(fh)
+        if cached:
+            logger.info(f"  cached    — team_game_stats_{year}")
+            return cached
     logger.info(f"  pulling   — team_game_stats_{year} (weeks 1-16) …")
     combined: list = []
     for week in range(1, 17):
@@ -108,6 +149,9 @@ def _pull_team_game_stats(year: int, force: bool = False) -> list:
     combined.extend(ps)
     time.sleep(API_DELAY)
     serialized = _to_serializable(combined)
+    if not serialized:
+        logger.warning(f"  empty response — team_game_stats_{year}; cache not updated")
+        return []
     with open(path, "w") as fh:
         json.dump(serialized, fh, default=str)
     return serialized
@@ -117,9 +161,11 @@ def _pull_plays_year(year: int, force: bool = False) -> list:
     """Fetch plays week-by-week for a full season (regular + postseason)."""
     path = RAW_DIR / f"plays_{year}.json"
     if not force and path.exists():
-        logger.info(f"  cached    — plays_{year}")
         with open(path) as fh:
-            return json.load(fh)
+            cached = json.load(fh)
+        if cached:
+            logger.info(f"  cached    — plays_{year}")
+            return cached
     logger.info(f"  pulling   — plays_{year} (weeks 1-16 + postseason) …")
     combined: list = []
     for week in range(1, 17):
@@ -131,6 +177,9 @@ def _pull_plays_year(year: int, force: bool = False) -> list:
         combined.extend(rows)
         time.sleep(API_DELAY)
     serialized = _to_serializable(combined)
+    if not serialized:
+        logger.warning(f"  empty response — plays_{year}; cache not updated")
+        return []
     with open(path, "w") as fh:
         json.dump(serialized, fh, default=str)
     return serialized
@@ -140,9 +189,11 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
     """Fetch drives week-by-week for a full season (regular + postseason)."""
     path = RAW_DIR / f"drives_{year}.json"
     if not force and path.exists():
-        logger.info(f"  cached    — drives_{year}")
         with open(path) as fh:
-            return json.load(fh)
+            cached = json.load(fh)
+        if cached:
+            logger.info(f"  cached    — drives_{year}")
+            return cached
     logger.info(f"  pulling   — drives_{year} (weeks 1-16 + postseason) …")
     combined: list = []
     for week in range(1, 17):
@@ -154,6 +205,9 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
         combined.extend(rows)
         time.sleep(API_DELAY)
     serialized = _to_serializable(combined)
+    if not serialized:
+        logger.warning(f"  empty response — drives_{year}; cache not updated")
+        return []
     with open(path, "w") as fh:
         json.dump(serialized, fh, default=str)
     return serialized
@@ -161,9 +215,18 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
 
 # ─────────────────────────────── ingestion ────────────────────────────────────
 
-def run(force: bool = False) -> None:
-    """Pull all data types for HISTORICAL_YEARS and build processed tables."""
-    logger.info("=== CFBD historical pull — 5 seasons (2021‑2025) ===")
+def run(force: bool = False, years: list[int] | None = None) -> None:
+    """Refresh the live season, reuse older caches, and rebuild derived data.
+
+    ``force`` re-pulls every selected season. Otherwise completed seasons reuse
+    non-empty caches and the current season is refreshed on every pipeline run.
+    """
+    global HISTORICAL_YEARS
+    if years:
+        HISTORICAL_YEARS = sorted(set(int(year) for year in years))
+    logger.info(
+        f"=== CFBD pull — seasons {HISTORICAL_YEARS[0]}-{HISTORICAL_YEARS[-1]} ==="
+    )
     logger.info(f"    API delay: {API_DELAY}s between calls")
 
     # Teams — single call for all FBS teams
@@ -174,39 +237,43 @@ def run(force: bool = False) -> None:
 
     # Coaches — single call per year
     for year in HISTORICAL_YEARS:
-        _pull(f"coaches_{year}", get_coaches, year=year, force=force)
+        _pull(
+            f"coaches_{year}", get_coaches, year=year,
+            force=force or year == _CURRENT_SEASON,
+        )
 
     for year in HISTORICAL_YEARS:
         logger.info(f"--- {year} ---")
+        year_force = force or year == _CURRENT_SEASON
         # 2 season-type calls per year (regular + bowls/playoffs)
-        _pull(f"games_{year}_regular",    get_games, year, "regular",    force=force)
-        _pull(f"games_{year}_postseason", get_games, year, "postseason",  force=force)
+        _pull(f"games_{year}_regular",    get_games, year, "regular",    force=year_force)
+        _pull(f"games_{year}_postseason", get_games, year, "postseason", force=year_force)
         # team game stats: iterate week-by-week (API requires week/team/conference)
-        _pull_team_game_stats(year, force=force)
-        _pull(f"lines_{year}",            get_lines, year,                force=force)
-        _pull(f"advanced_stats_{year}",   get_advanced_stats, year,       force=force)
-        _pull(f"sp_ratings_{year}",       get_sp_ratings, year,           force=force)
-        _pull(f"elo_ratings_{year}",      get_elo_ratings, year,          force=force)
-        _pull(f"recruiting_{year}",       get_team_recruiting, year,      force=force)
-        _pull(f"talent_{year}",           get_talent, year,               force=force)
+        _pull_team_game_stats(year, force=year_force)
+        _pull(f"lines_{year}",            get_lines, year,                force=year_force)
+        _pull(f"advanced_stats_{year}",   get_advanced_stats, year,       force=year_force)
+        _pull(f"sp_ratings_{year}",       get_sp_ratings, year,           force=year_force)
+        _pull(f"elo_ratings_{year}",      get_elo_ratings, year,          force=year_force)
+        _pull(f"recruiting_{year}",       get_team_recruiting, year,      force=year_force)
+        _pull(f"talent_{year}",           get_talent, year,               force=year_force)
         # NEW: P0 — FPI, SRS, Returning production (weather via Open-Meteo below)
-        _pull(f"fpi_ratings_{year}",      get_fpi_ratings, year,          force=force)
-        _pull(f"srs_ratings_{year}",      get_srs_ratings, year,          force=force)
-        _pull(f"returning_production_{year}", get_returning_production, year, force=force)
+        _pull(f"fpi_ratings_{year}",      get_fpi_ratings, year,          force=year_force)
+        _pull(f"srs_ratings_{year}",      get_srs_ratings, year,          force=year_force)
+        _pull(f"returning_production_{year}", get_returning_production, year, force=year_force)
         # NEW: P1 — PPA by down, WEPA, pre-game WP
-        _pull(f"ppa_teams_{year}",        get_ppa_teams, year,            force=force)
-        _pull(f"wepa_{year}",             get_wepa_team_season, year,     force=force)
-        _pull(f"pregame_wp_{year}",       get_pregame_win_prob, year,     force=force)
+        _pull(f"ppa_teams_{year}",        get_ppa_teams, year,            force=year_force)
+        _pull(f"wepa_{year}",             get_wepa_team_season, year,     force=year_force)
+        _pull(f"pregame_wp_{year}",       get_pregame_win_prob, year,     force=year_force)
         # NEW: P2 — Transfer portal, game media
-        _pull(f"transfer_portal_{year}",  get_transfer_portal, year,      force=force)
-        _pull(f"game_media_{year}",       get_game_media, year,           force=force)
+        _pull(f"transfer_portal_{year}",  get_transfer_portal, year,      force=year_force)
+        _pull(f"game_media_{year}",       get_game_media, year,           force=year_force)
         # P3: Play-by-play, drives, player usage
-        _pull_plays_year(year, force=force)
-        _pull_drives_year(year, force=force)
-        _pull(f"player_usage_{year}",      get_player_usage, year=year,     force=force)
+        _pull_plays_year(year, force=year_force)
+        _pull_drives_year(year, force=year_force)
+        _pull(f"player_usage_{year}",      get_player_usage, year=year,     force=year_force)
 
     logger.info("=== Building processed Parquet tables ===")
-    build_processed_tables(force=force)
+    build_processed_tables(force=True)
     logger.info("=== Done ===")
 
 
@@ -267,12 +334,14 @@ def _build_games(force: bool) -> None:
     if not rows:
         logger.warning("  No game data found — skipping games.parquet")
         return
-    df = pd.DataFrame(rows)
-    df = df.dropna(subset=["home_score", "away_score"])
-    df["home_win"]     = (df["home_score"] > df["away_score"]).astype(int)
-    df["home_margin"]  = df["home_score"].astype(float) - df["away_score"].astype(float)
-    df["total_points"] = df["home_score"].astype(float) + df["away_score"].astype(float)
-    save_parquet(df, "games")
+    df = pd.DataFrame(rows).drop_duplicates("game_id", keep="last")
+    df["home_score"] = pd.to_numeric(df["home_score"], errors="coerce")
+    df["away_score"] = pd.to_numeric(df["away_score"], errors="coerce")
+    completed = df["home_score"].notna() & df["away_score"].notna()
+    df["home_win"] = np.where(completed, (df["home_score"] > df["away_score"]).astype(float), np.nan)
+    df["home_margin"]  = df["home_score"] - df["away_score"]
+    df["total_points"] = df["home_score"] + df["away_score"]
+    df = _save_processed_upsert(df, "games", keys=["game_id"])
     logger.info(f"  games.parquet: {len(df):,} rows")
 
 
@@ -281,34 +350,19 @@ def _build_lines(force: bool) -> None:
     if not force and dst.exists():
         logger.info("  processed/lines.parquet — already exists")
         return
-    rows = []
+    games: list[dict] = []
     for year in HISTORICAL_YEARS:
-        for g in _load_raw(f"lines_{year}"):
-            gid = g.get("id")
-            for ln in g.get("lines") or []:
-                rows.append({
-                    "game_id":        gid,
-                    "provider":       ln.get("provider"),
-                    "spread":         ln.get("spread"),
-                    # cfbd v5 uses camelCase in the provider line sub-object
-                    "over_under":     ln.get("overUnder"),
-                    "home_moneyline": ln.get("homeMoneyline"),
-                    "away_moneyline": ln.get("awayMoneyline"),
-                })
-    if not rows:
+        games.extend(_load_raw(f"lines_{year}"))
+    if not games:
         logger.warning("  No lines data — skipping lines.parquet")
         return
-    df = pd.DataFrame(rows)
-    df["spread"]     = pd.to_numeric(df["spread"],     errors="coerce")
-    df["over_under"] = pd.to_numeric(df["over_under"], errors="coerce")
-    # Average across providers for a single market line per game
-    market = (
-        df.groupby("game_id")[["spread", "over_under", "home_moneyline", "away_moneyline"]]
-        .mean()
-        .reset_index()
-        .rename(columns={"spread": "market_spread", "over_under": "market_total"})
+    market = build_market_consensus(games)
+    if market.empty:
+        logger.warning("  No provider quotes in line payloads — skipping lines.parquet")
+        return
+    market = _save_processed_upsert(
+        market, "lines", keys=["game_id"], partition_column="season"
     )
-    save_parquet(market, "lines")
     logger.info(f"  lines.parquet: {len(market):,} rows")
 
 
@@ -344,7 +398,7 @@ def _build_ratings(force: bool) -> None:
         lambda r: talent_by.get((r["season"], r["team"])), axis=1
     )
     df["talent"] = pd.to_numeric(df["talent"], errors="coerce")
-    save_parquet(df, "ratings")
+    df = _save_processed_upsert(df, "ratings", keys=["season", "team"])
     logger.info(f"  ratings.parquet: {len(df):,} rows")
 
 
@@ -395,10 +449,10 @@ def _build_advanced_stats(force: bool) -> None:
     if not rows:
         logger.warning("  No advanced stats — skipping advanced_stats.parquet")
         return
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows).drop_duplicates(["season", "team"], keep="last")
     for col in df.columns.difference(["team", "conference"]):
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "advanced_stats")
+    df = _save_processed_upsert(df, "advanced_stats", keys=["season", "team"])
     logger.info(f"  advanced_stats.parquet: {len(df):,} rows")
 
 
@@ -472,13 +526,25 @@ def _build_team_game_stats(force: bool) -> None:
                             row[dest] = float("nan")
                 rows.append(row)
     if not rows:
+        if dst.exists():
+            existing = pd.read_parquet(dst)
+            cleaned = existing.drop_duplicates(["game_id", "team"], keep="last")
+            if len(cleaned) != len(existing):
+                save_parquet(cleaned, "team_game_stats")
+                logger.warning(
+                    f"  Raw team stats unavailable; repaired {len(existing) - len(cleaned):,} "
+                    "duplicate rows in the existing derived artifact"
+                )
+                return
         logger.warning("  No team game stats — skipping team_game_stats.parquet")
         return
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows).drop_duplicates(["game_id", "team"], keep="last")
     num_cols = [c for c in df.columns if c not in ("game_id", "season", "team", "home_away")]
     for col in num_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "team_game_stats")
+    df = _save_processed_upsert(
+        df, "team_game_stats", keys=["game_id", "team"]
+    )
     logger.info(f"  team_game_stats.parquet: {len(df):,} rows")
 
 
@@ -502,7 +568,7 @@ def _build_recruiting(force: bool) -> None:
         return
     df = pd.DataFrame(rows)
     df["points"] = pd.to_numeric(df["points"], errors="coerce")
-    save_parquet(df, "recruiting")
+    df = _save_processed_upsert(df, "recruiting", keys=["season", "team"])
     logger.info(f"  recruiting.parquet: {len(df):,} rows")
 
 
@@ -525,7 +591,7 @@ def _build_elo(force: bool) -> None:
         return
     df = pd.DataFrame(rows)
     df["elo"] = pd.to_numeric(df["elo"], errors="coerce")
-    save_parquet(df, "elo_ratings")
+    df = _save_processed_upsert(df, "elo_ratings", keys=["season", "team"])
     logger.info(f"  elo_ratings.parquet: {len(df):,} rows")
 
 
@@ -717,7 +783,7 @@ def _build_fpi(force: bool) -> None:
     for col in ["fpi", "fpi_offense", "fpi_defense", "fpi_special_teams", "fpi_overall"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "fpi_ratings")
+    df = _save_processed_upsert(df, "fpi_ratings", keys=["season", "team"])
     logger.info(f"  fpi_ratings.parquet: {len(df):,} rows")
 
 
@@ -743,7 +809,7 @@ def _build_srs(force: bool) -> None:
     df = pd.DataFrame(rows)
     df["srs_rating"] = pd.to_numeric(df["srs_rating"], errors="coerce")
     df["srs_ranking"] = pd.to_numeric(df["srs_ranking"], errors="coerce")
-    save_parquet(df, "srs_ratings")
+    df = _save_processed_upsert(df, "srs_ratings", keys=["season", "team"])
     logger.info(f"  srs_ratings.parquet: {len(df):,} rows")
 
 
@@ -779,7 +845,9 @@ def _build_returning_production(force: bool) -> None:
     num_cols = [c for c in df.columns if c not in ("season", "team", "conference")]
     for col in num_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "returning_production")
+    df = _save_processed_upsert(
+        df, "returning_production", keys=["season", "team"]
+    )
     logger.info(f"  returning_production.parquet: {len(df):,} rows")
 
 
@@ -817,7 +885,7 @@ def _build_ppa_teams(force: bool) -> None:
     num_cols = [c for c in df.columns if c not in ("season", "team", "conference")]
     for col in num_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "ppa_teams")
+    df = _save_processed_upsert(df, "ppa_teams", keys=["season", "team"])
     logger.info(f"  ppa_teams.parquet: {len(df):,} rows")
 
 
@@ -849,7 +917,7 @@ def _build_wepa(force: bool) -> None:
     num_cols = [c for c in df.columns if c not in ("season", "team", "conference")]
     for col in num_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "wepa")
+    df = _save_processed_upsert(df, "wepa", keys=["season", "team"])
     logger.info(f"  wepa.parquet: {len(df):,} rows")
 
 
@@ -877,7 +945,7 @@ def _build_pregame_wp(force: bool) -> None:
     df = pd.DataFrame(rows)
     for col in ["spread", "home_win_prob", "away_win_prob"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    save_parquet(df, "pregame_wp")
+    df = _save_processed_upsert(df, "pregame_wp", keys=["game_id"])
     logger.info(f"  pregame_wp.parquet: {len(df):,} rows")
 
 
@@ -907,7 +975,11 @@ def _build_transfer_portal(force: bool) -> None:
     df = pd.DataFrame(rows)
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
     df["stars"]  = pd.to_numeric(df["stars"],  errors="coerce")
-    save_parquet(df, "transfer_portal")
+    df = _save_processed_upsert(
+        df,
+        "transfer_portal",
+        keys=["season", "first_name", "last_name", "origin", "destination"],
+    )
     logger.info(f"  transfer_portal.parquet: {len(df):,} rows")
 
 
@@ -934,7 +1006,7 @@ def _build_game_media(force: bool) -> None:
     df = pd.DataFrame(rows)
     # Aggregate to one row per game (keep first TV network listed)
     df = df.drop_duplicates(subset=["game_id"], keep="first")
-    save_parquet(df, "game_media")
+    df = _save_processed_upsert(df, "game_media", keys=["game_id"])
     logger.info(f"  game_media.parquet: {len(df):,} rows")
 
 
@@ -969,7 +1041,7 @@ def _build_coaches(force: bool) -> None:
     df = df.sort_values("tenure_years", ascending=False).drop_duplicates(
         subset=["season", "team"], keep="first"
     )
-    save_parquet(df, "coaches")
+    df = _save_processed_upsert(df, "coaches", keys=["season", "team"])
     logger.info(f"  coaches.parquet: {len(df):,} rows")
 
 
@@ -1037,7 +1109,9 @@ def _build_plays(force: bool) -> None:
     df_out = pd.DataFrame(rows)
     for col in [c for c in df_out.columns if c not in ("season", "team")]:
         df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
-    save_parquet(df_out, "plays_agg")
+    df_out = _save_processed_upsert(
+        df_out, "plays_agg", keys=["season", "team"]
+    )
     logger.info(f"  plays_agg.parquet: {len(df_out):,} rows")
 
 
@@ -1100,7 +1174,9 @@ def _build_drives(force: bool) -> None:
     df_out = pd.DataFrame(rows)
     for col in [c for c in df_out.columns if c not in ("season", "team")]:
         df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
-    save_parquet(df_out, "drives_agg")
+    df_out = _save_processed_upsert(
+        df_out, "drives_agg", keys=["season", "team"]
+    )
     logger.info(f"  drives_agg.parquet: {len(df_out):,} rows")
 
 
@@ -1158,17 +1234,24 @@ def _build_player_usage(force: bool) -> None:
     df_out = pd.DataFrame(rows)
     for col in [c for c in df_out.columns if c not in ("season", "team")]:
         df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
-    save_parquet(df_out, "player_usage_agg")
+    df_out = _save_processed_upsert(
+        df_out, "player_usage_agg", keys=["season", "team"]
+    )
     logger.info(f"  player_usage_agg.parquet: {len(df_out):,} rows")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Pull 5 years (2021-2025) of CFBD data with minimal API calls."
+        description="Pull five completed seasons plus the current CFBD season."
     )
     parser.add_argument(
         "--force", action="store_true",
         help="Re-pull and reprocess even if cached data exists."
     )
+    parser.add_argument(
+        "--years",
+        help="Optional comma-separated seasons (default: dynamic six-season window).",
+    )
     args = parser.parse_args()
-    run(force=args.force)
+    selected_years = [int(value) for value in args.years.split(",")] if args.years else None
+    run(force=args.force, years=selected_years)

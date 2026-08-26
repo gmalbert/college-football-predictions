@@ -14,7 +14,6 @@ import plotly.graph_objects as go
 
 from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
-from utils.models import predict_batch, models_trained
 from footer import add_betting_oracle_footer
 
 
@@ -26,9 +25,13 @@ st.title("📈 Historical Analysis")
 @st.cache_data(ttl=3600)
 def load_data():
     try:
-        fm   = load_parquet("feature_matrix", layer="features")
-        if models_trained():
-            fm = predict_batch(fm)
+        fm = load_parquet("feature_matrix", layer="features").drop_duplicates("game_id")
+        try:
+            backtest = load_parquet("model_backtest", layer="features")
+            oos = backtest[["game_id", "predicted_spread_oos"]].drop_duplicates("game_id")
+            fm = fm.merge(oos, on="game_id", how="left", validate="one_to_one")
+        except FileNotFoundError:
+            pass
         return fm
     except FileNotFoundError:
         return pd.DataFrame()
@@ -90,13 +93,15 @@ with tab_trends:
     st.plotly_chart(fig_hfa, width="stretch")
 
     # ATS record by conference (if model predictions available)
-    if "predicted_spread" in df_slice.columns and "market_spread" in df_slice.columns:
-        df_slice["pred_covers"] = df_slice["home_margin"] > -df_slice["market_spread"]
-        df_slice["model_picked_home"] = df_slice["predicted_spread"] > df_slice["market_spread"]
-        df_slice["ats_correct"] = df_slice["pred_covers"] == df_slice["model_picked_home"]
+    if "predicted_spread_oos" in df_slice.columns and "market_spread" in df_slice.columns:
+        ats_slice = df_slice.dropna(subset=["predicted_spread_oos", "market_spread", "home_margin"]).copy()
+        ats_slice = ats_slice[(ats_slice["home_margin"] + ats_slice["market_spread"]) != 0]
+        ats_slice["pred_covers"] = ats_slice["home_margin"] > -ats_slice["market_spread"]
+        ats_slice["model_picked_home"] = ats_slice["predicted_spread_oos"] > -ats_slice["market_spread"]
+        ats_slice["ats_correct"] = ats_slice["pred_covers"] == ats_slice["model_picked_home"]
 
         ats_by_conf = (
-            df_slice.dropna(subset=["home_conference", "ats_correct"])
+            ats_slice.dropna(subset=["home_conference", "ats_correct"])
             .groupby("home_conference")["ats_correct"]
             .agg(["mean", "count"])
             .reset_index()

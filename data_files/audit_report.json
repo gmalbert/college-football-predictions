@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-08-25T02:12:59.814144+00:00",
+  "summary": {
+    "pass": 9,
+    "warn": 7,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "name": "games_contract",
+      "status": "pass",
+      "message": "Contract passed",
+      "value": 19155
+    },
+    {
+      "name": "feature_matrix_contract",
+      "status": "pass",
+      "message": "Contract passed",
+      "value": 19155
+    },
+    {
+      "name": "team_game_stats_contract",
+      "status": "pass",
+      "message": "Contract passed",
+      "value": 14730
+    },
+    {
+      "name": "feature_game_coverage",
+      "status": "pass",
+      "message": "Feature artifact covers 19,155 of 19,155 unique games",
+      "value": 1.0
+    },
+    {
+      "name": "current_season_schedule",
+      "status": "pass",
+      "message": "Latest scheduled season is 2026; current year is 2026",
+      "value": 2026
+    },
+    {
+      "name": "unsafe_exploration_columns",
+      "status": "warn",
+      "message": "Season aggregates may remain for UI exploration but are excluded from production feature lists: sp_plus_diff, off_epa_diff, fpi_diff, srs_diff, ppa_off_diff",
+      "value": 5
+    },
+    {
+      "name": "release_metadata",
+      "status": "warn",
+      "message": "No atomic release metadata has been published",
+      "value": null
+    },
+    {
+      "name": "empty_raw_cache",
+      "status": "warn",
+      "message": "87 empty JSON caches; new ingestion code ignores and does not create empty caches",
+      "value": 87
+    },
+    {
+      "name": "market_snapshot_history",
+      "status": "pass",
+      "message": "Timestamped market history contains 440 quotes; movement and CLV require forward collection",
+      "value": 440
+    },
+    {
+      "name": "context_feature_observations",
+      "status": "warn",
+      "message": "No timestamped contextual source has been ingested",
+      "value": 0
+    },
+    {
+      "name": "model_evaluation_scope",
+      "status": "pass",
+      "message": "Evaluation scope is walk_forward_season_oos",
+      "value": "walk_forward_season_oos"
+    },
+    {
+      "name": "model_release_decision",
+      "status": "warn",
+      "message": "Release decision is hold; failed gates: win_market_baseline, spread_market_baseline, closing_line_value",
+      "value": "hold"
+    },
+    {
+      "name": "oos_prediction_artifact",
+      "status": "pass",
+      "message": "OOS artifact has 19,155 rows and 0 duplicate games",
+      "value": 19155
+    },
+    {
+      "name": "model_manifests",
+      "status": "pass",
+      "message": "Found 4 model artifact manifests",
+      "value": 4
+    },
+    {
+      "name": "best_bets_freshness",
+      "status": "warn",
+      "message": "Best-bets export age is 319.0 hours",
+      "value": 319.0254976613889
+    },
+    {
+      "name": "shadow_total_freshness",
+      "status": "warn",
+      "message": "Shadow-total export age is 319.0 hours",
+      "value": 319.02638622916663
+    }
+  ],
+  "release_status": "shadow"
+}
