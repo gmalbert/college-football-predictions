@@ -40,6 +40,11 @@ if not models_trained():
     st.stop()
 
 metrics = load_metrics()
+if metrics.get("evaluation_scope") != "walk_forward_season_oos":
+    st.error(
+        "Saved metrics predate the leakage-safe walk-forward evaluator. Retrain before "
+        "using this page for betting decisions."
+    )
 
 # ── top-line metrics ──────────────────────────────────────────────────────────
 win_m    = metrics.get("win_model", {})
@@ -47,12 +52,61 @@ spread_m = metrics.get("spread_model", {})
 total_m  = metrics.get("total_model", {})
 ats_m    = metrics.get("ats", {})
 
+
+def _metric_better(value, baseline) -> bool:
+    try:
+        return np.isfinite(float(value)) and np.isfinite(float(baseline)) and float(value) < float(baseline)
+    except (TypeError, ValueError):
+        return False
+
 m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric("Brier Score",    f"{win_m.get('brier', 0):.4f}",     help="< 0.20 is good")
-m2.metric("Spread RMSE",    f"{spread_m.get('rmse', 0):.2f} pts", help="< 14 pts target")
-m3.metric("Total RMSE",     f"{total_m.get('rmse', 0):.2f} pts",  help="< 12 pts target")
-m4.metric("ATS Win %",      f"{ats_m.get('pct', 0):.1%}",          help="Break-even is 52.4%")
+m1.metric("OOS Brier Score", f"{win_m.get('brier', 0):.4f}",     help="Walk-forward; lower is better")
+m2.metric("OOS Spread RMSE", f"{spread_m.get('rmse', 0):.2f} pts", help="Walk-forward by season")
+m3.metric("OOS Total RMSE",  f"{total_m.get('rmse', 0):.2f} pts",  help="Walk-forward by season")
+m4.metric("OOS ATS Win %",   f"{ats_m.get('pct', 0):.1%}",          help="Break-even is 52.4%")
 m5.metric("ATS Record",     f"{ats_m.get('wins',0)}‑{ats_m.get('losses',0)}")
+
+comparison = pd.DataFrame(
+    [
+        {
+            "Target": "Win probability (Brier)",
+            "Comparable model": win_m.get("model_brier_on_baseline_subset"),
+            "Market baseline": win_m.get("baseline_brier"),
+            "Priced games": win_m.get("baseline_n"),
+            "Model beats market": _metric_better(
+                win_m.get("model_brier_on_baseline_subset"), win_m.get("baseline_brier")
+            ),
+        },
+        {
+            "Target": "Home margin (RMSE)",
+            "Comparable model": spread_m.get("model_rmse_on_baseline_subset"),
+            "Market baseline": spread_m.get("baseline_rmse"),
+            "Priced games": spread_m.get("baseline_n"),
+            "Model beats market": _metric_better(
+                spread_m.get("model_rmse_on_baseline_subset"), spread_m.get("baseline_rmse")
+            ),
+        },
+        {
+            "Target": "Game total (RMSE)",
+            "Comparable model": total_m.get("model_rmse_on_baseline_subset"),
+            "Market baseline": total_m.get("baseline_rmse"),
+            "Priced games": total_m.get("baseline_n"),
+            "Model beats market": _metric_better(
+                total_m.get("model_rmse_on_baseline_subset"), total_m.get("baseline_rmse")
+            ),
+        },
+    ]
+)
+st.caption("Market comparisons use exactly the same priced games for model and baseline.")
+st.dataframe(comparison, width="stretch", hide_index=True)
+
+with st.expander("Release gates", expanded=False):
+    gates = pd.DataFrame(metrics.get("release_gates", []))
+    if gates.empty:
+        st.info("No release-gate results are saved.")
+    else:
+        gates["threshold"] = gates["threshold"].map(str)
+        st.dataframe(gates, width="stretch", hide_index=True)
 
 st.divider()
 
@@ -67,22 +121,23 @@ def load_fm():
 
 df = load_fm()
 
+
+@st.cache_data(ttl=3600)
+def load_backtest():
+    try:
+        return load_parquet("model_backtest", layer="features")
+    except FileNotFoundError:
+        return pd.DataFrame()
+
+
+backtest = load_backtest()
+
 # ─────────────────── calibration curve ───────────────────────────────────────
-if not df.empty and HAS_SKLEARN:
+if not backtest.empty and HAS_SKLEARN:
     st.subheader("Calibration Curve — Win Probability")
-    models = load_models()
-    win_mod = models.get("win")
-
-    feats   = [f for f in WIN_FEATURES if f in df.columns]
-    df_cal  = df.dropna(subset=feats + ["home_win"]).copy()
-
-    if win_mod is not None and not df_cal.empty:
-        X = df_cal[feats].fillna(0).values
-        if HAS_XGB and isinstance(win_mod, xgb.Booster):
-            probs = win_mod.predict(xgb.DMatrix(X))
-        else:
-            probs = win_mod.predict_proba(X)[:, 1]
-
+    df_cal = backtest.dropna(subset=["win_prob_oos", "home_win"]).copy()
+    if not df_cal.empty:
+        probs = df_cal["win_prob_oos"].to_numpy()
         y_true = df_cal["home_win"].values.astype(int)
         frac_pos, mean_pred = calibration_curve(y_true, probs, n_bins=10, strategy="uniform")
 
@@ -109,16 +164,17 @@ if not df.empty and HAS_SKLEARN:
         )
         st.plotly_chart(fig_cal, width="stretch")
     else:
-        st.info("Win model not available for calibration chart.")
+        st.info("No out-of-sample win predictions are available.")
 
     st.divider()
 
 # ─────────────────── ATS record by week ──────────────────────────────────────
-if not df.empty and "predicted_spread" in df.columns and "market_spread" in df.columns:
+if not backtest.empty and "predicted_spread_oos" in backtest.columns:
     st.subheader("ATS Record by Week")
 
-    sub = df.dropna(subset=["predicted_spread", "market_spread", "home_margin"]).copy()
-    sub["model_picks_home"] = sub["predicted_spread"] > sub["market_spread"]
+    sub = backtest.dropna(subset=["predicted_spread_oos", "market_spread", "home_margin"]).copy()
+    sub = sub[(sub["home_margin"] + sub["market_spread"]) != 0]
+    sub["model_picks_home"] = sub["predicted_spread_oos"] > -sub["market_spread"]
     sub["home_covered"]     = sub["home_margin"] > -sub["market_spread"]
     sub["correct"]          = sub["model_picks_home"] == sub["home_covered"]
 
@@ -161,20 +217,16 @@ if spread_mod is not None:
         raw_imp = spread_mod.get_score(importance_type="gain")
         imp_df  = (
             pd.DataFrame(
-                [{"Feature": f"f{i}", "Importance": raw_imp.get(f"f{i}", 0)}
-                 for i in range(len(SPREAD_FEATURES))]
+                [{"Feature": feature, "Importance": raw_imp.get(feature, raw_imp.get(f"f{i}", 0))}
+                 for i, feature in enumerate(SPREAD_FEATURES)]
             )
-            .assign(Feature=lambda d: [SPREAD_FEATURES[int(r["Feature"][1:])]
-                                        if int(r["Feature"][1:]) < len(SPREAD_FEATURES)
-                                        else r["Feature"]
-                                        for _, r in d.iterrows()])
             .sort_values("Importance", ascending=True)
         )
     else:
         # sklearn Ridge / Pipeline — use absolute coefficients
         try:
             coefs = abs(spread_mod.named_steps["ridge"].coef_)
-            used_feats = [f for f in SPREAD_FEATURES if f in (df.columns if not df.empty else SPREAD_FEATURES)][:len(coefs)]
+            used_feats = spread_mod.named_steps["imputer"].get_feature_names_out(SPREAD_FEATURES)
             imp_df = pd.DataFrame({"Feature": used_feats, "Importance": coefs}).sort_values("Importance")
         except Exception:
             imp_df = pd.DataFrame()
@@ -192,7 +244,12 @@ if spread_mod is not None:
             font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_imp, width="stretch")
-        with st.expander("Spread Model Feature Dictionary", expanded=False):
+        with st.expander("Spread Feature Catalog", expanded=False):
+            st.info(
+                "Active production inputs: " + ", ".join(SPREAD_FEATURES) +
+                ". The table below is an extended source catalog; season-final fields are "
+                "excluded from production unless they gain a point-in-time available_at timestamp."
+            )
             st.markdown(
                 """
                 | Feature | Description | Why helpful |
@@ -247,20 +304,15 @@ if total_mod is not None:
         raw_imp = total_mod.get_score(importance_type="gain")
         imp_df_total = (
             pd.DataFrame(
-                [{"Feature": f"f{i}", "Importance": raw_imp.get(f"f{i}", 0)}
-                 for i in range(len(TOTAL_FEATURES))]
+                [{"Feature": feature, "Importance": raw_imp.get(feature, raw_imp.get(f"f{i}", 0))}
+                 for i, feature in enumerate(TOTAL_FEATURES)]
             )
-            .assign(Feature=lambda d: [
-                TOTAL_FEATURES[int(r["Feature"][1:])] if int(r["Feature"][1:]) < len(TOTAL_FEATURES)
-                else r["Feature"]
-                for _, r in d.iterrows()
-            ])
             .sort_values("Importance", ascending=True)
         )
     else:
         try:
             coefs = abs(total_mod.named_steps["ridge"].coef_)
-            used_feats = [f for f in TOTAL_FEATURES if f in (df.columns if not df.empty else TOTAL_FEATURES)][:len(coefs)]
+            used_feats = total_mod.named_steps["imputer"].get_feature_names_out(TOTAL_FEATURES)
             imp_df_total = pd.DataFrame({"Feature": used_feats, "Importance": coefs}).sort_values("Importance")
         except Exception:
             imp_df_total = pd.DataFrame()
@@ -278,7 +330,11 @@ if total_mod is not None:
             font=dict(color="#1A2B3C"),
         )
         st.plotly_chart(fig_imp_total, width="stretch")
-        with st.expander("Total Model Feature Dictionary", expanded=False):
+        with st.expander("Total Feature Catalog", expanded=False):
+            st.info(
+                "Active production inputs: " + ", ".join(TOTAL_FEATURES) +
+                ". Weather and venue candidates below activate only when an auditable pregame snapshot exists."
+            )
             st.markdown(
                 """
                 | Feature | Description | Why helpful |

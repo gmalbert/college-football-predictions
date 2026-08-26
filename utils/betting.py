@@ -7,6 +7,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
+from utils.market import remove_vig
+
 
 class Confidence(Enum):
     STRONG   = "strong"
@@ -79,13 +81,12 @@ def generate_spread_pick(
     win_prob: float = 0.5,
 ) -> BetRecommendation:
     """
-    model_spread and book_spread are from the home team's perspective
-    (negative = home favored, e.g., home −7).
-
-    Edge > 0 → model thinks home is less favored → take home / more points.
-    Edge < 0 → model thinks away is less favored → take away / more points.
+    ``model_spread`` is the predicted home scoring margin (positive means the
+    home team wins by that many). ``book_spread`` is the sportsbook's home-team
+    spread (negative means favored, e.g. home -7).  Therefore the book-implied
+    home margin is ``-book_spread`` and the edge is their difference.
     """
-    edge = model_spread - book_spread
+    edge = model_spread + book_spread
     conf = classify_spread_edge(edge)
 
     if edge > 0:
@@ -107,6 +108,7 @@ def generate_total_pick(
     model_total: float,
     book_total: float,
     game_id: int | None = None,
+    win_prob: float = 0.5,
 ) -> BetRecommendation:
     """Positive edge → model expects more scoring → Over."""
     edge = model_total - book_total
@@ -117,7 +119,7 @@ def generate_total_pick(
     return BetRecommendation(
         game_id=game_id, home_team=home, away_team=away,
         bet_type="total", model_line=model_total, book_line=book_total,
-        edge=abs(edge), confidence=conf, pick=pick,
+        edge=abs(edge), confidence=conf, pick=pick, win_prob=win_prob,
     )
 
 
@@ -134,8 +136,7 @@ def generate_moneyline_pick(
     exceeds the book's implied probability by a meaningful margin.
     home_ml / away_ml: American odds (e.g., -150, +130).
     """
-    book_home_prob = _american_to_implied(home_ml)
-    book_away_prob = _american_to_implied(away_ml)
+    book_home_prob, book_away_prob = remove_vig([home_ml, away_ml])
 
     home_edge = win_prob - book_home_prob
     away_edge = (1 - win_prob) - book_away_prob

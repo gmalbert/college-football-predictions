@@ -1,0 +1,22 @@
+{
+  "release_id": "dcd2b0015e2f44a9933653c23c7bba8c",
+  "generated_at": "2026-08-25T02:13:00.748280+00:00",
+  "model_version": "2.2.0",
+  "workflow_run_id": null,
+  "artifact_fingerprint": "3fd014864d11d3bfeccb98adc70f33c90ce792e6b424db5834b16c067f40c601",
+  "artifacts": [
+    "processed\\games.parquet",
+    "processed\\lines.parquet",
+    "features\\feature_matrix.parquet",
+    "features\\model_backtest.parquet",
+    "models\\model_metrics.json",
+    "best_bets_today.json",
+    "shadow_total_signals.json"
+  ],
+  "audit_summary": {
+    "pass": 9,
+    "warn": 7,
+    "fail": 0
+  },
+  "status": "shadow"
+}

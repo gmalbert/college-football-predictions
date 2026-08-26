@@ -1,5 +1,7 @@
 # Feature Engineering Roadmap
 
+> **Legacy design specification:** season-final aggregates in this document are not active production inputs unless they gain a point-in-time `available_at` contract. See [FEATURE_CHANGE_CATALOG.md](FEATURE_CHANGE_CATALOG.md).
+
 **Status:** ✅ Completed — implemented in `utils/feature_engine.py` and reflected in model training.
 
 This document defines every feature (and feature family) the models will

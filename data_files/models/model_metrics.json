@@ -1,20 +1,588 @@
 {
+  "model_version": "2.2.0",
+  "evaluation_scope": "walk_forward_season_oos",
   "win_model": {
-    "brier": 0.15937798023223876,
-    "log_loss": 0.4839044975353673,
-    "n_samples": 5100
+    "n": 11358,
+    "brier": 0.16238262940675408,
+    "log_loss": 0.4878338784848145,
+    "ece": 0.010794687591307979,
+    "accuracy": 0.7547983799964783,
+    "baseline_n": 2492,
+    "baseline_brier": 0.17361035163432176,
+    "model_brier_on_baseline_subset": 0.17361035163432176,
+    "brier_skill": 0.0,
+    "folds": [
+      {
+        "fold": 0,
+        "train_seasons": [
+          2021,
+          2022
+        ],
+        "test_season": 2023,
+        "n": 3730,
+        "brier": 0.16146799895458896,
+        "log_loss": 0.48572010181418745,
+        "ece": 0.015861971213194805,
+        "accuracy": 0.7563002680965147,
+        "baseline_n": 794,
+        "baseline_brier": 0.17321716258656453,
+        "model_brier_on_baseline_subset": 0.17321716258656453,
+        "brier_skill": 0.0
+      },
+      {
+        "fold": 1,
+        "train_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "test_season": 2024,
+        "n": 3799,
+        "brier": 0.16433336591260753,
+        "log_loss": 0.4925707016091974,
+        "ece": 0.02419133039732743,
+        "accuracy": 0.7459857857330876,
+        "baseline_n": 831,
+        "baseline_brier": 0.17882171374915815,
+        "model_brier_on_baseline_subset": 0.17882171374915815,
+        "brier_skill": 0.0
+      },
+      {
+        "fold": 2,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "test_season": 2025,
+        "n": 3829,
+        "brier": 0.16133815920587627,
+        "log_loss": 0.4851932924132314,
+        "ece": 0.014356328848791088,
+        "accuracy": 0.7620788717680856,
+        "baseline_n": 867,
+        "baseline_brier": 0.16897546142266104,
+        "model_brier_on_baseline_subset": 0.16897546142266104,
+        "brier_skill": 0.0
+      }
+    ],
+    "n_samples": 11358,
+    "strategy": "no_vig_market_when_available_structural_fallback",
+    "market_anchored_n": 2492
   },
   "spread_model": {
-    "rmse": 13.535793884994277,
-    "n_samples": 5100
+    "n": 11358,
+    "rmse": 17.568598792943757,
+    "mae": 13.723295245454654,
+    "bias": -0.020171886094903065,
+    "residual_std": 17.569360664995774,
+    "baseline_n": 4567,
+    "baseline_rmse": 15.198489212340796,
+    "baseline_mae": 11.959875191591854,
+    "model_rmse_on_baseline_subset": 15.198489212340796,
+    "model_mae_on_baseline_subset": 11.959875191591854,
+    "folds": [
+      {
+        "fold": 0,
+        "train_seasons": [
+          2021,
+          2022
+        ],
+        "test_season": 2023,
+        "n": 3730,
+        "rmse": 17.954594551541273,
+        "mae": 14.011869558389611,
+        "bias": -0.11893904835619931,
+        "residual_std": 17.95660780854649,
+        "baseline_n": 1413,
+        "baseline_rmse": 15.251273252103662,
+        "baseline_mae": 12.0914720452937,
+        "model_rmse_on_baseline_subset": 15.251273252103662,
+        "model_mae_on_baseline_subset": 12.0914720452937
+      },
+      {
+        "fold": 1,
+        "train_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "test_season": 2024,
+        "n": 3799,
+        "rmse": 17.328638400656402,
+        "mae": 13.495038084966744,
+        "bias": -0.34645853889652556,
+        "residual_std": 17.327455289557495,
+        "baseline_n": 1557,
+        "baseline_rmse": 15.28917628154033,
+        "baseline_mae": 11.921001926782274,
+        "model_rmse_on_baseline_subset": 15.28917628154033,
+        "model_mae_on_baseline_subset": 11.921001926782274
+      },
+      {
+        "fold": 2,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "test_season": 2025,
+        "n": 3829,
+        "rmse": 17.42431432800597,
+        "mae": 13.668650890648225,
+        "bias": 0.39977183530180593,
+        "residual_std": 17.422002830734304,
+        "baseline_n": 1597,
+        "baseline_rmse": 15.062417099910355,
+        "baseline_mae": 11.88134001252348,
+        "model_rmse_on_baseline_subset": 15.062417099910355,
+        "model_mae_on_baseline_subset": 11.88134001252348
+      }
+    ],
+    "n_samples": 11358,
+    "strategy": "market_consensus_when_available_structural_fallback",
+    "market_anchored_n": 4567
   },
   "total_model": {
-    "rmse": 15.25460780392805,
-    "n_samples": 4461
+    "n": 11358,
+    "rmse": 16.674888890295833,
+    "mae": 13.216629999655593,
+    "bias": -0.2868398273899172,
+    "residual_std": 16.673155611324162,
+    "baseline_n": 4558,
+    "baseline_rmse": 15.830007666331168,
+    "baseline_mae": 12.623793330408073,
+    "model_rmse_on_baseline_subset": 15.793164258560287,
+    "model_mae_on_baseline_subset": 12.605509302043172,
+    "folds": [
+      {
+        "fold": 0,
+        "train_seasons": [
+          2021,
+          2022
+        ],
+        "test_season": 2023,
+        "n": 3730,
+        "rmse": 16.739837343274953,
+        "mae": 13.292493026146273,
+        "bias": -0.3063895219880704,
+        "residual_std": 16.739277203494353,
+        "baseline_n": 1411,
+        "baseline_rmse": 15.779587869715042,
+        "baseline_mae": 12.617647058823529,
+        "model_rmse_on_baseline_subset": 15.746623011649616,
+        "model_mae_on_baseline_subset": 12.614234620492924
+      },
+      {
+        "fold": 1,
+        "train_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "test_season": 2024,
+        "n": 3799,
+        "rmse": 16.761496583100296,
+        "mae": 13.251154410495653,
+        "bias": -0.1383871824739669,
+        "residual_std": 16.76313169448419,
+        "baseline_n": 1553,
+        "baseline_rmse": 16.360532248492408,
+        "baseline_mae": 12.92369607211848,
+        "model_rmse_on_baseline_subset": 16.321466430124953,
+        "model_mae_on_baseline_subset": 12.898954993521512
+      },
+      {
+        "fold": 2,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "test_season": 2025,
+        "n": 3829,
+        "rmse": 16.52466754393891,
+        "mae": 13.108474521569503,
+        "bias": -0.415085123076672,
+        "residual_std": 16.521611007067264,
+        "baseline_n": 1594,
+        "baseline_rmse": 15.34149001472869,
+        "baseline_mae": 12.337045169385194,
+        "model_rmse_on_baseline_subset": 15.303384663467934,
+        "model_mae_on_baseline_subset": 12.31188785712569
+      }
+    ],
+    "n_samples": 11358,
+    "strategy": "nested_oos_shrunk_market_residual_ridge",
+    "residual_folds": [
+      {
+        "fold": 0,
+        "test_season": 2023,
+        "train_n": 2346,
+        "test_n": 1411,
+        "shrinkage": 0.19575051806992136,
+        "shrinkage_oos_n": 1459
+      },
+      {
+        "fold": 1,
+        "test_season": 2024,
+        "train_n": 3757,
+        "test_n": 1553,
+        "shrinkage": 0.2748581672175969,
+        "shrinkage_oos_n": 2870
+      },
+      {
+        "fold": 2,
+        "test_season": 2025,
+        "train_n": 5310,
+        "test_n": 1594,
+        "shrinkage": 0.33266209900955535,
+        "shrinkage_oos_n": 4423
+      }
+    ],
+    "final_residual_shrinkage": 0.36478902660591533,
+    "final_residual_shrinkage_oos_n": 6017
+  },
+  "total_cover_model": {
+    "n": 4525,
+    "brier": 0.2491539659674282,
+    "log_loss": 0.6914459775322273,
+    "ece": 0.01583034474831147,
+    "accuracy": 0.5206629834254144,
+    "baseline_n": 4525,
+    "baseline_brier": 0.25,
+    "model_brier_on_baseline_subset": 0.2491539659674282,
+    "brier_skill": 0.0033841361302872075,
+    "folds": [
+      {
+        "fold": 0,
+        "train_seasons": [
+          2021,
+          2022
+        ],
+        "test_season": 2023,
+        "n": 1399,
+        "brier": 0.250479549771639,
+        "log_loss": 0.6941444996155425,
+        "ece": 0.026731486063423068,
+        "accuracy": 0.5139385275196569,
+        "baseline_n": 1399,
+        "baseline_brier": 0.25,
+        "model_brier_on_baseline_subset": 0.250479549771639,
+        "brier_skill": -0.001918199086555994
+      },
+      {
+        "fold": 1,
+        "train_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "test_season": 2024,
+        "n": 1538,
+        "brier": 0.2489187571571328,
+        "log_loss": 0.6909387098141406,
+        "ece": 0.011055035101975474,
+        "accuracy": 0.5201560468140443,
+        "baseline_n": 1538,
+        "baseline_brier": 0.25,
+        "model_brier_on_baseline_subset": 0.2489187571571328,
+        "brier_skill": 0.004324971371468811
+      },
+      {
+        "fold": 2,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "test_season": 2025,
+        "n": 1588,
+        "brier": 0.2482139530002642,
+        "log_loss": 0.6895599229704256,
+        "ece": 0.01479621322195724,
+        "accuracy": 0.5270780856423174,
+        "baseline_n": 1588,
+        "baseline_brier": 0.25,
+        "model_brier_on_baseline_subset": 0.2482139530002642,
+        "brier_skill": 0.00714418799894323
+      }
+    ],
+    "n_samples": 4525,
+    "strategy": {
+      "n": 323,
+      "wins": 185,
+      "losses": 138,
+      "win_rate": 0.5727554179566563,
+      "wilson_95_low": 0.5182641520270312,
+      "wilson_95_high": 0.6255364544492245,
+      "flat_stake_roi_at_minus_110": 0.09344216155361668,
+      "probability_edge_threshold": 0.075,
+      "minimum_selected_probability": 0.575,
+      "assumed_odds": -110.0,
+      "break_even_win_rate": 0.5238095238095238,
+      "by_season": {
+        "2021": {
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "win_rate": 0.0,
+          "wilson_95_low": null,
+          "wilson_95_high": null,
+          "flat_stake_roi_at_minus_110": 0.0
+        },
+        "2022": {
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "win_rate": 0.0,
+          "wilson_95_low": null,
+          "wilson_95_high": null,
+          "flat_stake_roi_at_minus_110": 0.0
+        },
+        "2023": {
+          "n": 138,
+          "wins": 73,
+          "losses": 65,
+          "win_rate": 0.5289855072463768,
+          "wilson_95_low": 0.4460509194962871,
+          "wilson_95_high": 0.610350079665129,
+          "flat_stake_roi_at_minus_110": 0.009881422924901158
+        },
+        "2024": {
+          "n": 83,
+          "wins": 47,
+          "losses": 36,
+          "win_rate": 0.5662650602409639,
+          "wilson_95_low": 0.45905926402838865,
+          "wilson_95_high": 0.6676083455371329,
+          "flat_stake_roi_at_minus_110": 0.08105147864184008
+        },
+        "2025": {
+          "n": 102,
+          "wins": 65,
+          "losses": 37,
+          "win_rate": 0.6372549019607843,
+          "wilson_95_low": 0.5405417236816313,
+          "wilson_95_high": 0.7240048945526728,
+          "flat_stake_roi_at_minus_110": 0.21657754010695182
+        }
+      },
+      "by_side": {
+        "over": {
+          "n": 237,
+          "wins": 139,
+          "losses": 98,
+          "win_rate": 0.5864978902953587,
+          "wilson_95_low": 0.5229080659097894,
+          "wilson_95_high": 0.647328405006642,
+          "flat_stake_roi_at_minus_110": 0.1196777905638665
+        },
+        "under": {
+          "n": 86,
+          "wins": 46,
+          "losses": 40,
+          "win_rate": 0.5348837209302325,
+          "wilson_95_low": 0.43024302721776253,
+          "wilson_95_high": 0.6365412845995112,
+          "flat_stake_roi_at_minus_110": 0.021141649048625814
+        }
+      },
+      "by_season_and_side": {
+        "2021": {
+          "over": {
+            "n": 0,
+            "wins": 0,
+            "losses": 0,
+            "win_rate": 0.0,
+            "wilson_95_low": null,
+            "wilson_95_high": null,
+            "flat_stake_roi_at_minus_110": 0.0
+          },
+          "under": {
+            "n": 0,
+            "wins": 0,
+            "losses": 0,
+            "win_rate": 0.0,
+            "wilson_95_low": null,
+            "wilson_95_high": null,
+            "flat_stake_roi_at_minus_110": 0.0
+          }
+        },
+        "2022": {
+          "over": {
+            "n": 0,
+            "wins": 0,
+            "losses": 0,
+            "win_rate": 0.0,
+            "wilson_95_low": null,
+            "wilson_95_high": null,
+            "flat_stake_roi_at_minus_110": 0.0
+          },
+          "under": {
+            "n": 0,
+            "wins": 0,
+            "losses": 0,
+            "win_rate": 0.0,
+            "wilson_95_low": null,
+            "wilson_95_high": null,
+            "flat_stake_roi_at_minus_110": 0.0
+          }
+        },
+        "2023": {
+          "over": {
+            "n": 121,
+            "wins": 65,
+            "losses": 56,
+            "win_rate": 0.5371900826446281,
+            "wilson_95_low": 0.4485732934119226,
+            "wilson_95_high": 0.6235181422779343,
+            "flat_stake_roi_at_minus_110": 0.025544703230653606
+          },
+          "under": {
+            "n": 17,
+            "wins": 8,
+            "losses": 9,
+            "win_rate": 0.47058823529411764,
+            "wilson_95_low": 0.2616510644240944,
+            "wilson_95_high": 0.6903676493999557,
+            "flat_stake_roi_at_minus_110": -0.10160427807486633
+          }
+        },
+        "2024": {
+          "over": {
+            "n": 55,
+            "wins": 32,
+            "losses": 23,
+            "win_rate": 0.5818181818181818,
+            "wilson_95_low": 0.45033103735230756,
+            "wilson_95_high": 0.7026223424648964,
+            "flat_stake_roi_at_minus_110": 0.11074380165289255
+          },
+          "under": {
+            "n": 28,
+            "wins": 15,
+            "losses": 13,
+            "win_rate": 0.5357142857142857,
+            "wilson_95_low": 0.3581268923446791,
+            "wilson_95_high": 0.7046843001720462,
+            "flat_stake_roi_at_minus_110": 0.02272727272727274
+          }
+        },
+        "2025": {
+          "over": {
+            "n": 61,
+            "wins": 42,
+            "losses": 19,
+            "win_rate": 0.6885245901639344,
+            "wilson_95_low": 0.5640856563035855,
+            "wilson_95_high": 0.7906256721938473,
+            "flat_stake_roi_at_minus_110": 0.31445603576751113
+          },
+          "under": {
+            "n": 41,
+            "wins": 23,
+            "losses": 18,
+            "win_rate": 0.5609756097560976,
+            "wilson_95_low": 0.4104052722210609,
+            "wilson_95_high": 0.7010986826344964,
+            "flat_stake_roi_at_minus_110": 0.07095343680709537
+          }
+        }
+      },
+      "development_note": "C and threshold developed on 2021-2024; 2025 is the retrospective confirmation season."
+    },
+    "prediction_contract": "final eligible pre-kickoff market snapshot",
+    "regularization_c": 0.005,
+    "strategy_release": {
+      "status": "shadow",
+      "retrospective_gates_passed": true,
+      "eligible_sides": [
+        "over"
+      ],
+      "prospective_clv_passed": false,
+      "reason": "Retrospective confirmation passed; collect 2026 closing-line value before live promotion."
+    }
   },
   "ats": {
-    "wins": 3325,
-    "losses": 1775,
-    "pct": 0.652
+    "wins": 0,
+    "losses": 0,
+    "pushes": 77,
+    "pct": 0.0,
+    "n": 0,
+    "abstentions": 4567,
+    "minimum_edge_points": 1.0,
+    "scope": "walk_forward_season_oos_actionable_lined_games"
+  },
+  "release_gates": [
+    {
+      "name": "out_of_sample_games",
+      "passed": true,
+      "actual": 11358,
+      "threshold": 500,
+      "reason": "Require an adequately sized untouched walk-forward sample."
+    },
+    {
+      "name": "brier",
+      "passed": true,
+      "actual": 0.16238262940675408,
+      "threshold": 0.25,
+      "reason": "Probability quality must beat a coin-flip Brier score."
+    },
+    {
+      "name": "win_market_baseline",
+      "passed": false,
+      "actual": 0.0,
+      "threshold": "> 0 Brier skill",
+      "reason": "Win probabilities must improve on the vig-removed moneyline market."
+    },
+    {
+      "name": "calibration",
+      "passed": true,
+      "actual": 0.010794687591307979,
+      "threshold": 0.05,
+      "reason": "Calibration error controls overconfident bet sizing."
+    },
+    {
+      "name": "spread_market_baseline",
+      "passed": false,
+      "actual": 15.198489212340796,
+      "threshold": "< market RMSE 15.198489212340796",
+      "reason": "A spread model is not releasable when the market predicts margin better."
+    },
+    {
+      "name": "total_market_baseline",
+      "passed": true,
+      "actual": 15.793164258560287,
+      "threshold": "< market RMSE 15.830007666331168",
+      "reason": "A total model is not releasable when the market predicts totals better."
+    },
+    {
+      "name": "closing_line_value",
+      "passed": false,
+      "actual": null,
+      "threshold": 0.5,
+      "reason": "A live strategy should beat later market prices more often than not."
+    }
+  ],
+  "release_decision": {
+    "decision": "hold",
+    "passed": 4,
+    "total": 7,
+    "failed_gates": [
+      "win_market_baseline",
+      "spread_market_baseline",
+      "closing_line_value"
+    ]
+  },
+  "artifact_manifests": {
+    "win_probability": "win_probability_manifest.json",
+    "home_margin": "home_margin_manifest.json",
+    "game_total": "game_total_manifest.json",
+    "total_over_probability": "total_over_probability_manifest.json"
   }
 }

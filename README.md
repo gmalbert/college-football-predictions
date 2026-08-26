@@ -1,147 +1,123 @@
-# college-football-predictions
+# College football predictions
 
-Data-driven college football predictions and value-betting analytics — a full-stack Streamlit app backed by 5 years of CFBD historical data, XGBoost models, and Kelly-criterion bankroll sizing.
+A Streamlit research application for college-football forecasting, market comparison, and leakage-safe betting analysis. It ingests CFBD data, builds point-in-time features, trains win/margin/total models, persists season walk-forward predictions, and exposes model and data-quality dashboards.
 
-## Overview
+## Current validated baseline
 
-- **Win probability** — XGBoost binary classifier (Brier score: 0.160)
-- **Spread projections** — XGBoost regressor (RMSE: 13.80 pts)
-- **Totals projections** — Ridge regressor (RMSE: 15.14 pts)
-- **ATS record** (in-sample, FBS vs FBS): **64.9%** (3,297 W / 1,783 L)
-- **Value bets** — spread, total, and moneyline edge alerts with Kelly sizing
-- **5 seasons of data** — 2021–2025, 17,517 games, ~46 API calls total
-- **Feature matrix** — 21,932 rows × 86 features including rest days, rolling team-game stats, and recruiting rank diffs
+The August 2026 rebuild contains 19,155 unique games: 17,517 completed games across 2021–2025 plus 1,638 scheduled 2026 games. Metrics below are expanding-season walk-forward results for 2023–2025 (11,358 held-out games), not training-set scores.
 
-## Recent updates
+| Target | Model | OOS result | Market baseline | Conclusion |
+|---|---|---:|---:|---|
+| Home win probability | Per-book no-vig consensus + XGBoost fallback | Overall Brier 0.1624; priced-subset Brier 0.1736 | Priced-subset Brier 0.1736 | Market parity, not an edge |
+| Home margin | Median market anchor + XGBoost fallback | Overall RMSE 17.57; lined-subset RMSE 15.198 | Lined-subset RMSE 15.198 | Market parity, not an edge |
+| Game total | Market-state residual Ridge + fallback | Overall RMSE 16.67; lined-subset RMSE 15.793 | Lined-subset RMSE 15.830 | Positive OOS improvement |
+| Closing-time over classifier | Regularized logistic model | Brier 0.2492; high-confidence overs 139–98 (58.65%) | Coin-flip Brier 0.2500; -110 break-even 52.38% | Retrospective edge; 2026 shadow deployment |
+| Actionable spread decisions | Minimum one-point edge | 0 bets; 4,567 abstentions | Market anchor has zero point edge | Correct behavior is to abstain |
 
-- Implemented feature and model roadmap from `docs/features.md`, `docs/data_pipeline.md`, and `docs/models.md`.
-- Added weekly CFBD `team_game_stats` ingestion and `team_game_stats.parquet` to support rolling 5-game stats, turnovers, rushing/passing EPA, penalties, and special-teams metrics.
-- Expanded the feature engine with new diffs for SP+ offense/defense, rushing/passing EPA, explosiveness, havoc, rest advantage, and recruiting rank.
-- Added a standalone `EloModel` and improved XGBoost training with log-loss tracking, higher max depth, and stronger early stopping.
-- Added O/U predictions and moneyline recommendations to the prediction pages.
-- Added `.gitignore` exclusions for generated data directories and common Python/Streamlit artifacts.
-- Settings page is hidden automatically on Streamlit Cloud deployments.
+The global model release remains **hold**, but v2.2 has a concrete target-specific solution in shadow deployment. The closing-time total classifier produced 185–138 (57.28%) across all high-confidence sides and 139–98 (58.65%) for the only side that passed stability gates: overs. Its 2025 confirmation was 42–19 (68.85%) with a 95% Wilson lower bound of 56.41%. These are retrospective results assuming -110; the over signal remains shadow-only until timestamped 2026 prices demonstrate prospective CLV. The former 64.9%/65.2% ATS figures were invalid and must not be cited.
+
+## What changed
+
+- One row per game and one row per team/game are enforced by executable data contracts.
+- Team rolling features are shifted before aggregation and joined by game/team keys.
+- Pregame Elo walks forward chronologically; season-final ratings are excluded from active model inputs.
+- Rest follows a team's previous game across both home and away roles.
+- Home spread uses sportsbook notation (`-7` means home favored by seven); model margin is `home - away`; edge is their sum.
+- Models use expanding-season validation and persist `model_backtest.parquet` for honest historical pages.
+- Model v2.1 uses no-vig/margin market anchors when a current price exists, structural fallbacks before lines appear, and nested OOS shrinkage for total-market residuals.
+- Model v2.2 recovers provider-level opening history, uses median line consensus, de-vigs within each book, and models opening-to-current movement, dispersion, and book depth.
+- A fourth artifact estimates `P(over current total)` under a final-pre-kickoff prediction contract; only ≥57.5% over signals enter the shadow ledger.
+- Spread evaluation abstains when the forecast does not differ from the market by at least one point; market parity is never mislabeled as a bet.
+- Market utilities cover odds conversion, vig removal, EV, quote consensus/as-of selection, movement, CLV, pushes and voids.
+- A forward-only CFBD adapter normalizes provider quotes and appends a daily immutable market-snapshot table for future movement/CLV analysis.
+- The 2026 pull currently includes 1,638 scheduled games, 888 CFBD game-line payloads, and an initial normalized snapshot of 440 quotes.
+- Risk utilities add shrinkage, uncertainty haircuts, fractional Kelly, concentration caps and correlation penalties.
+- Model manifests record exact features, data/schema fingerprints, training period, metrics and prediction contracts.
+- CI runs predictive-core tests and a strict data/model audit before publishing artifacts.
+- The app includes a Data Quality page and distinguishes historical OOS predictions from future full-fit forecasts.
+- A Total Market Signals page exposes the separate OOS record, side-specific gates, and prospective shadow file.
 
 ## Pages
 
-| Page | Description |
+| Page | Purpose |
 |---|---|
-| 🏠 Home (`predictions.py`) | Summary cards — top picks, model accuracy, dataset stats |
-| 📊 Weekly Predictions | Game cards for any week/season with spread, win prob, and edge |
-| 💰 Value Bets | Value-bet table sorted by edge, bankroll simulator |
-| 🏟 Team Explorer | Team card, Elo history chart, radar chart, schedule |
-| 📈 Historical Analysis | Season trends, head-to-head lookup, conference power rankings |
-| 🎯 Model Performance | Brier score, calibration curve, feature importance, ATS by week |
-| ⚙ Settings | API status, data refresh controls, model retraining |
+| Home | Upcoming model edges, validated OOS metrics and dataset summary |
+| Weekly Predictions | Selected slate; historical games use saved OOS predictions |
+| Value Bets | Price/line disagreement and strategy visualization |
+| Team Explorer | Team history and matchup detail |
+| Historical Analysis | Results, trends and OOS ATS diagnostics |
+| Model Performance | OOS calibration, baselines, feature importance and ATS by week |
+| Data Quality | Contracts, duplication, freshness, missingness and leakage warnings |
+| Total Market Signals | Closing-time total probability, OOS selections and 2026 shadow signals |
+| Settings | Data refresh, feature build and model training |
 
-## Data pipeline
+## Data flow
 
-Data is fetched from the [College Football Data API](https://api.collegefootballdata.com/) (CFBD v5) and cached as JSON so repeat runs never hit the network. Processed Parquet tables are built from the cache.
-
+```text
+CFBD/API caches -> canonical processed Parquets -> point-in-time feature matrix
+               -> expanding-season folds -> OOS predictions + final future model
+               -> market/settlement/risk layer -> Streamlit and JSON export
 ```
+
+Generated layout:
+
+```text
 data_files/
-  raw/              JSON cache (one file per endpoint per year)
-  processed/        Parquet tables — games, lines, ratings, advanced_stats,
-                    recruiting, elo_ratings, team_game_stats
-  features/         feature_matrix.parquet  (21,932 rows × 86 columns)
-  models/           win_prob_model.joblib, spread_model.joblib,
-                    total_model.joblib, model_metrics.json
+  raw/          source caches; empty responses are never accepted as valid
+  processed/    games, lines, team-game stats, ratings and optional sources
+  features/     feature_matrix.parquet and model_backtest.parquet
+  models/       joblib models, model_metrics.json and per-model manifests
+  audit_report.json
+  best_bets_today.json
 ```
-
-API call budget: **~46 calls** for a full 5-year pull (one call per endpoint per season). All data is re-used from disk on subsequent runs.
-
-> Use `python -m utils.fetch_historical --force` to rebuild all raw data and `team_game_stats.parquet` when the pipeline changes.
-
-## Feature engineering
-
-| Feature | Source |
-|---|---|
-| `elo_diff` | CFBD end-of-season Elo differential |
-| `sp_plus_diff` | SP+ rating differential (FBS only) |
-| `off_epa_diff` | Offensive EPA/play differential |
-| `def_epa_diff` | Defensive EPA/play differential (inverted) |
-| `recruiting_diff` | 3-year rolling recruiting points differential |
-| `talent_diff` | Composite talent score differential |
-| `home_flag` | 1.0 = home game, 0.5 = neutral site |
-| `conference_game` | Boolean — same-conference matchup |
-| `market_spread` | Closing spread (spread/total models only) |
 
 ## Getting started
 
-1. **Install dependencies**
-   ```bash
+1. Install dependencies:
+
+   ```powershell
    python -m pip install -r requirements.txt
    ```
 
-2. **Set your CFBD API key** in `.streamlit/secrets.toml`:
-   ```toml
-   [cfbd]
-   api_key = "YOUR_CFBD_API_KEY"
-   ```
-   Or set the environment variable `CFBD_API_KEY` (also accepts `CBBD_API_KEY`).
-   Get a free key at [collegefootballdata.com](https://collegefootballdata.com).
+2. Set `CFBD_API_KEY` or add it under `[cfbd]` in `.streamlit/secrets.toml`.
 
-3. **Pull historical data** (one-time, ~46 API calls):
-   ```bash
-   python -m utils.fetch_historical
-   ```
+3. Run the pipeline:
 
-4. **Build feature matrix**:
-   ```bash
-   python -c "from utils.feature_engine import build_feature_matrix; build_feature_matrix(force=True)"
+   ```powershell
+   venv\Scripts\python.exe -m utils.fetch_historical
+   venv\Scripts\python.exe -m utils.feature_engine --force
+   venv\Scripts\python.exe -m utils.models --force
+   venv\Scripts\python.exe scripts\export_best_bets.py
+   venv\Scripts\python.exe scripts\audit_pipeline.py --strict
    ```
 
-5. **Train models**:
-   ```bash
-   python -c "from utils.models import train_all; train_all(force=True)"
-   ```
+4. Start the app:
 
-6. **Run the app**:
-   ```bash
+   ```powershell
    streamlit run predictions.py --server.port 8502
    ```
-   Or use the ⚙ Settings page to trigger data refresh and model retraining from the UI.
 
-## Repository structure
+5. Run tests:
 
-```
-predictions.py              Home page
-pages/
-  1_Weekly_Predictions.py
-  2_Value_Bets.py
-  3_Team_Explorer.py
-  4_Historical_Analysis.py
-  5_Model_Performance.py
-  6_Settings.py
-utils/
-  cfbd_client.py            CFBD API v5 wrapper (access_token auth)
-  fetch_historical.py       5-year data pull script
-  feature_engine.py         Feature matrix builder
-  models.py                 XGBoost/Ridge train, persist, inference
-  betting.py                Edge detection, Kelly criterion
-  elo.py                    Custom Elo model
-  espn_client.py            ESPN public API wrapper
-  config.py                 Secrets / env-var loading
-  storage.py                Parquet read/write helpers
-  logger.py                 Structured logging
-  ui_components.py          Shared Streamlit sidebar + cards
-data_files/                 Raw JSON cache + processed Parquets + models
-docs/                       Planning docs (layout, features, models, etc.)
-.streamlit/
-  config.toml               Dark theme, server settings
-  secrets.toml              API key (not committed)
-requirements.txt
-```
+   ```powershell
+   venv\Scripts\python.exe -m unittest discover -s tests -v
+   ```
 
-## Streamlit notes
+Normal ingestion reuses completed-season caches, refreshes the current season, retains scheduled games with null labels, and rebuilds derived tables. `--force` repulls all selected seasons; `--years 2022,2023,2024,2025,2026` selects an explicit range.
 
-- `use_container_width=True` is deprecated — use `width="stretch"` for responsive full-width components and `width="content"` for fixed-width content.
-- Use `st.columns` and explicit layout components for responsive design.
+## Documentation
 
-## Model notes
+- [Comprehensive repository review](docs/COMPREHENSIVE_REPOSITORY_REVIEW_2026.md)
+- [61-feature/change catalog](docs/FEATURE_CHANGE_CATALOG.md)
+- [Data model v2](docs/DATA_MODEL_V2.md)
+- [Predictive-betting research](docs/PREDICTIVE_BETTING_RESEARCH.md)
+- [Implementation runbook](docs/IMPLEMENTATION_RUNBOOK.md)
 
-- Models are trained on FBS-vs-FBS games with complete SP+, EPA, and Elo data (~3,933 games).
-- Elo ratings are CFBD end-of-season values used as a season-level strength signal.
-- The spread model requires a closing market line as an input feature (`market_spread`).
-- All models are saved with `joblib` and versioned by a `model_metrics.json` manifest.
+## Important limitations
 
+- The committed raw cache still contains 92 legacy empty JSON files. New ingestion ignores them, but a successful authenticated repull is needed to populate those optional sources.
+- Season-level exploration columns remain in the feature artifact for UI/research compatibility but are excluded from active model feature lists.
+- Genuine line movement and CLV require immutable, timestamped multi-book odds snapshots; the code/schema exists, but the current historical cache cannot recreate observations never collected.
+- `scripts/snapshot_market.py` starts that collection prospectively; CFBD may omit spread/total prices, so a richer paid odds feed is still desirable.
+- Weather, injuries, quarterback status, travel and roster context must be timestamped as they were known before the prediction. Observed postgame values are not valid substitutes.
+- A good forecast is not automatically a profitable bet. Prices, limits, latency, correlation, uncertainty and responsible bankroll constraints matter.

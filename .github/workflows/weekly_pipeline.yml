@@ -18,7 +18,7 @@ on:
         type: choice
         options: ["false", "true"]
       years:
-        description: "Comma-separated years to pull (leave blank for default 2021-2025)"
+        description: "Comma-separated seasons (blank = dynamic five completed + live season)"
         required: false
         default: ""
 
@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run predictive-core tests
+        run: python -m unittest discover -s tests -v
+
       # ── pull data ────────────────────────────────────────────────────────────
       - name: Fetch historical data
         env:
@@ -56,7 +59,17 @@ jobs:
           if [ "${{ github.event.inputs.force_repull }}" = "true" ]; then
             FORCE_FLAG="--force"
           fi
-          python -m utils.fetch_historical $FORCE_FLAG
+          YEARS_FLAG=""
+          if [ -n "${{ github.event.inputs.years }}" ]; then
+            YEARS_FLAG="--years=${{ github.event.inputs.years }}"
+          fi
+          python -m utils.fetch_historical $FORCE_FLAG $YEARS_FLAG
+
+      - name: Capture sportsbook snapshot
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python scripts/snapshot_market.py
+        continue-on-error: true
 
       # ── build features ───────────────────────────────────────────────────────
       - name: Build feature matrix
@@ -75,6 +88,15 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
+      - name: Export prospective shadow total signals
+        run: python scripts/export_shadow_totals.py
+
+      - name: Publish coherent release metadata
+        run: python scripts/publish_release.py
+
+      - name: Enforce data and evaluation contracts
+        run: python scripts/audit_pipeline.py --strict --output data_files/audit_report.json
+
       # ── commit artifacts ─────────────────────────────────────────────────────
       - name: Commit updated data files
         run: |
@@ -85,7 +107,10 @@ jobs:
             data_files/processed/ \
             data_files/features/ \
             data_files/models/ \
-            data_files/best_bets_today.json
+            data_files/audit_report.json \
+            data_files/releases/ \
+            data_files/best_bets_today.json \
+            data_files/shadow_total_signals.json
           git diff --staged --quiet || \
             git commit -m "chore: weekly data pipeline $(date -u '+%Y-%m-%d')"
           git push

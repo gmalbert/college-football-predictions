@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from utils.ui_components import render_sidebar
 from utils.storage import load_parquet
-from utils.models import predict_batch, models_trained
+from utils.models import load_metrics, predict_for_display, models_trained
 from utils.betting import (
     generate_spread_pick, generate_total_pick, generate_moneyline_pick,
     CONFIDENCE_EMOJI, Confidence,
@@ -21,6 +21,9 @@ from footer import add_betting_oracle_footer
 
 render_sidebar()
 st.title("📊 Weekly Predictions")
+release = load_metrics().get("release_decision", {})
+if release.get("decision") != "promote":
+    st.warning("Research mode: model release gates have not approved betting use.")
 
 # ── data availability check ──────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
@@ -53,7 +56,7 @@ df_week = df_all[(df_all["season"] == season) & (df_all["week"] == week)].copy()
 
 # ── run predictions ──────────────────────────────────────────────────────────
 if models_trained():
-    df_week = predict_batch(df_week)
+    df_week = predict_for_display(df_week)
 else:
     st.info("Models not yet trained. Go to ⚙️ Settings → Train Models.")
     for col in ["win_prob", "predicted_spread", "predicted_total"]:
@@ -76,7 +79,7 @@ if sel_conf != "All":
     ]
 
 if "predicted_spread" in df_week.columns and "market_spread" in df_week.columns:
-    df_week["edge"] = (df_week["predicted_spread"] - df_week["market_spread"]).abs()
+    df_week["edge"] = (df_week["predicted_spread"] + df_week["market_spread"]).abs()
     if min_edge > 0:
         df_week = df_week[df_week["edge"] >= min_edge]
     if sort_by == "Edge (High→Low)":
@@ -85,6 +88,9 @@ if "predicted_spread" in df_week.columns and "market_spread" in df_week.columns:
         df_week = df_week.sort_values("win_prob", ascending=False)
 
 st.markdown(f"**{len(df_week)} games** — Season {season} · Week {int(week)}")
+scopes = set(df_week.get("prediction_scope", pd.Series(dtype=str)).dropna())
+if "walk_forward_oos" in scopes:
+    st.caption("Completed games use predictions made by season walk-forward backtests; unplayed games use the current full-history model.")
 st.divider()
 
 # ── game cards ────────────────────────────────────────────────────────────────
@@ -125,7 +131,7 @@ for _, row in df_week.iterrows():
 
         # Model spread vs book spread
         if pd.notna(ms):
-            m2.metric("Model Spread", f"{ms:+.1f}")
+            m2.metric("Model Home Margin", f"{ms:+.1f}")
         else:
             m2.metric("Model Spread", "—")
 
@@ -136,8 +142,8 @@ for _, row in df_week.iterrows():
 
         # Edge
         if pd.notna(ms) and pd.notna(bs):
-            edge_val = ms - bs
-            rec      = generate_spread_pick(home, away, ms, bs, win_prob=wp if pd.notna(wp) else 0.5)
+            edge_val = ms + bs
+            rec      = generate_spread_pick(home, away, ms, bs)
             badge    = CONFIDENCE_EMOJI[rec.confidence]
             m4.metric("Spread Edge", f"{abs(edge_val):.1f} {badge}")
             m5.metric("Pick", rec.pick if rec.confidence.value != "none" else "No edge")

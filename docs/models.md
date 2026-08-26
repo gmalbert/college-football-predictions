@@ -1,5 +1,18 @@
 # Suggested Models Roadmap
 
+> **Legacy design specification:** current executable contracts and validated metrics are documented in the repository [README](../README.md), [DATA_MODEL_V2.md](DATA_MODEL_V2.md), and generated model manifests.
+
+## Current production design (v2.2)
+
+- Win: no-vig consensus moneyline probability when both prices are usable; chronological XGBoost fallback before the market exists.
+- Margin: implied market margin (`-home_spread`) when lined; chronological XGBoost fallback when unlined.
+- Total: market total plus a nested-walk-forward, OOS-shrunk Ridge residual correction using opening/current movement, dispersion, and market depth; Ridge fallback when unlined.
+- Total side: regularized logistic `P(over current total)` at the final eligible pre-kickoff snapshot. A 7.5-point probability edge is required; only overs passed side-specific retrospective stability gates and remain shadow-only for 2026.
+- Evaluation: expanding-season 2023–2025 predictions, identical-row market comparisons, and no grading of a full-fit model on its training games.
+- Strategy: a spread position exists only when absolute model edge is at least one point. Market parity is an abstention, not a home/away pick.
+
+See [TOTAL_MARKET_EDGE_SOLUTION.md](TOTAL_MARKET_EDGE_SOLUTION.md) and [MODEL_CHALLENGER_BAKEOFF_2026.md](MODEL_CHALLENGER_BAKEOFF_2026.md) for the candidate comparison and promotion rationale. Code examples below are historical roadmap material and are not authoritative production implementations.
+
 **Status:** ✅ Completed — implemented in `utils/models.py` with XGBoost, Ridge, and Elo modeling.
 
 This document outlines the modeling strategy — from simple baselines to

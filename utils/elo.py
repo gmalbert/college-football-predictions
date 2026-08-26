@@ -6,6 +6,7 @@ Used for real-time rating updates when CFBD pre-computed Elo is unavailable
 """
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 K_FACTOR = 20
@@ -35,6 +36,73 @@ def update_elo(
 def season_revert(elo: float) -> float:
     """Mean-revert rating toward 1500 at the start of a new season."""
     return elo + REVERSION_FACTOR * (INITIAL_ELO - elo)
+
+
+def margin_multiplier(margin: float, elo_difference: float) -> float:
+    """Bounded margin-of-victory multiplier with favorite autocorrelation control."""
+    raw = np.log1p(abs(float(margin))) * 2.2 / (abs(float(elo_difference)) * 0.001 + 2.2)
+    return float(np.clip(raw, 0.5, 2.5))
+
+
+def build_pregame_elo_features(
+    games_df: pd.DataFrame,
+    *,
+    k: float = K_FACTOR,
+    home_adv: float = HOME_ADVANTAGE,
+    initial: float = INITIAL_ELO,
+    reversion: float = REVERSION_FACTOR,
+) -> pd.DataFrame:
+    """Walk forward and emit ratings before each game result is observed.
+
+    Unlike the CFBD season Elo endpoint, these values are safe for historical
+    training rows because the current game and all future games are excluded.
+    """
+    required = {"game_id", "season", "home_team", "away_team"}
+    missing = sorted(required.difference(games_df.columns))
+    if missing:
+        raise KeyError(f"games are missing columns: {missing}")
+    order = [column for column in ("start_date", "game_id") if column in games_df.columns]
+    games = games_df.sort_values(order or ["season", "week", "game_id"]).copy()
+    ratings: dict[str, float] = {}
+    rows: list[dict] = []
+    previous_season: int | None = None
+
+    for _, game in games.iterrows():
+        season = int(game["season"])
+        if previous_season is not None and season != previous_season:
+            ratings = {
+                team: rating + reversion * (initial - rating)
+                for team, rating in ratings.items()
+            }
+        previous_season = season
+        home = str(game["home_team"])
+        away = str(game["away_team"])
+        home_rating = ratings.get(home, initial)
+        away_rating = ratings.get(away, initial)
+        neutral = bool(game.get("neutral_site", False))
+        advantage = 0.0 if neutral else home_adv
+        expected = expected_win_prob(home_rating + advantage, away_rating)
+        rows.append(
+            {
+                "game_id": game["game_id"],
+                "home_elo_pregame": home_rating,
+                "away_elo_pregame": away_rating,
+                "elo_diff": home_rating - away_rating,
+                "elo_home_win_prob": expected,
+            }
+        )
+
+        home_score = pd.to_numeric(pd.Series([game.get("home_score")]), errors="coerce").iloc[0]
+        away_score = pd.to_numeric(pd.Series([game.get("away_score")]), errors="coerce").iloc[0]
+        if pd.isna(home_score) or pd.isna(away_score):
+            continue
+        margin = float(home_score - away_score)
+        actual = 1.0 if margin > 0 else 0.0 if margin < 0 else 0.5
+        multiplier = margin_multiplier(margin, home_rating + advantage - away_rating)
+        delta = k * multiplier * (actual - expected)
+        ratings[home] = home_rating + delta
+        ratings[away] = away_rating - delta
+    return pd.DataFrame(rows)
 
 
 class EloModel:

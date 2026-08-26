@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
-from utils.models import predict_batch, models_trained
+from utils.models import load_metrics, predict_for_display, models_trained
 from utils.betting import (
     generate_spread_pick, generate_total_pick, generate_moneyline_pick,
     kelly_fraction, half_kelly, simulate_bankroll,
@@ -23,6 +23,13 @@ from footer import add_betting_oracle_footer
 render_sidebar()
 st.title("💰 Value Bets")
 st.caption("Games where the model's projected line disagrees materially with the sportsbook.")
+release = load_metrics().get("release_decision", {})
+if release.get("decision") != "promote":
+    failed = ", ".join(release.get("failed_gates", [])) or "release gates unavailable"
+    st.warning(
+        f"Research mode only: the model release is on hold ({failed}). "
+        "Do not interpret point differences as validated betting recommendations."
+    )
 
 # ── load data ────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
@@ -53,13 +60,15 @@ with col3:
     min_edge  = st.slider("Min Edge (pts)", 0.5, 10.0, 2.0, 0.5)
 with col4:
     min_conf  = st.selectbox(
-        "Min Confidence",
+        "Min Edge Tier",
         ["All", "LEAN", "MODERATE", "STRONG"],
         index=2,
     )
 
 df_season = df_all[df_all["season"] == season].copy()
-df_season = predict_batch(df_season)
+df_season = predict_for_display(df_season)
+if "walk_forward_oos" in set(df_season["prediction_scope"].dropna()):
+    st.caption("Settled games use season walk-forward predictions; unplayed games use the current full-history model.")
 
 # ── helpers ─────────────────────────────────────────────────────────────────
 def _conf_gte(c: Confidence, minimum: Confidence) -> bool:
@@ -67,10 +76,13 @@ def _conf_gte(c: Confidence, minimum: Confidence) -> bool:
     return order.index(c) >= order.index(minimum)
 
 
-def _spread_result(margin: float, book: float) -> str:
-    if margin > -book:
+def _spread_result(margin: float, book: float, pick_home: bool) -> str:
+    settled = margin + book
+    if not pick_home:
+        settled = -settled
+    if settled > 0:
         return "✅ WIN"
-    elif margin == -book:
+    elif settled == 0:
         return "➡️ PUSH"
     return "❌ LOSS"
 
@@ -119,7 +131,7 @@ for _, row in df_season.iterrows():
     actual_total  = row.get("total_points")
 
     if bet_type in ("Spread", "All") and pd.notna(ms) and pd.notna(bs):
-        rec = generate_spread_pick(home, away, ms, bs, game_id=gid, win_prob=wp)
+        rec = generate_spread_pick(home, away, ms, bs, game_id=gid)
         if rec.edge >= min_edge:
             if min_conf_enum is None or _conf_gte(rec.confidence, min_conf_enum):
                 records.append({
@@ -129,9 +141,9 @@ for _, row in df_season.iterrows():
                     "Model":      f"{ms:+.1f}",
                     "Book":       f"{bs:+.1f}",
                     "Edge":       round(rec.edge, 1),
-                    "Confidence": CONFIDENCE_LABEL[rec.confidence],
+                    "Edge Tier":  CONFIDENCE_LABEL[rec.confidence],
                     "Pick":       rec.pick,
-                    "Result":     _spread_result(actual_margin, bs) if pd.notna(actual_margin) else "—",
+                    "Result":     _spread_result(actual_margin, bs, rec.pick.startswith(f"Take {home} ")) if pd.notna(actual_margin) else "—",
                     "_conf_val":  rec.confidence,
                 })
 
@@ -146,7 +158,7 @@ for _, row in df_season.iterrows():
                     "Model":      f"{mt:.1f}",
                     "Book":       f"{bt:.1f}",
                     "Edge":       round(rec.edge, 1),
-                    "Confidence": CONFIDENCE_LABEL[rec.confidence],
+                    "Edge Tier":  CONFIDENCE_LABEL[rec.confidence],
                     "Pick":       rec.pick,
                     "Result":     _total_result(actual_total, bt, mt) if pd.notna(actual_total) else "—",
                     "_conf_val":  rec.confidence,
@@ -165,7 +177,7 @@ for _, row in df_season.iterrows():
                     "Model":      f"{wp:.1%}",
                     "Book":       f"{int(hml):+d} / {int(aml):+d}",
                     "Edge":       round(rec.edge * 100, 1),
-                    "Confidence": CONFIDENCE_LABEL[rec.confidence],
+                    "Edge Tier":  CONFIDENCE_LABEL[rec.confidence],
                     "Pick":       rec.pick,
                     "Result":     _ml_result(home, away, actual_margin, rec.pick) if pd.notna(actual_margin) else "—",
                     "_conf_val":  rec.confidence,
@@ -188,12 +200,12 @@ m1, m2, m3, m4 = st.columns(4)
 m1.metric("Total Bets",   len(df_recs))
 m2.metric("Record",       f"{wins}–{losses}" if total else "N/A")
 m3.metric("Win Rate",     f"{wins/total:.1%}" if total else "—")
-m4.metric("Strong Picks", (df_recs["Confidence"] == "STRONG").sum())
+m4.metric("Strong Edge Tier", (df_recs["Edge Tier"] == "STRONG").sum())
 
 st.divider()
 st.subheader("All Value Bets")
 
-display_cols = ["Week", "Game", "Bet Type", "Model", "Book", "Edge", "Confidence", "Pick", "Result"]
+display_cols = ["Week", "Game", "Bet Type", "Model", "Book", "Edge", "Edge Tier", "Pick", "Result"]
 themed_dataframe(
     df_recs[display_cols].reset_index(drop=True),
     width="stretch",
@@ -206,18 +218,24 @@ themed_dataframe(
 # ── bankroll simulator ────────────────────────────────────────────────────────
 st.divider()
 st.subheader("💸 Bankroll Simulator")
-b1, b2, b3 = st.columns(3)
+b1, b2, b3, b4 = st.columns(4)
 with b1:
     start_bankroll = st.number_input("Starting Bankroll ($)", value=1000, min_value=100, step=100)
 with b2:
     stake_method = st.selectbox("Stake Method", ["Flat (1%)", "Half Kelly", "Full Kelly"])
 with b3:
     bet_odds = st.number_input("Odds (American)", value=-110, step=5)
+with b4:
+    scenario_probability = st.slider(
+        "Scenario Win Probability", 0.50, 0.65, 0.50, 0.01,
+        help="User-supplied scenario; spread/total point edges are not calibrated win probabilities.",
+    )
+st.caption("The bankroll chart is a scenario tool. It does not infer cover probability from edge points.")
 
 # Build simulated bet history from wins/losses in table
 sim_bets = []
 for _, row in df_recs[df_recs["Result"].isin(["✅ WIN", "❌ LOSS"])].iterrows():
-    wp = 0.53  # assume 53% based on typical model edge
+    wp = scenario_probability
     if stake_method == "Half Kelly":
         stake_frac = half_kelly(wp, bet_odds)
     elif stake_method == "Full Kelly":
