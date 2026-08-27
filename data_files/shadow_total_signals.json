@@ -1,10 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T01:07:42.684405+00:00",
+    "generated_at": "2026-08-27T21:25:19.831382+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "0267b205db7a48b79dac253ee04b0b30",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
   "signals": []
 }
