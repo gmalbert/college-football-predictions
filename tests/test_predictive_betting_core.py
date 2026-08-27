@@ -352,6 +352,15 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(consensus["market_total_book_count"], 2)
         self.assertTrue(0 < consensus["market_home_prob"] < 1)
 
+    def test_provider_consensus_normalizes_numeric_string_game_ids(self):
+        payload = [{
+            "id": "401866615", "season": 2026,
+            "lines": [{"provider": "Book A", "spread": -3.5, "overUnder": 51.5}],
+        }]
+        consensus = build_market_consensus(payload)
+        self.assertEqual(consensus.loc[0, "game_id"], 401866615)
+        self.assertTrue(pd.api.types.is_integer_dtype(consensus["game_id"]))
+
 
 class TemporalTests(unittest.TestCase):
     def setUp(self):

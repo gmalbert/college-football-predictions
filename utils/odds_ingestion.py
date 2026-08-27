@@ -134,6 +134,11 @@ def build_market_consensus(games: Iterable[dict]) -> pd.DataFrame:
     if quotes.empty:
         return pd.DataFrame()
 
+    # Historical raw JSON may preserve numeric CFBD identifiers as strings.
+    # Normalize them before grouping/upserting so PyArrow never receives a
+    # mixed integer/string ``game_id`` column.
+    quotes["game_id"] = pd.to_numeric(quotes["game_id"], errors="raise").astype("int64")
+
     numeric = [
         "market_spread", "market_spread_open", "market_total",
         "market_total_open", "home_moneyline", "away_moneyline",
