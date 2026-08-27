@@ -46,6 +46,7 @@ from utils.temporal import (
 )
 from utils.challenger_models import MarketBaselineClassifier, MarketBaselineRegressor
 import utils.fetch_historical as fetch_historical
+import utils.cfbd_client as cfbd_client
 
 
 class _ConstantClassifier:
@@ -59,6 +60,13 @@ class _ConstantRegressor:
 
 
 class IngestionTests(unittest.TestCase):
+    def test_cfbd_key_normalizes_bearer_prefix_and_rejects_empty(self):
+        with patch.object(cfbd_client, "get_secret", return_value="Bearer token-value"):
+            self.assertEqual(cfbd_client._api_key(), "token-value")
+        with patch.object(cfbd_client, "get_secret", return_value="   "):
+            with self.assertRaisesRegex(ValueError, "CFBD_API_KEY is empty"):
+                cfbd_client._api_key()
+
     def test_partial_partition_upsert_preserves_history(self):
         with tempfile.TemporaryDirectory() as directory:
             processed = Path(directory)
@@ -82,6 +90,55 @@ class IngestionTests(unittest.TestCase):
             self.assertEqual(set(result.game_id), {1, 2, 3})
             self.assertEqual(result.set_index("game_id").loc[1, "value"], 10)
             self.assertEqual(result.set_index("game_id").loc[2, "value"], 99)
+
+    def test_weather_batches_games_by_venue_range(self):
+        with tempfile.TemporaryDirectory() as directory:
+            processed = Path(directory)
+            pd.DataFrame(
+                {
+                    "game_id": [1, 2],
+                    "season": [2024, 2025],
+                    "week": [1, 1],
+                    "venue": ["Stadium", "Stadium"],
+                    "start_date": ["2024-09-01T18:00:00Z", "2025-09-01T18:00:00Z"],
+                }
+            ).to_parquet(processed / "games.parquet", index=False)
+            pd.DataFrame(
+                {
+                    "name": ["Stadium"],
+                    "latitude": [40.0],
+                    "longitude": [-75.0],
+                    "dome": [False],
+                }
+            ).to_parquet(processed / "venues.parquet", index=False)
+
+            response = {
+                "hourly": {
+                    "time": ["2024-09-01T18:00", "2025-09-01T18:00"],
+                    "temperature_2m": [70, 72],
+                    "wind_speed_10m": [5, 6],
+                    "precipitation": [0, 0],
+                    "weathercode": [0, 1],
+                    "relativehumidity_2m": [50, 55],
+                }
+            }
+            with patch.object(fetch_historical, "PROCESSED_DIR", processed), \
+                    patch.object(fetch_historical, "save_parquet") as save, \
+                    patch("requests.get", return_value=type(
+                        "Response", (), {
+                            "raise_for_status": lambda self: None,
+                            "json": lambda self: response,
+                        }
+                    )()) as get:
+                save.side_effect = lambda frame, name: frame.to_parquet(
+                    processed / f"{name}.parquet", index=False
+                )
+                fetch_historical._build_weather(force=True)
+
+            self.assertEqual(get.call_count, 1)
+            params = get.call_args.args[0].split("?", 1)[1]
+            self.assertIn("start_date=2024-09-01", params)
+            self.assertIn("end_date=2025-09-01", params)
 
 
 class MarketTests(unittest.TestCase):
