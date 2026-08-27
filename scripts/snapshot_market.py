@@ -48,58 +48,43 @@ def main() -> int:
     )
     parser.add_argument(
         "--source", choices=("auto", "odds-api-io", "rundown", "odds", "cfbd"), default="auto",
-        help="Market provider (default: OddsAPI.io, TheRundown, Odds API, then CFBD)",
+        help="Market provider (default: try configured alternate providers; CFBD is explicit only)",
     )
     args = parser.parse_args()
     captured_at = datetime.now(timezone.utc)
     source = "cfbd_lines"
     payload = []
-    use_odds_api_io = args.source == "odds-api-io" or (
-        args.source == "auto" and odds_api_io_is_configured()
-    )
-    use_rundown = args.source == "rundown" or (
-        args.source == "auto" and not use_odds_api_io and rundown_is_configured()
-    )
-    use_odds = args.source == "odds" or (
-        args.source == "auto" and not use_odds_api_io and not use_rundown and is_configured()
-    )
-    if use_odds_api_io:
-        events = get_odds_api_io_odds()
-        games_path = PROCESSED_DIR / "games.parquet"
-        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
-        payload = odds_api_io_to_cfbd_line_payload(events, games, season=args.season)
-        source = "odds_api_io"
-        if not payload:
-            print("No matched OddsAPI.io quotes returned; existing artifact unchanged")
-            return 1
-    if use_rundown:
-        events = get_ncaaf_events()
-        games_path = PROCESSED_DIR / "games.parquet"
-        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
-        payload = rundown_to_cfbd_line_payload(events, games, season=args.season)
-        source = "therundown"
-        if not payload:
-            print("No matched TheRundown quotes returned; existing artifact unchanged")
-            return 1
-    if use_odds:
-        odds_events = get_ncaaf_odds()
-        games_path = PROCESSED_DIR / "games.parquet"
-        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
-        payload = to_cfbd_line_payload(odds_events, games, season=args.season)
-        source = "odds_api"
-        if not payload:
-            print("No matched Odds API quotes returned; existing artifact unchanged")
-            return 1
-    if args.source == "cfbd" or (args.source == "auto" and not use_odds_api_io and not use_rundown and not use_odds):
-        if args.source != "cfbd":
+    games_path = PROCESSED_DIR / "games.parquet"
+    games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
+    if args.source == "cfbd":
+        payload = _plain(get_lines(args.season))
+    else:
+        providers = []
+        if args.source in ("auto", "odds-api-io") and odds_api_io_is_configured():
+            providers.append(("OddsAPI.io", "odds_api_io", get_odds_api_io_odds, odds_api_io_to_cfbd_line_payload))
+        if args.source in ("auto", "rundown") and rundown_is_configured():
+            providers.append(("TheRundown", "therundown", get_ncaaf_events, rundown_to_cfbd_line_payload))
+        if args.source in ("auto", "odds") and is_configured():
+            providers.append(("Odds API", "odds_api", get_ncaaf_odds, to_cfbd_line_payload))
+
+        if not providers:
             print(
                 "No alternate market provider is configured. Skipping snapshot rather than "
                 "calling CFBD; set ODDS_API_IO_KEY, THERUNDOWN_API_KEY, or ODDS_API_KEY "
                 "in the runner environment, or explicitly pass --source cfbd."
             )
             return 1
-        payload = _plain(get_lines(args.season))
-        source = "cfbd_lines"
+
+        for provider_name, provider_source, fetch, convert in providers:
+            payload = convert(fetch(), games, season=args.season)
+            if payload:
+                source = provider_source
+                print(f"Using {provider_name} for the market snapshot")
+                break
+            print(f"No matched {provider_name} quotes returned; trying the next alternate provider")
+        if not payload:
+            print("No alternate market provider returned matched quotes; existing artifact unchanged")
+            return 1
     raw_path, ingestion_run_id, captured_at = save_immutable_raw_json(
         payload or [], source=source, season=args.season, captured_at=captured_at
     )
