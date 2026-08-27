@@ -91,6 +91,13 @@ def main() -> int:
             print("No matched Odds API quotes returned; existing artifact unchanged")
             return 1
     if args.source == "cfbd" or (args.source == "auto" and not use_odds_api_io and not use_rundown and not use_odds):
+        if args.source != "cfbd":
+            print(
+                "No alternate market provider is configured. Skipping snapshot rather than "
+                "calling CFBD; set ODDS_API_IO_KEY, THERUNDOWN_API_KEY, or ODDS_API_KEY "
+                "in the runner environment, or explicitly pass --source cfbd."
+            )
+            return 1
         payload = _plain(get_lines(args.season))
         source = "cfbd_lines"
     raw_path, ingestion_run_id, captured_at = save_immutable_raw_json(
