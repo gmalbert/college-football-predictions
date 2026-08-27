@@ -34,6 +34,10 @@ jobs:
       - name: Append snapshot
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          THERUNDOWN_API_KEY: ${{ secrets.THERUNDOWN_API_KEY }}
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ secrets.ODDS_API_IO_BOOKMAKERS }}
         run: |
           SEASON_FLAG=""
           if [ -n "${{ github.event.inputs.season }}" ]; then
