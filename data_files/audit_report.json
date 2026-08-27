@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-25T02:12:59.814144+00:00",
+  "generated_at": "2026-08-27T01:07:43.726262+00:00",
   "summary": {
-    "pass": 9,
-    "warn": 7,
+    "pass": 12,
+    "warn": 4,
     "fail": 0
   },
   "checks": [
@@ -44,15 +44,15 @@
     },
     {
       "name": "release_metadata",
-      "status": "warn",
-      "message": "No atomic release metadata has been published",
-      "value": null
+      "status": "pass",
+      "message": "Release metadata is present",
+      "value": "0267b205db7a48b79dac253ee04b0b30"
     },
     {
       "name": "empty_raw_cache",
       "status": "warn",
-      "message": "87 empty JSON caches; new ingestion code ignores and does not create empty caches",
-      "value": 87
+      "message": "102 empty JSON caches; new ingestion code ignores and does not create empty caches",
+      "value": 102
     },
     {
       "name": "market_snapshot_history",
@@ -92,16 +92,17 @@
     },
     {
       "name": "best_bets_freshness",
-      "status": "warn",
-      "message": "Best-bets export age is 319.0 hours",
-      "value": 319.0254976613889
+      "status": "pass",
+      "message": "Best-bets export age is 0.0 hours",
+      "value": 0.0006654316666666667
     },
     {
       "name": "shadow_total_freshness",
-      "status": "warn",
-      "message": "Shadow-total export age is 319.0 hours",
-      "value": 319.02638622916663
+      "status": "pass",
+      "message": "Shadow-total export age is 0.0 hours",
+      "value": 0.0002893972222222222
     }
   ],
-  "release_status": "shadow"
+  "release_status": "shadow",
+  "strict_failures": 0
 }

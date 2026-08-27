@@ -1,21 +1,21 @@
 {
-  "release_id": "dcd2b0015e2f44a9933653c23c7bba8c",
-  "generated_at": "2026-08-25T02:13:00.748280+00:00",
+  "release_id": "0267b205db7a48b79dac253ee04b0b30",
+  "generated_at": "2026-08-27T01:07:43.254889+00:00",
   "model_version": "2.2.0",
-  "workflow_run_id": null,
-  "artifact_fingerprint": "3fd014864d11d3bfeccb98adc70f33c90ce792e6b424db5834b16c067f40c601",
+  "workflow_run_id": "33027819469",
+  "artifact_fingerprint": "fd0f4476d3ddac74bede6e16c974feaf1307ba84ca3fe3bee2f95defec37544b",
   "artifacts": [
-    "processed\\games.parquet",
-    "processed\\lines.parquet",
-    "features\\feature_matrix.parquet",
-    "features\\model_backtest.parquet",
-    "models\\model_metrics.json",
+    "processed/games.parquet",
+    "processed/lines.parquet",
+    "features/feature_matrix.parquet",
+    "features/model_backtest.parquet",
+    "models/model_metrics.json",
     "best_bets_today.json",
     "shadow_total_signals.json"
   ],
   "audit_summary": {
-    "pass": 9,
-    "warn": 7,
+    "pass": 12,
+    "warn": 4,
     "fail": 0
   },
   "status": "shadow"
