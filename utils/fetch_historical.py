@@ -72,8 +72,10 @@ def _to_serializable(obj):
     return obj
 
 
-def _pull(name: str, fn, *args, force: bool = False, **kwargs) -> list:
-    """Fetch data via *fn*, cache as JSON, return deserialized list."""
+def _pull(
+    name: str, fn, *args, force: bool = False, allow_fetch: bool = True, **kwargs
+) -> list:
+    """Load cached raw data, fetching only when this run permits it."""
     path = RAW_DIR / f"{name}.json"
     if not force and path.exists():
         with open(path) as fh:
@@ -82,6 +84,9 @@ def _pull(name: str, fn, *args, force: bool = False, **kwargs) -> list:
             logger.info(f"  cached    — {name}")
             return cached
         logger.warning(f"  ignoring empty cache — {name}")
+    if not allow_fetch:
+        logger.warning(f"  cache miss — {name}; skipped (use --force for a historical backfill)")
+        return []
     logger.info(f"  pulling   — {name} …")
     data = fn(*args, **kwargs)
     serialized = _to_serializable(data)
@@ -129,7 +134,7 @@ def _save_processed_upsert(
     return combined
 
 
-def _pull_team_game_stats(year: int, force: bool = False) -> list:
+def _pull_team_game_stats(year: int, force: bool = False, allow_fetch: bool = True) -> list:
     """Fetch team game stats week-by-week (CFBD v5 requires week/team/conference)."""
     path = RAW_DIR / f"team_game_stats_{year}.json"
     if not force and path.exists():
@@ -138,6 +143,9 @@ def _pull_team_game_stats(year: int, force: bool = False) -> list:
         if cached:
             logger.info(f"  cached    — team_game_stats_{year}")
             return cached
+    if not allow_fetch:
+        logger.warning(f"  cache miss — team_game_stats_{year}; skipped (use --force for a historical backfill)")
+        return []
     logger.info(f"  pulling   — team_game_stats_{year} (weeks 1-16) …")
     combined: list = []
     empty_weeks = 0
@@ -161,7 +169,7 @@ def _pull_team_game_stats(year: int, force: bool = False) -> list:
     return serialized
 
 
-def _pull_plays_year(year: int, force: bool = False) -> list:
+def _pull_plays_year(year: int, force: bool = False, allow_fetch: bool = True) -> list:
     """Fetch plays week-by-week for a full season (regular + postseason)."""
     path = RAW_DIR / f"plays_{year}.json"
     if not force and path.exists():
@@ -170,6 +178,9 @@ def _pull_plays_year(year: int, force: bool = False) -> list:
         if cached:
             logger.info(f"  cached    — plays_{year}")
             return cached
+    if not allow_fetch:
+        logger.warning(f"  cache miss — plays_{year}; skipped (use --force for a historical backfill)")
+        return []
     logger.info(f"  pulling   — plays_{year} (weeks 1-16 + postseason) …")
     combined: list = []
     empty_weeks = 0
@@ -198,7 +209,7 @@ def _pull_plays_year(year: int, force: bool = False) -> list:
     return serialized
 
 
-def _pull_drives_year(year: int, force: bool = False) -> list:
+def _pull_drives_year(year: int, force: bool = False, allow_fetch: bool = True) -> list:
     """Fetch drives week-by-week for a full season (regular + postseason)."""
     path = RAW_DIR / f"drives_{year}.json"
     if not force and path.exists():
@@ -207,6 +218,9 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
         if cached:
             logger.info(f"  cached    — drives_{year}")
             return cached
+    if not allow_fetch:
+        logger.warning(f"  cache miss — drives_{year}; skipped (use --force for a historical backfill)")
+        return []
     logger.info(f"  pulling   — drives_{year} (weeks 1-16 + postseason) …")
     combined: list = []
     empty_weeks = 0
@@ -240,8 +254,8 @@ def _pull_drives_year(year: int, force: bool = False) -> list:
 def run(force: bool = False, years: list[int] | None = None) -> None:
     """Refresh the live season, reuse older caches, and rebuild derived data.
 
-    ``force`` re-pulls every selected season. Otherwise completed seasons reuse
-    non-empty caches and the current season is refreshed on every pipeline run.
+    ``force`` re-pulls every selected season. Scheduled runs refresh only the
+    live season; a missing completed-season cache is never backfilled silently.
     """
     global HISTORICAL_YEARS
     if years:
@@ -252,47 +266,49 @@ def run(force: bool = False, years: list[int] | None = None) -> None:
     logger.info(f"    API delay: {API_DELAY}s between calls")
 
     # Teams — single call for all FBS teams
-    _pull("teams", get_teams, force=force)
+    _pull("teams", get_teams, force=force, allow_fetch=force)
 
     # Venues — single call (static)
-    _pull("venues", get_venues, force=force)
+    _pull("venues", get_venues, force=force, allow_fetch=force)
 
     # Coaches — single call per year
     for year in HISTORICAL_YEARS:
         _pull(
             f"coaches_{year}", get_coaches, year=year,
             force=force or year == _CURRENT_SEASON,
+            allow_fetch=force or year == _CURRENT_SEASON,
         )
 
     for year in HISTORICAL_YEARS:
         logger.info(f"--- {year} ---")
         year_force = force or year == _CURRENT_SEASON
+        allow_fetch = year_force
         # 2 season-type calls per year (regular + bowls/playoffs)
-        _pull(f"games_{year}_regular",    get_games, year, "regular",    force=year_force)
-        _pull(f"games_{year}_postseason", get_games, year, "postseason", force=year_force)
+        _pull(f"games_{year}_regular",    get_games, year, "regular",    force=year_force, allow_fetch=allow_fetch)
+        _pull(f"games_{year}_postseason", get_games, year, "postseason", force=year_force, allow_fetch=allow_fetch)
         # team game stats: iterate week-by-week (API requires week/team/conference)
-        _pull_team_game_stats(year, force=year_force)
-        _pull(f"lines_{year}",            get_lines, year,                force=year_force)
-        _pull(f"advanced_stats_{year}",   get_advanced_stats, year,       force=year_force)
-        _pull(f"sp_ratings_{year}",       get_sp_ratings, year,           force=year_force)
-        _pull(f"elo_ratings_{year}",      get_elo_ratings, year,          force=year_force)
-        _pull(f"recruiting_{year}",       get_team_recruiting, year,      force=year_force)
-        _pull(f"talent_{year}",           get_talent, year,               force=year_force)
+        _pull_team_game_stats(year, force=year_force, allow_fetch=allow_fetch)
+        _pull(f"lines_{year}",            get_lines, year,                force=year_force, allow_fetch=allow_fetch)
+        _pull(f"advanced_stats_{year}",   get_advanced_stats, year,       force=year_force, allow_fetch=allow_fetch)
+        _pull(f"sp_ratings_{year}",       get_sp_ratings, year,           force=year_force, allow_fetch=allow_fetch)
+        _pull(f"elo_ratings_{year}",      get_elo_ratings, year,          force=year_force, allow_fetch=allow_fetch)
+        _pull(f"recruiting_{year}",       get_team_recruiting, year,      force=year_force, allow_fetch=allow_fetch)
+        _pull(f"talent_{year}",           get_talent, year,               force=year_force, allow_fetch=allow_fetch)
         # NEW: P0 — FPI, SRS, Returning production (weather via Open-Meteo below)
-        _pull(f"fpi_ratings_{year}",      get_fpi_ratings, year,          force=year_force)
-        _pull(f"srs_ratings_{year}",      get_srs_ratings, year,          force=year_force)
-        _pull(f"returning_production_{year}", get_returning_production, year, force=year_force)
+        _pull(f"fpi_ratings_{year}",      get_fpi_ratings, year,          force=year_force, allow_fetch=allow_fetch)
+        _pull(f"srs_ratings_{year}",      get_srs_ratings, year,          force=year_force, allow_fetch=allow_fetch)
+        _pull(f"returning_production_{year}", get_returning_production, year, force=year_force, allow_fetch=allow_fetch)
         # NEW: P1 — PPA by down, WEPA, pre-game WP
-        _pull(f"ppa_teams_{year}",        get_ppa_teams, year,            force=year_force)
-        _pull(f"wepa_{year}",             get_wepa_team_season, year,     force=year_force)
-        _pull(f"pregame_wp_{year}",       get_pregame_win_prob, year,     force=year_force)
+        _pull(f"ppa_teams_{year}",        get_ppa_teams, year,            force=year_force, allow_fetch=allow_fetch)
+        _pull(f"wepa_{year}",             get_wepa_team_season, year,     force=year_force, allow_fetch=allow_fetch)
+        _pull(f"pregame_wp_{year}",       get_pregame_win_prob, year,     force=year_force, allow_fetch=allow_fetch)
         # NEW: P2 — Transfer portal, game media
-        _pull(f"transfer_portal_{year}",  get_transfer_portal, year,      force=year_force)
-        _pull(f"game_media_{year}",       get_game_media, year,           force=year_force)
+        _pull(f"transfer_portal_{year}",  get_transfer_portal, year,      force=year_force, allow_fetch=allow_fetch)
+        _pull(f"game_media_{year}",       get_game_media, year,           force=year_force, allow_fetch=allow_fetch)
         # P3: Play-by-play, drives, player usage
-        _pull_plays_year(year, force=year_force)
-        _pull_drives_year(year, force=year_force)
-        _pull(f"player_usage_{year}",      get_player_usage, year=year,     force=year_force)
+        _pull_plays_year(year, force=year_force, allow_fetch=allow_fetch)
+        _pull_drives_year(year, force=year_force, allow_fetch=allow_fetch)
+        _pull(f"player_usage_{year}",      get_player_usage, year=year,     force=year_force, allow_fetch=allow_fetch)
 
     logger.info("=== Building processed Parquet tables ===")
     build_processed_tables(force=True)

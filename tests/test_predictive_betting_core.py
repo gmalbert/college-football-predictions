@@ -35,6 +35,10 @@ from utils.market import (
     spread_edge,
 )
 from utils.odds_ingestion import build_market_consensus, normalize_cfbd_line_snapshots
+from utils.odds_api import to_cfbd_line_payload
+from utils.odds_api import _same_team, match_scheduled_game
+from utils.rundown_client import to_cfbd_line_payload as rundown_to_cfbd_line_payload
+from utils.odds_api_io import to_cfbd_line_payload as odds_api_io_to_cfbd_line_payload
 from utils.risk import RiskLimits, conservative_probability, size_portfolio
 from utils.seasons import current_cfb_season, rolling_season_window
 from utils.temporal import (
@@ -90,6 +94,14 @@ class IngestionTests(unittest.TestCase):
             self.assertEqual(set(result.game_id), {1, 2, 3})
             self.assertEqual(result.set_index("game_id").loc[1, "value"], 10)
             self.assertEqual(result.set_index("game_id").loc[2, "value"], 99)
+
+    def test_historical_cache_miss_does_not_call_cfbd_without_force(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fetch = unittest.mock.Mock(return_value=[{"id": 1}])
+            with patch.object(fetch_historical, "RAW_DIR", Path(directory)):
+                result = fetch_historical._pull("games_2021_regular", fetch, allow_fetch=False)
+            self.assertEqual(result, [])
+            fetch.assert_not_called()
 
     def test_weather_batches_games_by_venue_range(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -237,6 +249,82 @@ class MarketTests(unittest.TestCase):
         away = snapshots.query("market == 'spread' and side == 'away'").iloc[0]
         self.assertEqual(home["line"], -7.5)
         self.assertEqual(away["line"], 7.5)
+
+    def test_odds_api_payload_maps_to_cfbd_game_ids(self):
+        games = pd.DataFrame({
+            "game_id": [101], "season": [2026],
+            "home_team": ["Ohio State"], "away_team": ["Texas"],
+        })
+        events = [{
+            "home_team": "Ohio State Buckeyes", "away_team": "Texas Longhorns",
+            "bookmakers": [{"title": "Book A", "markets": [
+                {"key": "h2h", "outcomes": [
+                    {"name": "Ohio State Buckeyes", "price": -150},
+                    {"name": "Texas Longhorns", "price": 130},
+                ]},
+                {"key": "spreads", "outcomes": [
+                    {"name": "Ohio State Buckeyes", "point": -3.5, "price": -110},
+                    {"name": "Texas Longhorns", "point": 3.5, "price": -110},
+                ]},
+                {"key": "totals", "outcomes": [
+                    {"name": "Over", "point": 51.5, "price": -105},
+                    {"name": "Under", "point": 51.5, "price": -115},
+                ]},
+            ]}],
+        }]
+        payload = to_cfbd_line_payload(events, games, season=2026)
+        self.assertEqual(payload[0]["id"], 101)
+        quote = payload[0]["lines"][0]
+        self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["overUnder"], 51.5)
+        self.assertEqual(quote["homeMoneyline"], -150)
+
+    def test_rundown_payload_maps_main_lines_to_cfbd_game_ids(self):
+        games = pd.DataFrame({"game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"]})
+        price = lambda value: {"19": {"price": value}}
+        events = [{"teams": [{"name": "Texas", "is_away": True}, {"name": "Ohio State", "is_home": True}], "markets": [
+            {"market_id": 1, "period_id": 0, "participants": [
+                {"name": "Ohio State", "lines": [{"value": "", "prices": price(-150)}]},
+                {"name": "Texas", "lines": [{"value": "", "prices": price(130)}]},
+            ]},
+            {"market_id": 2, "period_id": 0, "participants": [
+                {"name": "Ohio State", "lines": [{"value": "-3.5", "prices": price(-110)}]},
+                {"name": "Texas", "lines": [{"value": "3.5", "prices": price(-110)}]},
+            ]},
+            {"market_id": 3, "period_id": 0, "participants": [
+                {"name": "Over", "lines": [{"value": "51.5", "prices": price(-105)}]},
+                {"name": "Under", "lines": [{"value": "51.5", "prices": price(-115)}]},
+            ]},
+        ]}]
+        quote = rundown_to_cfbd_line_payload(events, games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["provider"], "DraftKings")
+        self.assertEqual(quote["spread"], "-3.5")
+        self.assertEqual(quote["overUnder"], "51.5")
+
+    def test_odds_api_io_payload_maps_decimal_main_markets(self):
+        games = pd.DataFrame({"game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"]})
+        events = [{"home": "Ohio State", "away": "Texas", "bookmakers": {"Book A": [
+            {"name": "ML", "odds": [{"home": "1.667", "away": "2.300"}]},
+            {"name": "Spread", "odds": [{"hdp": -3.5, "home": "1.909", "away": "1.909"}]},
+            {"name": "Totals", "odds": [{"max": 51.5, "over": "1.952", "under": "1.870"}]},
+        ]}}]
+        quote = odds_api_io_to_cfbd_line_payload(events, games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["homeMoneyline"], -150)
+        self.assertEqual(quote["awayMoneyline"], 130)
+        self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["overUnder"], 51.5)
+
+    def test_team_matching_supports_fbs_acronyms_and_mascots(self):
+        self.assertTrue(_same_team("TCU", "TCU Horned Frogs"))
+        self.assertTrue(_same_team("UAB", "UAB Blazers"))
+
+    def test_team_matching_uses_kickoff_to_resolve_name_collision(self):
+        schedule = pd.DataFrame({
+            "game_id": [1, 2], "home_team": ["Ohio", "Ohio State"], "away_team": ["Ball State", "Ball State"],
+            "start_date": ["2026-09-12T18:00Z", "2026-09-05T16:30Z"],
+        })
+        game = match_scheduled_game(schedule, "Ohio State Buckeyes", "Ball State Cardinals", "2026-09-05T16:30Z")
+        self.assertEqual(game["game_id"], 2)
 
     def test_provider_consensus_preserves_open_move_and_devigs_per_book(self):
         payload = [

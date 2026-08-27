@@ -10,9 +10,20 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from utils.cfbd_client import get_lines  # noqa: E402
+from utils.odds_api import get_ncaaf_odds, is_configured, to_cfbd_line_payload  # noqa: E402
+from utils.odds_api_io import (  # noqa: E402
+    get_ncaaf_odds as get_odds_api_io_odds,
+    is_configured as odds_api_io_is_configured,
+    to_cfbd_line_payload as odds_api_io_to_cfbd_line_payload,
+)
+from utils.rundown_client import (  # noqa: E402
+    get_ncaaf_events, is_configured as rundown_is_configured,
+    to_cfbd_line_payload as rundown_to_cfbd_line_payload,
+)
 from utils.odds_ingestion import append_line_snapshots, normalize_cfbd_line_snapshots  # noqa: E402
 from utils.seasons import current_cfb_season  # noqa: E402
 from utils.storage import PROCESSED_DIR, save_raw_json, save_immutable_raw_json  # noqa: E402
+import pandas as pd
 
 
 def _plain(value):
@@ -26,7 +37,7 @@ def _plain(value):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Append the latest CFBD sportsbook snapshot")
+    parser = argparse.ArgumentParser(description="Append the latest sportsbook snapshot")
     parser.add_argument("--season", type=int, default=current_cfb_season())
     parser.add_argument(
         "--output", type=Path, default=PROCESSED_DIR / "line_snapshots.parquet"
@@ -35,11 +46,55 @@ def main() -> int:
         "--refresh-features", action="store_true",
         help="Also refresh the current line consensus, feature matrix, and shadow signals",
     )
+    parser.add_argument(
+        "--source", choices=("auto", "odds-api-io", "rundown", "odds", "cfbd"), default="auto",
+        help="Market provider (default: OddsAPI.io, TheRundown, Odds API, then CFBD)",
+    )
     args = parser.parse_args()
     captured_at = datetime.now(timezone.utc)
-    payload = _plain(get_lines(args.season))
+    source = "cfbd_lines"
+    payload = []
+    use_odds_api_io = args.source == "odds-api-io" or (
+        args.source == "auto" and odds_api_io_is_configured()
+    )
+    use_rundown = args.source == "rundown" or (
+        args.source == "auto" and not use_odds_api_io and rundown_is_configured()
+    )
+    use_odds = args.source == "odds" or (
+        args.source == "auto" and not use_odds_api_io and not use_rundown and is_configured()
+    )
+    if use_odds_api_io:
+        events = get_odds_api_io_odds()
+        games_path = PROCESSED_DIR / "games.parquet"
+        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
+        payload = odds_api_io_to_cfbd_line_payload(events, games, season=args.season)
+        source = "odds_api_io"
+        if not payload:
+            print("No matched OddsAPI.io quotes returned; existing artifact unchanged")
+            return 1
+    if use_rundown:
+        events = get_ncaaf_events()
+        games_path = PROCESSED_DIR / "games.parquet"
+        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
+        payload = rundown_to_cfbd_line_payload(events, games, season=args.season)
+        source = "therundown"
+        if not payload:
+            print("No matched TheRundown quotes returned; existing artifact unchanged")
+            return 1
+    if use_odds:
+        odds_events = get_ncaaf_odds()
+        games_path = PROCESSED_DIR / "games.parquet"
+        games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
+        payload = to_cfbd_line_payload(odds_events, games, season=args.season)
+        source = "odds_api"
+        if not payload:
+            print("No matched Odds API quotes returned; existing artifact unchanged")
+            return 1
+    if args.source == "cfbd" or (args.source == "auto" and not use_odds_api_io and not use_rundown and not use_odds):
+        payload = _plain(get_lines(args.season))
+        source = "cfbd_lines"
     raw_path, ingestion_run_id, captured_at = save_immutable_raw_json(
-        payload or [], source="cfbd_lines", season=args.season, captured_at=captured_at
+        payload or [], source=source, season=args.season, captured_at=captured_at
     )
     snapshots = normalize_cfbd_line_snapshots(
         payload or [],
