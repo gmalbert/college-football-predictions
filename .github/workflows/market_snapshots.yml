@@ -47,6 +47,7 @@ jobs:
       - name: Refresh shadow CLV and release metadata
         run: |
           python scripts/settle_shadow_ledger.py
+          python scripts/export_best_bets.py
           python scripts/publish_release.py
           python scripts/audit_pipeline.py --strict --output data_files/audit_report.json
       - name: Commit snapshot
@@ -59,6 +60,7 @@ jobs:
             data_files/processed/lines.parquet \
             data_files/processed/line_snapshots.parquet \
             data_files/features/feature_matrix.parquet \
+            data_files/best_bets_today.json \
             data_files/shadow_total_signals.json \
             data_files/processed/bet_ledger.parquet \
             data_files/releases/
