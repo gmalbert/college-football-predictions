@@ -1,10 +1,10 @@
 {
   "model_name": "home_margin",
   "version": "2.2.0",
-  "created_at": "2026-08-27T01:07:39.989650+00:00",
-  "git_sha": "db6ef2e494739f914057f3386edb06eb8110b46e",
+  "created_at": "2026-09-01T07:02:30.037563+00:00",
+  "git_sha": "0424907ed724ba7cd086b739953b80841c7af2ea",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-01-20T00:30:00+00:00",
+  "training_end": "2026-08-31T00:00:00+00:00",
   "feature_names": [
     "market_home_prob",
     "elo_diff",
@@ -32,23 +32,23 @@
     "market_spread"
   ],
   "feature_schema_hash": "ddadf381fdb955669f8158a402a4d1c50914dbc74233eda0c5adc5901c3d3604",
-  "data_fingerprint": "0f3bc9d57592018acfe0baa79b0249c27dbf08e130ba8bb8aac21d25802f22e7",
+  "data_fingerprint": "da5ce81ed5e148fbc3fd96f6438e4af4feee86973a6001b8eb9934b4da63a4ef",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "native_missing"
   },
   "metrics": {
-    "n": 11358,
-    "rmse": 17.57083159959292,
-    "mae": 13.720063520562633,
-    "bias": -0.02038231702315795,
-    "residual_std": 17.571593328562848,
-    "baseline_n": 4567,
-    "baseline_rmse": 15.198489212340796,
-    "baseline_mae": 11.959875191591854,
-    "model_rmse_on_baseline_subset": 15.198489212340796,
-    "model_mae_on_baseline_subset": 11.959875191591854,
+    "n": 11483,
+    "rmse": 17.651301759605683,
+    "mae": 13.76163909151186,
+    "bias": -0.06900919064636753,
+    "residual_std": 17.651935488985448,
+    "baseline_n": 4620,
+    "baseline_rmse": 15.185628547871813,
+    "baseline_mae": 11.958062770562771,
+    "model_rmse_on_baseline_subset": 15.185628547871813,
+    "model_mae_on_baseline_subset": 11.958062770562771,
     "folds": [
       {
         "fold": 0,
@@ -97,20 +97,41 @@
         ],
         "test_season": 2025,
         "n": 3829,
-        "rmse": 17.428788204810274,
-        "mae": 13.675508905963943,
-        "bias": 0.40288077015794577,
-        "residual_std": 17.426406853055543,
+        "rmse": 17.422574262662906,
+        "mae": 13.669036387517702,
+        "bias": 0.40144687793520417,
+        "residual_std": 17.420223549219347,
         "baseline_n": 1597,
         "baseline_rmse": 15.062417099910355,
         "baseline_mae": 11.88134001252348,
         "model_rmse_on_baseline_subset": 15.062417099910355,
         "model_mae_on_baseline_subset": 11.88134001252348
+      },
+      {
+        "fold": 3,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "test_season": 2026,
+        "n": 125,
+        "rmse": 23.994601025637504,
+        "mae": 17.737627955287696,
+        "bias": -4.443518448978662,
+        "residual_std": 23.674455876780005,
+        "baseline_n": 53,
+        "baseline_rmse": 14.033232121417536,
+        "baseline_mae": 11.80188679245283,
+        "model_rmse_on_baseline_subset": 14.033232121417536,
+        "model_mae_on_baseline_subset": 11.80188679245283
       }
     ],
-    "n_samples": 11358,
+    "n_samples": 11483,
     "strategy": "market_consensus_when_available_structural_fallback",
-    "market_anchored_n": 4567
+    "market_anchored_n": 4620
   },
   "prediction_contract": "home_score - away_score; positive means home by N",
   "status": "challenger"

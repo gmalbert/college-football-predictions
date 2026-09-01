@@ -1,10 +1,10 @@
 {
   "model_name": "total_over_probability",
   "version": "2.2.0",
-  "created_at": "2026-08-27T01:07:40.012036+00:00",
-  "git_sha": "db6ef2e494739f914057f3386edb06eb8110b46e",
+  "created_at": "2026-09-01T07:02:30.064128+00:00",
+  "git_sha": "0424907ed724ba7cd086b739953b80841c7af2ea",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-01-20T00:30:00+00:00",
+  "training_end": "2026-08-30T02:00:00+00:00",
   "feature_names": [
     "home_points_for_l5",
     "away_points_for_l5",
@@ -37,22 +37,22 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "9bb81c8b24e67c2a486092f69d15575c7768ac59461d179306caaea16556a9f2",
+  "data_fingerprint": "82594a0fd7e6cbe448feac2fd5f8bf68ab9d7a043130f5e6f8a5dea2c3152bf2",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "median_with_indicator"
   },
   "metrics": {
-    "n": 4525,
-    "brier": 0.2491539659674282,
-    "log_loss": 0.6914459775322273,
-    "ece": 0.015830344748311492,
-    "accuracy": 0.5206629834254144,
-    "baseline_n": 4525,
+    "n": 4578,
+    "brier": 0.24917502579824002,
+    "log_loss": 0.6915327860361515,
+    "ece": 0.01519272604771422,
+    "accuracy": 0.5209698558322412,
+    "baseline_n": 4578,
     "baseline_brier": 0.25,
-    "model_brier_on_baseline_subset": 0.2491539659674282,
-    "brier_skill": 0.0033841361302872075,
+    "model_brier_on_baseline_subset": 0.24917502579824002,
+    "brier_skill": 0.0032998968070399037,
     "folds": [
       {
         "fold": 0,
@@ -107,17 +107,37 @@
         "baseline_brier": 0.25,
         "model_brier_on_baseline_subset": 0.2482139530002642,
         "brier_skill": 0.00714418799894323
+      },
+      {
+        "fold": 3,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "test_season": 2026,
+        "n": 53,
+        "brier": 0.2509730585232131,
+        "log_loss": 0.6989442667957269,
+        "ece": 0.07093334627800321,
+        "accuracy": 0.5471698113207547,
+        "baseline_n": 53,
+        "baseline_brier": 0.25,
+        "model_brier_on_baseline_subset": 0.2509730585232131,
+        "brier_skill": -0.0038922340928524424
       }
     ],
-    "n_samples": 4525,
+    "n_samples": 4578,
     "strategy": {
-      "n": 323,
-      "wins": 185,
-      "losses": 138,
-      "win_rate": 0.5727554179566563,
-      "wilson_95_low": 0.5182641520270312,
-      "wilson_95_high": 0.6255364544492245,
-      "flat_stake_roi_at_minus_110": 0.09344216155361668,
+      "n": 358,
+      "wins": 206,
+      "losses": 152,
+      "win_rate": 0.5754189944134078,
+      "wilson_95_low": 0.5236834722007155,
+      "wilson_95_high": 0.6255531580516487,
+      "flat_stake_roi_at_minus_110": 0.0985271711528695,
       "probability_edge_threshold": 0.075,
       "minimum_selected_probability": 0.575,
       "assumed_odds": -110.0,
@@ -167,26 +187,35 @@
           "wilson_95_low": 0.5405417236816313,
           "wilson_95_high": 0.7240048945526728,
           "flat_stake_roi_at_minus_110": 0.21657754010695182
+        },
+        "2026": {
+          "n": 35,
+          "wins": 21,
+          "losses": 14,
+          "win_rate": 0.6,
+          "wilson_95_low": 0.43572709012892513,
+          "wilson_95_high": 0.7444927114061941,
+          "flat_stake_roi_at_minus_110": 0.14545454545454542
         }
       },
       "by_side": {
         "over": {
-          "n": 237,
+          "n": 238,
           "wins": 139,
-          "losses": 98,
-          "win_rate": 0.5864978902953587,
-          "wilson_95_low": 0.5229080659097894,
-          "wilson_95_high": 0.647328405006642,
-          "flat_stake_roi_at_minus_110": 0.1196777905638665
+          "losses": 99,
+          "win_rate": 0.5840336134453782,
+          "wilson_95_low": 0.5205645663043027,
+          "wilson_95_high": 0.6448330466403693,
+          "flat_stake_roi_at_minus_110": 0.11497326203208555
         },
         "under": {
-          "n": 86,
-          "wins": 46,
-          "losses": 40,
-          "win_rate": 0.5348837209302325,
-          "wilson_95_low": 0.43024302721776253,
-          "wilson_95_high": 0.6365412845995112,
-          "flat_stake_roi_at_minus_110": 0.021141649048625814
+          "n": 120,
+          "wins": 67,
+          "losses": 53,
+          "win_rate": 0.5583333333333333,
+          "wilson_95_low": 0.46904523091319655,
+          "wilson_95_high": 0.6440025330046213,
+          "flat_stake_roi_at_minus_110": 0.06590909090909089
         }
       },
       "by_season_and_side": {
@@ -289,6 +318,26 @@
             "wilson_95_high": 0.7010986826344964,
             "flat_stake_roi_at_minus_110": 0.07095343680709537
           }
+        },
+        "2026": {
+          "over": {
+            "n": 1,
+            "wins": 0,
+            "losses": 1,
+            "win_rate": 0.0,
+            "wilson_95_low": 0.0,
+            "wilson_95_high": 0.7934506856227626,
+            "flat_stake_roi_at_minus_110": -1.0
+          },
+          "under": {
+            "n": 34,
+            "wins": 21,
+            "losses": 13,
+            "win_rate": 0.6176470588235294,
+            "wilson_95_low": 0.45041017344430706,
+            "wilson_95_high": 0.7609981667549109,
+            "flat_stake_roi_at_minus_110": 0.17914438502673793
+          }
         }
       },
       "development_note": "C and threshold developed on 2021-2024; 2025 is the retrospective confirmation season."
@@ -296,13 +345,11 @@
     "prediction_contract": "final eligible pre-kickoff market snapshot",
     "regularization_c": 0.005,
     "strategy_release": {
-      "status": "shadow",
-      "retrospective_gates_passed": true,
-      "eligible_sides": [
-        "over"
-      ],
+      "status": "hold",
+      "retrospective_gates_passed": false,
+      "eligible_sides": [],
       "prospective_clv_passed": false,
-      "reason": "Retrospective confirmation passed; collect 2026 closing-line value before live promotion."
+      "reason": "Retrospective probability/confirmation gates did not pass."
     }
   },
   "prediction_contract": "P(game total exceeds current market total) at final eligible pre-kickoff snapshot",

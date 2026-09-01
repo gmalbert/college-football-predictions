@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-27T01:07:43.726262+00:00",
+  "generated_at": "2026-09-01T07:02:34.000559+00:00",
   "summary": {
     "pass": 12,
     "warn": 4,
@@ -10,24 +10,24 @@
       "name": "games_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 19155
+      "value": 21193
     },
     {
       "name": "feature_matrix_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 19155
+      "value": 21193
     },
     {
       "name": "team_game_stats_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 14730
+      "value": 14872
     },
     {
       "name": "feature_game_coverage",
       "status": "pass",
-      "message": "Feature artifact covers 19,155 of 19,155 unique games",
+      "message": "Feature artifact covers 21,193 of 21,193 unique games",
       "value": 1.0
     },
     {
@@ -46,7 +46,7 @@
       "name": "release_metadata",
       "status": "pass",
       "message": "Release metadata is present",
-      "value": "0267b205db7a48b79dac253ee04b0b30"
+      "value": "479ea560c26346fea0ba2dfeb549a46e"
     },
     {
       "name": "empty_raw_cache",
@@ -57,8 +57,8 @@
     {
       "name": "market_snapshot_history",
       "status": "pass",
-      "message": "Timestamped market history contains 440 quotes; movement and CLV require forward collection",
-      "value": 440
+      "message": "Timestamped market history contains 14,931 quotes; movement and CLV require forward collection",
+      "value": 14931
     },
     {
       "name": "context_feature_observations",
@@ -81,8 +81,8 @@
     {
       "name": "oos_prediction_artifact",
       "status": "pass",
-      "message": "OOS artifact has 19,155 rows and 0 duplicate games",
-      "value": 19155
+      "message": "OOS artifact has 21,193 rows and 0 duplicate games",
+      "value": 21193
     },
     {
       "name": "model_manifests",
@@ -94,15 +94,15 @@
       "name": "best_bets_freshness",
       "status": "pass",
       "message": "Best-bets export age is 0.0 hours",
-      "value": 0.0006654316666666667
+      "value": 0.0007110986111111111
     },
     {
       "name": "shadow_total_freshness",
       "status": "pass",
       "message": "Shadow-total export age is 0.0 hours",
-      "value": 0.0002893972222222222
+      "value": 0.0003226886111111111
     }
   ],
-  "release_status": "shadow",
+  "release_status": "hold",
   "strict_failures": 0
 }
