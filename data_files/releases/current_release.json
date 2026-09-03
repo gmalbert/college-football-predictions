@@ -1,9 +1,9 @@
 {
-  "release_id": "31696c8dd8ec4f9eb3557b6274cc8fc4",
-  "generated_at": "2026-09-03T12:09:01.282634+00:00",
+  "release_id": "04e6b912648347b78a02c5f4a029dce5",
+  "generated_at": "2026-09-03T15:10:19.961656+00:00",
   "model_version": "2.2.0",
-  "workflow_run_id": "33753418808",
-  "artifact_fingerprint": "5bf82d3b5305b9e2ddc3134ab17d635641b8da150707bfb1473513ca64e54b2e",
+  "workflow_run_id": "33770914632",
+  "artifact_fingerprint": "ed717d3fea0f5bfbf844d8b1145ae6e0874cda8d3b5f6b8592976e94cac649e7",
   "artifacts": [
     "processed/games.parquet",
     "processed/lines.parquet",
