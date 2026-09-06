@@ -2,11 +2,11 @@
   "model_version": "2.2.0",
   "evaluation_scope": "walk_forward_season_oos",
   "win_model": {
-    "n": 11358,
-    "brier": 0.162284390175695,
-    "log_loss": 0.4874608332883935,
-    "ece": 0.009800441548790074,
-    "accuracy": 0.7549744673357985,
+    "n": 11483,
+    "brier": 0.16295280607914286,
+    "log_loss": 0.48917453062642346,
+    "ece": 0.009161926619498316,
+    "accuracy": 0.7536358094574589,
     "baseline_n": 2492,
     "baseline_brier": 0.17361035163432176,
     "model_brier_on_baseline_subset": 0.17361035163432176,
@@ -38,9 +38,9 @@
         ],
         "test_season": 2024,
         "n": 3799,
-        "brier": 0.1641752031573833,
-        "log_loss": 0.49191832176847977,
-        "ece": 0.022125248377018313,
+        "brier": 0.16417516314890157,
+        "log_loss": 0.4919181159352436,
+        "ece": 0.02212543175661508,
         "accuracy": 0.746775467228218,
         "baseline_n": 831,
         "baseline_brier": 0.17882171374915815,
@@ -57,26 +57,42 @@
         ],
         "test_season": 2025,
         "n": 3829,
-        "brier": 0.16165477089003782,
-        "log_loss": 0.48589021969582774,
-        "ece": 0.010794384486344604,
-        "accuracy": 0.7592060590232437,
+        "brier": 0.1615702718588171,
+        "log_loss": 0.485761985001211,
+        "ece": 0.010616817127162953,
+        "accuracy": 0.7594672238182293,
         "baseline_n": 867,
         "baseline_brier": 0.16897546142266104,
         "model_brier_on_baseline_subset": 0.16897546142266104,
         "brier_skill": 0.0
+      },
+      {
+        "fold": 3,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "test_season": 2026,
+        "n": 125,
+        "brier": 0.22627733899216204,
+        "log_loss": 0.6488222663983968,
+        "ece": 0.1151593152284622,
+        "accuracy": 0.624
       }
     ],
-    "n_samples": 11358,
+    "n_samples": 11483,
     "strategy": "no_vig_market_when_available_structural_fallback",
     "market_anchored_n": 2492
   },
   "spread_model": {
-    "n": 11358,
-    "rmse": 17.569413604928673,
-    "mae": 13.72077013592962,
-    "bias": -0.04218881972409459,
-    "residual_std": 17.57013643825519,
+    "n": 11483,
+    "rmse": 17.66042846527196,
+    "mae": 13.774047642081182,
+    "bias": -0.07786370377618111,
+    "residual_std": 17.661025840608996,
     "baseline_n": 4567,
     "baseline_rmse": 15.198489212340796,
     "baseline_mae": 11.959875191591854,
@@ -130,27 +146,43 @@
         ],
         "test_season": 2025,
         "n": 3829,
-        "rmse": 17.419645767350737,
-        "mae": 13.662571591793684,
-        "bias": 0.39879515409636457,
-        "residual_std": 17.417354826350188,
+        "rmse": 17.41937080483804,
+        "mae": 13.662052063169003,
+        "bias": 0.40804837075553174,
+        "residual_std": 17.41686537160752,
         "baseline_n": 1597,
         "baseline_rmse": 15.062417099910355,
         "baseline_mae": 11.88134001252348,
         "model_rmse_on_baseline_subset": 15.062417099910355,
         "model_mae_on_baseline_subset": 11.88134001252348
+      },
+      {
+        "fold": 3,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "test_season": 2026,
+        "n": 125,
+        "rmse": 24.56693016930849,
+        "mae": 18.630969161868094,
+        "bias": -3.6028709009885787,
+        "residual_std": 24.399096427249496
       }
     ],
-    "n_samples": 11358,
+    "n_samples": 11483,
     "strategy": "market_consensus_when_available_structural_fallback",
     "market_anchored_n": 4567
   },
   "total_model": {
-    "n": 11358,
-    "rmse": 16.67488889029583,
-    "mae": 13.216629999655593,
-    "bias": -0.28683982738991737,
-    "residual_std": 16.673155611324162,
+    "n": 11483,
+    "rmse": 16.694426265471854,
+    "mae": 13.226185284570658,
+    "bias": -0.33311723329719295,
+    "residual_std": 16.691829279303086,
     "baseline_n": 4558,
     "baseline_rmse": 15.830007666331168,
     "baseline_mae": 12.623793330408073,
@@ -213,9 +245,25 @@
         "baseline_mae": 12.337045169385194,
         "model_rmse_on_baseline_subset": 15.303384663467934,
         "model_mae_on_baseline_subset": 12.31188785712569
+      },
+      {
+        "fold": 3,
+        "train_seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "test_season": 2026,
+        "n": 125,
+        "rmse": 18.383213722929174,
+        "mae": 14.09441669309298,
+        "bias": -4.538067443655879,
+        "residual_std": 17.885965243205952
       }
     ],
-    "n_samples": 11358,
+    "n_samples": 11483,
     "strategy": "nested_oos_shrunk_market_residual_ridge",
     "residual_folds": [
       {
@@ -522,14 +570,14 @@
     {
       "name": "out_of_sample_games",
       "passed": true,
-      "actual": 11358,
+      "actual": 11483,
       "threshold": 500,
       "reason": "Require an adequately sized untouched walk-forward sample."
     },
     {
       "name": "brier",
       "passed": true,
-      "actual": 0.162284390175695,
+      "actual": 0.16295280607914286,
       "threshold": 0.25,
       "reason": "Probability quality must beat a coin-flip Brier score."
     },
@@ -543,7 +591,7 @@
     {
       "name": "calibration",
       "passed": true,
-      "actual": 0.009800441548790074,
+      "actual": 0.009161926619498316,
       "threshold": 0.05,
       "reason": "Calibration error controls overconfident bet sizing."
     },
