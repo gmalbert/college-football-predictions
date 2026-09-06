@@ -22,7 +22,7 @@ st.set_page_config(
 # Home page function (called by st.navigation)
 # ---------------------------------------------------------------------------
 def home_page():
-    render_sidebar()
+    render_sidebar(show_logo=False)
 
     # ── Logo & title ───────────────────────────────────────────────────────────
     logo_path = Path(__file__).parent / "data_files" / "logo.png"
@@ -68,9 +68,16 @@ def home_page():
             return frame
 
     @st.cache_data(ttl=3600)
-    def _load_summary():
+    def _load_dataset():
         try:
-            df = load_parquet("feature_matrix", layer="features")
+            return load_parquet("feature_matrix", layer="features")
+        except FileNotFoundError:
+            return pd.DataFrame()
+
+    @st.cache_data(ttl=3600)
+    def _load_summary():
+        df = _load_dataset().copy()
+        try:
             if "home_margin" in df.columns:
                 df = df[pd.to_numeric(df["home_margin"], errors="coerce").isna()].copy()
             elif {"home_score", "away_score"}.issubset(df.columns):
@@ -82,7 +89,7 @@ def home_page():
             if models_trained() and not df.empty:
                 df = predict_batch(df)
             return df
-        except FileNotFoundError:
+        except (KeyError, TypeError):
             return pd.DataFrame()
 
     @st.cache_data(ttl=3600)
@@ -90,6 +97,7 @@ def home_page():
         return load_metrics()
 
     df_all   = _load_summary()
+    df_dataset = _load_dataset()
     metrics  = _metrics()
     ats_m    = metrics.get("ats", {})
     win_m    = metrics.get("win_model", {})
@@ -151,13 +159,14 @@ def home_page():
 
     with col_c:
         st.subheader("📊 Dataset")
-        if not df_all.empty:
-            seasons = sorted(df_all["season"].dropna().unique())
-            n_games = len(df_all)
-            n_teams = len(set(df_all["home_team"].dropna().tolist() + df_all["away_team"].dropna().tolist()))
+        if not df_dataset.empty:
+            seasons = sorted(df_dataset["season"].dropna().unique())
+            n_games = len(df_dataset)
+            n_teams = len(set(df_dataset["home_team"].dropna().tolist() + df_dataset["away_team"].dropna().tolist()))
             st.metric("Games",   f"{n_games:,}")
             st.metric("Teams",   f"{n_teams:,}")
-            st.metric("Seasons", f"{seasons[0]}–{seasons[-1]}")
+            season_range = f"{seasons[0]}–{seasons[-1]}"
+            st.metric("Seasons", season_range, f"{len(seasons)} seasons in dataset")
             st.metric("Model",   "XGBoost + Ridge" if models_trained() else "Not trained")
         else:
             st.caption("No data loaded. Go to ⚙️ Settings to get started.")

@@ -358,7 +358,7 @@ def apply_theme(name: str | None = None, table_style: str | None = None) -> None
     st.markdown(css, unsafe_allow_html=True)
 
 
-def render_sidebar() -> None:
+def render_sidebar(*, show_logo: bool = True) -> None:
     """Standard sidebar rendered on every page."""
     if "table_style" not in st.session_state:
         st.session_state.table_style = "Frost"
@@ -366,7 +366,7 @@ def render_sidebar() -> None:
     with st.sidebar:
         from pathlib import Path
         logo = Path(__file__).resolve().parent.parent / "data_files" / "logo.png"
-        if logo.exists():
+        if show_logo and logo.exists():
             st.image(str(logo), width=200)
 
         st.divider()
@@ -387,10 +387,6 @@ def render_sidebar() -> None:
                     st.metric("Model Brier", f"{win['brier']:.4f}", help="Lower is better")
         except Exception:
             pass
-
-        st.divider()
-        st.caption("Data: CFBD API · ESPN | Updated daily")
-        st.divider()
 
     apply_theme(table_style=st.session_state.table_style)
 
