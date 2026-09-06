@@ -48,9 +48,23 @@ seasons    = sorted(df_all["season"].dropna().unique(), reverse=True)
 default_s  = int(seasons[0]) if seasons else 2025
 season     = st.selectbox("Season", seasons, index=0)
 
-weeks      = sorted(df_all[df_all["season"] == season]["week"].dropna().unique())
-default_w  = int(weeks[-1]) if weeks else 1
-week       = st.selectbox("Week", weeks, index=len(weeks) - 1, format_func=lambda w: f"Week {int(w)}")
+season_games = df_all[df_all["season"] == season].copy()
+weeks = sorted(season_games["week"].dropna().unique())
+
+# Choose the current calendar week when possible. The old behavior selected
+# the highest scheduled week, which jumped to a future Week 15 game in August.
+now = pd.Timestamp.now(tz="UTC")
+season_games["_start"] = pd.to_datetime(season_games["start_date"], utc=True, errors="coerce")
+past_weeks = sorted(season_games.loc[season_games["_start"] <= now, "week"].dropna().unique())
+default_week = int(past_weeks[-1]) if past_weeks else int(weeks[0]) if weeks else 1
+week = st.selectbox(
+    "Week",
+    weeks,
+    index=weeks.index(default_week) if default_week in weeks else 0,
+    format_func=lambda w: f"Week {int(w)}",
+)
+
+st.caption(f"Season {int(season)} = the {int(season)} fall schedule · Week {int(week)}")
 
 df_week = df_all[(df_all["season"] == season) & (df_all["week"] == week)].copy()
 
