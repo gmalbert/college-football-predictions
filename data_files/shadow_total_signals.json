@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-09-06T15:08:36.370459+00:00",
+    "generated_at": "2026-09-07T17:30:29.806538+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "Total-side model has not passed retrospective gates"
+    "note": "No priced games are within the closing-time window"
   },
   "signals": []
 }
