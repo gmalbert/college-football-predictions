@@ -38,10 +38,10 @@ jobs:
           fetch-depth: 1
 
       # ── Python setup ────────────────────────────────────────────────────────
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5.6.0
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
