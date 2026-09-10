@@ -1,10 +1,34 @@
 {
   "meta": {
-    "generated_at": "2026-09-10T15:09:46.768104+00:00",
+    "generated_at": "2026-09-10T16:06:34.367985+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "5c6b75cfe519406396165bcac1713cf7",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401858213,
+      "game": "Florida A&M @ Miami",
+      "kickoff": "2026-09-11T00:00:00+00:00",
+      "side": "over",
+      "market_total": 65.5,
+      "prediction_time": "2026-09-10T16:06:34.247835+00:00",
+      "sportsbook": "DraftKings",
+      "taken_line": 65.5,
+      "taken_odds": -108.0,
+      "source_snapshot_at": "2026-09-10T16:05:25.398265+00:00",
+      "ingestion_run_id": "285b7abc185f49cfb99b1275e6991bf4",
+      "over_probability": 0.631721,
+      "selected_probability": 0.631721,
+      "probability_edge": 0.131721,
+      "opening_total": null,
+      "line_move": null,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
