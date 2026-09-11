@@ -1,10 +1,74 @@
 {
   "meta": {
-    "generated_at": "2026-09-11T15:09:42.864396+00:00",
+    "generated_at": "2026-09-11T16:06:36.332134+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "34428ba7a63d4ad2a27f0bcb85a81f01",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401858220,
+      "game": "Norfolk State @ Virginia",
+      "kickoff": "2026-09-11T23:00:00+00:00",
+      "side": "over",
+      "market_total": 55.5,
+      "prediction_time": "2026-09-11T16:06:36.214584+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 55.5,
+      "taken_odds": -115.0,
+      "source_snapshot_at": "2026-09-11T16:05:35.261843+00:00",
+      "ingestion_run_id": "c939e300bb64474b803e08faca5358b2",
+      "over_probability": 0.633958,
+      "selected_probability": 0.633958,
+      "probability_edge": 0.133958,
+      "opening_total": null,
+      "line_move": null,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401858215,
+      "game": "Villanova @ Louisville",
+      "kickoff": "2026-09-11T23:00:00+00:00",
+      "side": "over",
+      "market_total": 56.5,
+      "prediction_time": "2026-09-11T16:06:36.214584+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 56.5,
+      "taken_odds": -110.0,
+      "source_snapshot_at": "2026-09-11T16:05:35.261843+00:00",
+      "ingestion_run_id": "c939e300bb64474b803e08faca5358b2",
+      "over_probability": 0.666388,
+      "selected_probability": 0.666388,
+      "probability_edge": 0.166388,
+      "opening_total": null,
+      "line_move": null,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401858214,
+      "game": "Rutgers @ Boston College",
+      "kickoff": "2026-09-11T23:30:00+00:00",
+      "side": "over",
+      "market_total": 53.5,
+      "prediction_time": "2026-09-11T16:06:36.214584+00:00",
+      "sportsbook": "DraftKings",
+      "taken_line": 53.5,
+      "taken_odds": -110.0,
+      "source_snapshot_at": "2026-09-11T16:05:35.261843+00:00",
+      "ingestion_run_id": "c939e300bb64474b803e08faca5358b2",
+      "over_probability": 0.627862,
+      "selected_probability": 0.627862,
+      "probability_edge": 0.127862,
+      "opening_total": null,
+      "line_move": null,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
