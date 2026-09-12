@@ -371,6 +371,34 @@ class MarketTests(unittest.TestCase):
         self.assertTrue(_same_team("TCU", "TCU Horned Frogs"))
         self.assertTrue(_same_team("UAB", "UAB Blazers"))
 
+    def test_team_matching_supports_provider_aliases(self):
+        schedule = pd.DataFrame({
+            "game_id": list(range(1, 10)),
+            "home_team": [
+                "WPI", "East Carolina", "Massachusetts", "Pittsburgh", "USC",
+                "SE Louisiana", "UAB", "East Texas A&M", "Westminster (PA)",
+            ],
+            "away_team": [
+                "New England", "App State", "Sacred Heart", "UCF", "Louisiana",
+                "North Alabama", "UL Monroe", "Northwestern State", "Franklin & Marshall",
+            ],
+        })
+        provider_events = [
+            (1, "Worcester Polytechnic", "University of New England"),
+            (2, "East Carolina", "Appalachian State"),
+            (3, "UMass Minutemen", "Sacred Heart Pioneers"),
+            (4, "Pittsburgh", "Central Florida"),
+            (5, "USC", "UL Lafayette"),
+            (6, "Southeastern Louisiana", "North Alabama"),
+            (7, "UAB", "Louisiana-Monroe"),
+            (8, "Texas A&M-Commerce", "Northwestern State"),
+            (9, "Westminster College (PA)", "Franklin & Marshall"),
+        ]
+        for game_id, home, away in provider_events:
+            game = match_scheduled_game(schedule, home, away)
+            self.assertIsNotNone(game, (home, away))
+            self.assertEqual(game["game_id"], game_id, (home, away))
+
     def test_team_matching_uses_kickoff_to_resolve_name_collision(self):
         schedule = pd.DataFrame({
             "game_id": [1, 2], "home_team": ["Ohio", "Ohio State"], "away_team": ["Ball State", "Ball State"],
