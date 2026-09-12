@@ -29,6 +29,7 @@ def normalize_cfbd_line_snapshots(
     captured_at: str | pd.Timestamp,
     ingestion_run_id: str | None = None,
     raw_payload_path: str | None = None,
+    source: str = "cfbd",
 ) -> pd.DataFrame:
     """Convert CFBD's nested provider payload to canonical long market rows."""
     captured = pd.Timestamp(captured_at)
@@ -38,6 +39,17 @@ def normalize_cfbd_line_snapshots(
         game_id = game.get("id") or game.get("gameId") or game.get("game_id")
         if game_id is None:
             continue
+        row_source = str(game.get("source") or source)
+        available_at = pd.to_datetime(game.get("available_at"), utc=True, errors="coerce")
+        if pd.isna(available_at):
+            available_at = captured
+        provider_event_id = game.get("provider_event_id")
+        provider_observed_at = pd.to_datetime(
+            game.get("provider_observed_at"), utc=True, errors="coerce"
+        )
+        if pd.isna(provider_observed_at):
+            provider_observed_at = pd.NaT
+        game_is_live = game.get("is_live")
         for quote in game.get("lines") or []:
             sportsbook = _provider_name(quote.get("provider"))
             home_spread = _number(quote.get("spread"))
@@ -61,22 +73,32 @@ def normalize_cfbd_line_snapshots(
                         "market": market,
                         "side": side,
                         "captured_at": captured,
+                        "available_at": available_at,
+                        "provider_event_id": quote.get("provider_event_id") or provider_event_id,
+                        "provider_observed_at": pd.to_datetime(
+                            quote.get("provider_observed_at"), utc=True, errors="coerce"
+                        ) if quote.get("provider_observed_at") else provider_observed_at,
+                        "is_live": quote.get("is_live", game_is_live),
+                        "stale_seconds": quote.get("stale_seconds"),
+                        "topped_up": quote.get("topped_up"),
                         "line": line,
                         "odds": price,
-                        "source": "cfbd",
+                        "source": row_source,
                         "ingestion_run_id": ingestion_run_id,
                         "raw_payload_path": raw_payload_path,
                     }
                 )
     columns = [
-        "game_id", "sportsbook", "market", "side", "captured_at", "line", "odds", "source",
+        "game_id", "sportsbook", "market", "side", "captured_at", "available_at",
+        "provider_event_id", "provider_observed_at", "is_live", "stale_seconds", "topped_up",
+        "line", "odds", "source",
         "ingestion_run_id", "raw_payload_path",
     ]
     result = pd.DataFrame(rows, columns=columns)
     if result.empty:
         return result
     result = result.drop_duplicates(
-        ["game_id", "sportsbook", "market", "side", "captured_at"], keep="last"
+        ["game_id", "source", "sportsbook", "market", "side", "captured_at"], keep="last"
     )
     report = validate_line_snapshots(result)
     report.raise_for_errors()
@@ -182,7 +204,15 @@ def append_line_snapshots(snapshots: pd.DataFrame, path: str | Path) -> Path:
     existing = pd.read_parquet(destination) if destination.exists() else pd.DataFrame()
     combined = pd.concat([existing, snapshots], ignore_index=True)
     combined["captured_at"] = ensure_utc(combined["captured_at"])
-    keys = ["game_id", "sportsbook", "market", "side", "captured_at"]
+    if "source" not in combined.columns:
+        combined["source"] = "cfbd"
+    combined["source"] = combined["source"].fillna("cfbd")
+    if "available_at" not in combined.columns:
+        combined["available_at"] = combined["captured_at"]
+    else:
+        combined["available_at"] = ensure_utc(combined["available_at"])
+        combined["available_at"] = combined["available_at"].fillna(combined["captured_at"])
+    keys = ["game_id", "source", "sportsbook", "market", "side", "captured_at"]
     combined = combined.sort_values("captured_at").drop_duplicates(keys, keep="last")
     validate_line_snapshots(combined).raise_for_errors()
     return atomic_write_parquet(combined, destination)

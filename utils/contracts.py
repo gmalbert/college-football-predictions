@@ -146,12 +146,12 @@ LINE_SNAPSHOT_CONTRACT = FrameContract(
     name="line_snapshots",
     grain="one quote per sportsbook, market, side, and capture time",
     required=(
-        "game_id", "sportsbook", "market", "side", "captured_at", "odds",
+        "game_id", "sportsbook", "market", "side", "captured_at", "odds", "source",
     ),
-    unique_key=("game_id", "sportsbook", "market", "side", "captured_at"),
+    unique_key=("game_id", "source", "sportsbook", "market", "side", "captured_at"),
     # Some feeds expose a line without its associated price. Keep that absence
     # explicit; price-aware EV code must reject rather than invent such odds.
-    non_null=("game_id", "sportsbook", "market", "side", "captured_at"),
+    non_null=("game_id", "sportsbook", "market", "side", "captured_at", "source"),
 )
 
 FEATURE_OBSERVATION_CONTRACT = FrameContract(
@@ -212,6 +212,17 @@ def validate_line_snapshots(frame: pd.DataFrame) -> ValidationReport:
                 "invalid_capture_time",
                 f"{bad_dates} quotes have an invalid captured_at value",
                 rows=bad_dates,
+            )
+    for column in ("available_at", "provider_observed_at"):
+        if column not in frame.columns:
+            continue
+        supplied = frame[column].notna()
+        invalid = int(ensure_utc(frame.loc[supplied, column]).isna().sum())
+        if invalid:
+            report.add(
+                f"invalid_{column}",
+                f"{invalid} quotes have an invalid {column} value",
+                rows=invalid,
             )
     return report
 

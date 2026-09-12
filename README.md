@@ -112,6 +112,7 @@ Normal ingestion reuses completed-season caches, refreshes the current season, r
 - [Data model v2](docs/DATA_MODEL_V2.md)
 - [Predictive-betting research](docs/PREDICTIVE_BETTING_RESEARCH.md)
 - [Implementation runbook](docs/IMPLEMENTATION_RUNBOOK.md)
+- [ParlayAPI shadow collector](docs/PARLAY_API_SHADOW_COLLECTOR.md)
 
 ## Important limitations
 
@@ -119,5 +120,6 @@ Normal ingestion reuses completed-season caches, refreshes the current season, r
 - Season-level exploration columns remain in the feature artifact for UI/research compatibility but are excluded from active model feature lists.
 - Genuine line movement and CLV require immutable, timestamped multi-book odds snapshots; the code/schema exists, but the current historical cache cannot recreate observations never collected.
 - `scripts/snapshot_market.py` starts that collection prospectively; CFBD may omit spread/total prices, so a richer paid odds feed is still desirable.
+- ParlayAPI NCAAF quotes can be captured in shadow mode with `PARLAY_API_KEY` and `python scripts/snapshot_market.py --source parlay`; they remain outside active model features until coverage, freshness, and CLV gates pass.
 - Weather, injuries, quarterback status, travel and roster context must be timestamped as they were known before the prediction. Observed postgame values are not valid substitutes.
 - A good forecast is not automatically a profitable bet. Prices, limits, latency, correlation, uncertainty and responsible bankroll constraints matter.

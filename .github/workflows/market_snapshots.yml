@@ -38,12 +38,23 @@ jobs:
           THERUNDOWN_API_KEY: ${{ secrets.THERUNDOWN_API_KEY }}
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ secrets.ODDS_API_IO_BOOKMAKERS }}
+          PARLAY_API_KEY: ${{ secrets.PARLAY_API_KEY }}
         run: |
           SEASON_FLAG=""
           if [ -n "${{ github.event.inputs.season }}" ]; then
             SEASON_FLAG="--season=${{ github.event.inputs.season }}"
           fi
           python scripts/snapshot_market.py $SEASON_FLAG --refresh-features
+      - name: Append ParlayAPI shadow snapshot
+        env:
+          PARLAY_API_KEY: ${{ secrets.PARLAY_API_KEY }}
+        run: |
+          SEASON_FLAG=""
+          if [ -n "${{ github.event.inputs.season }}" ]; then
+            SEASON_FLAG="--season=${{ github.event.inputs.season }}"
+          fi
+          python scripts/snapshot_market.py --source parlay $SEASON_FLAG
+        continue-on-error: true
       - name: Refresh shadow CLV and release metadata
         run: |
           python scripts/settle_shadow_ledger.py
