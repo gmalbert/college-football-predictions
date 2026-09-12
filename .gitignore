@@ -22,3 +22,8 @@ utils/__init__.py*
 # Keep raw JSON cache out of source control unless explicitly needed
 data_files/raw/
 .DS_Store
+.venv
+.venv312
+.kilo
+.vscode
+*code-workspace
