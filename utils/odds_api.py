@@ -15,6 +15,62 @@ logger = get_logger(__name__)
 ODDS_URL = "https://api.the-odds-api.com/v4/sports/americanfootball_ncaaf/odds"
 TIMEOUT = 20
 
+# Market feeds use a mixture of abbreviations, historical school names, and
+# mascotted names while CFBD generally uses one schedule-facing label. Keep
+# these aliases conservative and explicit: they are applied before the
+# existing exact/prefix matcher, so they cannot turn an arbitrary fuzzy match
+# into a game assignment.
+_TEAM_ALIAS_GROUPS = (
+    ("appstate", "appalachianstate"),
+    ("wpi", "worcesterpolytechnic"),
+    ("newengland", "universityofnewengland"),
+    ("vermontstatecastleton", "castletonstatecollege"),
+    ("wheatonil", "wheatoncollegeillinois"),
+    ("ualbany", "albany"),
+    ("longislanduniversity", "longisland"),
+    ("northcarolinawesleyan", "ncwesleyan"),
+    ("uncpembroke", "northcarolinapembroke"),
+    ("westminsterpa", "westminstercollegepa"),
+    ("utmartin", "tennesseemartin"),
+    ("maryvilletn", "maryvillecollege"),
+    ("wilmingtonoh", "wilmingtoncollege"),
+    ("lakeland", "lakelanduniversity"),
+    ("callutheran", "californialutheran"),
+    ("augustanasd", "augustanauniversitysd"),
+    ("saintxavier", "stxavieril"),
+    ("augustanail", "augustanacollegeil"),
+    ("cornellia", "cornellcollegeia"),
+    ("stthomasmn", "stthomasminnesota"),
+    ("washingtonstlouis", "washingtonmissouri"),
+    ("csupueblo", "coloradostatepueblo"),
+    ("saintanselm", "stanselm"),
+    ("washingtonandlee", "washingtonleeuniversity"),
+    ("westminstermo", "westminstercollegemo"),
+    ("eureka", "eurekacollege"),
+    ("iupennsylvania", "indianapa"),
+    ("simpsonia", "simpsoncollege"),
+    ("northwesternmn", "univofnorthwesternstpaul"),
+    ("utpermianbasin", "universityoftexasofthepermianbasin"),
+    ("trinitytx", "trinityuniversitytx"),
+    ("trinityct", "trinitycollegect"),
+    ("loras", "lorascollege"),
+    ("colby", "colbycollege"),
+    ("benedictineil", "benedictineuniversityil"),
+    ("easttexasam", "texasamcommerce"),
+    ("concordiamn", "concordiamoorhead"),
+    ("randolphmacon", "randolphmaconcollege"),
+    ("wesleyanct", "wesleyanuniversityct"),
+    ("saintjohnsmn", "stjohnsmn"),
+    ("lyon", "lyoncollege"),
+    ("utriograndevalley", "utrgv"),
+    ("ucf", "centralflorida"),
+    ("louisiana", "ullafayette"),
+    ("selouisiana", "southeasternlouisiana"),
+    ("ulmonroe", "louisianamonroe"),
+    ("massachusetts", "umass", "umassminutemen"),
+    ("olemiss", "mississippi"),
+)
+
 
 def _api_key() -> str:
     """Return the configured Odds API key without ever logging it."""
@@ -61,7 +117,11 @@ def get_ncaaf_odds() -> list[dict]:
 
 def _team_key(value: object) -> str:
     normalized = unicodedata.normalize("NFKD", str(value)).encode("ascii", "ignore").decode()
-    return "".join(character for character in normalized.casefold() if character.isalnum())
+    key = "".join(character for character in normalized.casefold() if character.isalnum())
+    for canonical, *aliases in _TEAM_ALIAS_GROUPS:
+        if key == canonical or key in aliases:
+            return canonical
+    return key
 
 
 def _same_team(left: object, right: object) -> bool:
