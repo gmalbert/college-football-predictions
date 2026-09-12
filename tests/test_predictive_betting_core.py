@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import unittest
 from datetime import date
+import io
 from pathlib import Path
 import tempfile
 from unittest.mock import patch
 
+import joblib
 import numpy as np
 import pandas as pd
 
@@ -34,7 +36,11 @@ from utils.market import (
     settle_bet,
     spread_edge,
 )
-from utils.odds_ingestion import build_market_consensus, normalize_cfbd_line_snapshots
+from utils.odds_ingestion import (
+    build_market_consensus,
+    build_market_consensus_from_snapshots,
+    normalize_cfbd_line_snapshots,
+)
 from utils.odds_api import to_cfbd_line_payload
 from utils.odds_api import _same_team, match_scheduled_game
 from utils.rundown_client import to_cfbd_line_payload as rundown_to_cfbd_line_payload
@@ -65,6 +71,52 @@ class _ConstantRegressor:
 
 
 class IngestionTests(unittest.TestCase):
+    def test_snapshot_union_preserves_existing_quotes_and_excludes_shadow_inputs(self):
+        games = pd.DataFrame({
+            "game_id": [101],
+            "season": [2026],
+            "home_team": ["Kansas"],
+            "away_team": ["Missouri"],
+        })
+        snapshots = pd.DataFrame([
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T12:00:00Z", "line": 4.5, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "away",
+                "captured_at": "2026-09-12T12:00:00Z", "line": -4.5, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "total", "side": "over",
+                "captured_at": "2026-09-12T12:00:00Z", "line": 51.5, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "total", "side": "under",
+                "captured_at": "2026-09-12T12:00:00Z", "line": 51.5, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "moneyline", "side": "home",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": 170, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "moneyline", "side": "away",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": -208, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T12:01:00Z", "line": 20, "odds": -110, "source": "parlay_api",
+            },
+        ])
+
+        result = build_market_consensus_from_snapshots(snapshots, games, season=2026)
+
+        self.assertEqual(result.loc[0, "game_id"], 101)
+        self.assertEqual(result.loc[0, "market_spread"], 4.5)
+        self.assertEqual(result.loc[0, "market_total"], 51.5)
+        self.assertEqual(result.loc[0, "home_moneyline"], 170)
+        self.assertEqual(result.loc[0, "away_moneyline"], -208)
+
     def test_cfbd_key_normalizes_bearer_prefix_and_rejects_empty(self):
         with patch.object(cfbd_client, "get_secret", return_value="Bearer token-value"):
             self.assertEqual(cfbd_client._api_key(), "token-value")
@@ -167,6 +219,33 @@ class MarketTests(unittest.TestCase):
             _ConstantRegressor(), tuple(frame.columns), "market_spread", -1.0
         )
         np.testing.assert_allclose(regressor.predict(frame), [3.5, 7.0])
+
+    def test_xgboost_market_wrapper_round_trips_without_pickle_booster(self):
+        try:
+            import xgboost as xgb
+        except ImportError:
+            self.skipTest("xgboost is not installed")
+        features = ("market_home_prob",)
+        train = xgb.DMatrix(
+            np.array([[0.25], [0.75]], dtype=float),
+            label=np.array([0, 1]),
+            feature_names=list(features),
+        )
+        booster = xgb.train(
+            {"objective": "binary:logistic", "seed": 42},
+            train,
+            num_boost_round=1,
+        )
+        wrapper = MarketBaselineClassifier(booster, features)
+        buffer = io.BytesIO()
+        joblib.dump(wrapper, buffer)
+        buffer.seek(0)
+        restored = joblib.load(buffer)
+        probabilities = restored.predict_proba(
+            pd.DataFrame({"market_home_prob": [0.6]})
+        )[:, 1]
+        np.testing.assert_allclose(probabilities, [0.6])
+
     def test_spread_sign_convention(self):
         edge = spread_edge(model_home_margin=10, home_spread=-7)
         self.assertEqual(edge.side, Side.HOME)

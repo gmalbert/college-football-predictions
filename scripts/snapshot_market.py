@@ -25,9 +25,18 @@ from utils.rundown_client import (  # noqa: E402
     get_ncaaf_events, is_configured as rundown_is_configured,
     to_cfbd_line_payload as rundown_to_cfbd_line_payload,
 )
-from utils.odds_ingestion import append_line_snapshots, normalize_cfbd_line_snapshots  # noqa: E402
+from utils.odds_ingestion import (  # noqa: E402
+    append_line_snapshots,
+    build_market_consensus_from_snapshots,
+    normalize_cfbd_line_snapshots,
+)
 from utils.seasons import current_cfb_season  # noqa: E402
-from utils.storage import PROCESSED_DIR, save_raw_json, save_immutable_raw_json  # noqa: E402
+from utils.storage import (  # noqa: E402
+    PROCESSED_DIR,
+    atomic_write_parquet,
+    save_immutable_raw_json,
+    save_raw_json,
+)
 import pandas as pd
 
 
@@ -39,6 +48,33 @@ def _plain(value):
     if hasattr(value, "to_dict"):
         return _plain(value.to_dict())
     return value
+
+
+def _rebuild_lines_from_snapshot_union(games: pd.DataFrame, season: int, output: Path) -> bool:
+    """Refresh model-facing lines without dropping other provider snapshots."""
+    if not output.exists() or games.empty:
+        return False
+    snapshots = pd.read_parquet(output)
+    consensus = build_market_consensus_from_snapshots(
+        snapshots,
+        games,
+        season=season,
+        exclude_sources=("parlay_api",),
+    )
+    if consensus.empty:
+        return False
+
+    destination = PROCESSED_DIR / "lines.parquet"
+    existing = pd.read_parquet(destination) if destination.exists() else pd.DataFrame()
+    if not existing.empty and "season" in existing.columns:
+        existing = existing[existing["season"].ne(season)].copy()
+    combined = pd.concat([existing, consensus], ignore_index=True, sort=False)
+    atomic_write_parquet(combined, destination)
+    print(
+        f"Rebuilt {destination} from the retained snapshot union: "
+        f"{len(consensus):,} current-season games"
+    )
+    return True
 
 
 def main() -> int:
@@ -127,12 +163,14 @@ def main() -> int:
         f"(run={ingestion_run_id}, raw={raw_path.relative_to(ROOT)})"
     )
     if args.refresh_features:
-        save_raw_json(payload, f"lines_{args.season}")
-        from utils.fetch_historical import _build_lines
+        # Keep each provider response auditable without replacing the legacy
+        # season cache.  The model-facing line table is rebuilt from all
+        # retained non-shadow snapshots below.
+        save_raw_json(payload, f"lines_{source}_{args.season}")
         from utils.feature_engine import build_feature_matrix
         from scripts.export_shadow_totals import main as export_shadow_totals
 
-        _build_lines(True)
+        _rebuild_lines_from_snapshot_union(games, args.season, args.output)
         build_feature_matrix(force=True)
         export_shadow_totals()
     return 0

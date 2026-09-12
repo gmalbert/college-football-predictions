@@ -195,6 +195,126 @@ def build_market_consensus(games: Iterable[dict]) -> pd.DataFrame:
     return consensus
 
 
+def build_market_consensus_from_snapshots(
+    snapshots: pd.DataFrame,
+    games: pd.DataFrame,
+    *,
+    season: int,
+    exclude_sources: Iterable[str] = ("parlay_api",),
+) -> pd.DataFrame:
+    """Build current market features from the retained snapshot union.
+
+    ``lines.parquet`` historically came from one provider's nested response.
+    That made a later provider refresh erase games that were present in an
+    earlier feed.  The immutable long-form snapshot table is the durable
+    source of truth, so use its latest quote per book/market/side and combine
+    all non-shadow sources into one consensus for the requested season.
+
+    ParlayAPI is excluded by default because it remains a shadow source and
+    must not change production model inputs.  The Streamlit page can still
+    use those rows as a display-only fallback.
+    """
+    required = {"game_id", "sportsbook", "market", "side", "captured_at", "line", "odds"}
+    missing = sorted(required.difference(snapshots.columns))
+    if missing or games.empty:
+        return pd.DataFrame()
+
+    schedule = games[games["season"].eq(season)].copy()
+    if schedule.empty:
+        return pd.DataFrame()
+    game_ids = pd.to_numeric(schedule["game_id"], errors="coerce").dropna().astype("int64")
+
+    frame = snapshots.copy()
+    frame["game_id"] = pd.to_numeric(frame["game_id"], errors="coerce")
+    frame = frame[frame["game_id"].isin(set(game_ids))].copy()
+    excluded = {str(source) for source in exclude_sources}
+    if "source" in frame.columns and excluded:
+        frame = frame[~frame["source"].astype(str).isin(excluded)].copy()
+    if frame.empty:
+        return pd.DataFrame()
+
+    frame["captured_at"] = ensure_utc(frame["captured_at"])
+    frame["line"] = pd.to_numeric(frame["line"], errors="coerce")
+    frame["odds"] = pd.to_numeric(frame["odds"], errors="coerce")
+    frame = frame.dropna(subset=["game_id", "captured_at"])
+    if frame.empty:
+        return pd.DataFrame()
+    frame["game_id"] = frame["game_id"].astype("int64")
+
+    quote_keys = ["game_id", "sportsbook", "market", "side"]
+    ordered = frame.sort_values("captured_at")
+    current = ordered.drop_duplicates(quote_keys, keep="last")
+    opening = ordered.drop_duplicates(quote_keys, keep="first")
+
+    def median_value(group: pd.DataFrame, market: str, side: str, column: str) -> float:
+        values = group.loc[
+            group["market"].eq(market) & group["side"].eq(side), column
+        ].dropna()
+        return float(values.median()) if not values.empty else np.nan
+
+    rows: list[dict] = []
+    for game_id, group in current.groupby("game_id", sort=False):
+        first = opening[opening["game_id"].eq(game_id)]
+        home_spread = median_value(group, "spread", "home", "line")
+        open_spread = median_value(first, "spread", "home", "line")
+        total = median_value(group, "total", "over", "line")
+        if pd.isna(total):
+            total = median_value(group, "total", "under", "line")
+        open_total = median_value(first, "total", "over", "line")
+        if pd.isna(open_total):
+            open_total = median_value(first, "total", "under", "line")
+
+        current_spreads = group.loc[
+            group["market"].eq("spread") & group["side"].eq("home"), "line"
+        ].dropna()
+        current_totals = group.loc[
+            group["market"].eq("total") & group["side"].eq("over"), "line"
+        ].dropna()
+        if current_totals.empty:
+            current_totals = group.loc[
+                group["market"].eq("total") & group["side"].eq("under"), "line"
+            ].dropna()
+
+        home_moneylines: list[float] = []
+        away_moneylines: list[float] = []
+        market_home_probs: list[float] = []
+        for _, book in group.groupby("sportsbook", sort=False):
+            home_ml = median_value(book, "moneyline", "home", "odds")
+            away_ml = median_value(book, "moneyline", "away", "odds")
+            if pd.notna(home_ml):
+                home_moneylines.append(home_ml)
+            if pd.notna(away_ml):
+                away_moneylines.append(away_ml)
+            if pd.notna(home_ml) and pd.notna(away_ml) and home_ml != 0 and away_ml != 0:
+                market_home_probs.append(float(remove_vig([home_ml, away_ml])[0]))
+
+        rows.append(
+            {
+                "game_id": int(game_id),
+                "season": int(season),
+                "market_spread": home_spread,
+                "market_spread_open": open_spread,
+                "market_spread_dispersion": float(current_spreads.std()) if len(current_spreads) > 1 else 0.0,
+                "market_spread_book_count": int(current_spreads.count()),
+                "market_total": total,
+                "market_total_open": open_total,
+                "market_total_dispersion": float(current_totals.std()) if len(current_totals) > 1 else 0.0,
+                "market_total_book_count": int(current_totals.count()),
+                "home_moneyline": float(np.median(home_moneylines)) if home_moneylines else np.nan,
+                "away_moneyline": float(np.median(away_moneylines)) if away_moneylines else np.nan,
+                "market_home_prob": float(np.median(market_home_probs)) if market_home_probs else np.nan,
+                "moneyline_book_count": len(market_home_probs),
+            }
+        )
+
+    consensus = pd.DataFrame(rows)
+    if consensus.empty:
+        return consensus
+    consensus["market_spread_move"] = consensus["market_spread"] - consensus["market_spread_open"]
+    consensus["market_total_move"] = consensus["market_total"] - consensus["market_total_open"]
+    return consensus
+
+
 def append_line_snapshots(snapshots: pd.DataFrame, path: str | Path) -> Path:
     """Append idempotently and replace the compressed Parquet artifact atomically."""
     destination = Path(path)

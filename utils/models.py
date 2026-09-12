@@ -489,7 +489,8 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     def _load(path):
         try:
             return joblib.load(path)
-        except Exception:
+        except Exception as exc:
+            logger.warning("Unable to load model artifact %s: %s", path, exc)
             return None
 
     win_m = _load(WIN_MODEL_PATH)
@@ -506,17 +507,31 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
         if f not in df.columns:
             df[f] = np.nan
 
-    try:
-        X = df[WIN_FEATURES]
-        df["win_prob"] = _clf_predict_proba(win_m, X)
-    except Exception:
-        df["win_prob"] = float("nan")
+    if win_m is None and "market_home_prob" in df.columns:
+        # A market-anchored model can still produce its contract value when an
+        # older structural fallback artifact is unreadable.
+        df["win_prob"] = pd.to_numeric(
+            df["market_home_prob"], errors="coerce"
+        ).clip(1e-6, 1 - 1e-6)
+    else:
+        try:
+            X = df[WIN_FEATURES]
+            df["win_prob"] = _clf_predict_proba(win_m, X)
+        except Exception:
+            df["win_prob"] = float("nan")
 
-    try:
-        X = df[SPREAD_FEATURES]
-        df["predicted_spread"] = _reg_predict(spread_m, X)
-    except Exception:
-        df["predicted_spread"] = float("nan")
+    if spread_m is None and "market_spread" in df.columns:
+        # market_spread is expressed from the away-team perspective; the
+        # model contract is home score minus away score.
+        df["predicted_spread"] = -pd.to_numeric(
+            df["market_spread"], errors="coerce"
+        )
+    else:
+        try:
+            X = df[SPREAD_FEATURES]
+            df["predicted_spread"] = _reg_predict(spread_m, X)
+        except Exception:
+            df["predicted_spread"] = float("nan")
 
     try:
         X = df[TOTAL_FEATURES]

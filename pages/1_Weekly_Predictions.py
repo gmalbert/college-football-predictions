@@ -8,9 +8,11 @@ from __future__ import annotations
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from pathlib import Path
 
 from utils.ui_components import render_sidebar, themed_dataframe
-from utils.storage import load_parquet
+from utils.storage import FEATURES_DIR, PROCESSED_DIR, load_parquet
+from utils.odds_ingestion import build_market_consensus_from_snapshots
 from utils.models import load_metrics, predict_for_display, models_trained
 from utils.betting import (
     generate_spread_pick, generate_total_pick, generate_moneyline_pick,
@@ -26,8 +28,15 @@ if release.get("decision") != "promote":
     st.warning("Research mode: model release gates have not approved betting use.")
 
 # ── data availability check ──────────────────────────────────────────────────
+def _artifact_mtime(path: Path) -> int | None:
+    try:
+        return path.stat().st_mtime_ns
+    except FileNotFoundError:
+        return None
+
+
 @st.cache_data(ttl=3600)
-def load_feature_matrix():
+def load_feature_matrix(artifact_mtime: int | None = None):
     try:
         return load_parquet("feature_matrix", layer="features")
     except FileNotFoundError:
@@ -35,24 +44,21 @@ def load_feature_matrix():
 
 
 @st.cache_data(ttl=300)
-def load_parlay_snapshots():
-    """Load locally captured ParlayAPI quotes without touching model inputs."""
+def load_market_snapshots(artifact_mtime: int | None = None):
+    """Load retained market quotes for display without changing model inputs."""
     try:
         snapshots = load_parquet("line_snapshots")
     except FileNotFoundError:
         return pd.DataFrame()
-    if snapshots.empty or "source" not in snapshots.columns:
-        return pd.DataFrame()
-    snapshots = snapshots[snapshots["source"].eq("parlay_api")].copy()
     if snapshots.empty:
-        return snapshots
+        return pd.DataFrame()
     snapshots["captured_at"] = pd.to_datetime(
         snapshots["captured_at"], utc=True, errors="coerce"
     )
     return snapshots.dropna(subset=["game_id", "captured_at"])
 
 
-df_all = load_feature_matrix()
+df_all = load_feature_matrix(_artifact_mtime(FEATURES_DIR / "feature_matrix.parquet"))
 
 if df_all.empty:
     st.warning(
@@ -130,8 +136,15 @@ if df_week.empty:
     st.info("No games match the current filters.")
     st.stop()
 
-# ── ParlayAPI shadow quotes ──────────────────────────────────────────────────
-parlay = load_parlay_snapshots()
+# ── retained market quotes ───────────────────────────────────────────────────
+market_snapshots = load_market_snapshots(
+    _artifact_mtime(PROCESSED_DIR / "line_snapshots.parquet")
+)
+parlay = (
+    market_snapshots[market_snapshots["source"].eq("parlay_api")].copy()
+    if not market_snapshots.empty and "source" in market_snapshots.columns
+    else pd.DataFrame()
+)
 if not parlay.empty:
     week_ids = pd.to_numeric(df_week["game_id"], errors="coerce")
     parlay_week = parlay[
@@ -192,7 +205,9 @@ else:
     ):
         st.caption(
             f"Latest local capture: {latest_capture}. These prices are informational only "
-            "and do not drive the model or recommendations."
+            "and do not drive the model or recommendations. Cards use the retained "
+            "market snapshot union as a display-only fallback when model-facing lines "
+            "are unavailable."
         )
         themed_dataframe(
             parlay_week[
@@ -207,6 +222,18 @@ else:
             hide_index=True,
         )
 
+# Use the latest retained quote union only when the model-facing market fields
+# are missing. This keeps ParlayAPI shadow prices visible without allowing them
+# to silently replace a production consensus already attached to the feature
+# matrix.
+display_consensus = build_market_consensus_from_snapshots(
+    market_snapshots,
+    df_week.assign(season=season),
+    season=int(season),
+    exclude_sources=(),
+)
+display_consensus = display_consensus.set_index("game_id") if not display_consensus.empty else pd.DataFrame()
+
 for _, row in df_week.iterrows():
     home = row.get("home_team", "—")
     away = row.get("away_team", "—")
@@ -217,6 +244,19 @@ for _, row in df_week.iterrows():
     bt   = row.get("market_total", float("nan"))
     hml  = row.get("home_moneyline", float("nan"))
     aml  = row.get("away_moneyline", float("nan"))
+    try:
+        fallback = display_consensus.loc[int(row["game_id"])] if not display_consensus.empty else None
+    except (KeyError, TypeError, ValueError):
+        fallback = None
+    if fallback is not None:
+        if pd.isna(bs):
+            bs = fallback.get("market_spread", float("nan"))
+        if pd.isna(bt):
+            bt = fallback.get("market_total", float("nan"))
+        if pd.isna(hml):
+            hml = fallback.get("home_moneyline", float("nan"))
+        if pd.isna(aml):
+            aml = fallback.get("away_moneyline", float("nan"))
 
     with st.container():
         hdr1, hdr2, hdr3 = st.columns([5, 1, 5])
