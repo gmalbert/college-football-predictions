@@ -39,6 +39,7 @@ from utils.odds_api import to_cfbd_line_payload
 from utils.odds_api import _same_team, match_scheduled_game
 from utils.rundown_client import to_cfbd_line_payload as rundown_to_cfbd_line_payload
 from utils.odds_api_io import to_cfbd_line_payload as odds_api_io_to_cfbd_line_payload
+from utils.parlay_api import to_cfbd_line_payload as parlay_to_cfbd_line_payload
 from utils.risk import RiskLimits, conservative_probability, size_portfolio
 from utils.seasons import current_cfb_season, rolling_season_window
 from utils.temporal import (
@@ -278,6 +279,58 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["spread"], -3.5)
         self.assertEqual(quote["overUnder"], 51.5)
         self.assertEqual(quote["homeMoneyline"], -150)
+
+    def test_parlay_payload_preserves_event_and_freshness_metadata(self):
+        games = pd.DataFrame({
+            "game_id": [101], "season": [2026],
+            "home_team": ["Ohio State"], "away_team": ["Texas"],
+            "start_date": ["2026-09-12T18:00:00Z"],
+        })
+        events = [{
+            "id": "parlay-event-1",
+            "home_team": "Ohio State Buckeyes",
+            "away_team": "Texas Longhorns",
+            "commence_time": "2026-09-12T18:00:00Z",
+            "bookmakers": [{
+                "key": "book-a", "title": "Book A", "last_update": "2026-09-12T12:00:00Z",
+                "markets": [
+                    {"key": "h2h", "outcomes": [
+                        {"name": "Ohio State Buckeyes", "price": -150},
+                        {"name": "Texas Longhorns", "price": 130},
+                    ]},
+                    {"key": "spreads", "outcomes": [
+                        {"name": "Ohio State Buckeyes", "point": -3.5, "price": -110},
+                        {"name": "Texas Longhorns", "point": 3.5, "price": -110},
+                    ]},
+                    {"key": "totals", "outcomes": [
+                        {"name": "Over", "point": 51.5, "price": -105},
+                        {"name": "Under", "point": 51.5, "price": -115},
+                    ]},
+                ],
+            }],
+        }]
+        payload = parlay_to_cfbd_line_payload(
+            events, games, season=2026, observed_at="2026-09-12T12:01:00Z"
+        )
+        self.assertEqual(payload[0]["id"], 101)
+        self.assertEqual(payload[0]["source"], "parlay_api")
+        self.assertEqual(payload[0]["provider_event_id"], "parlay-event-1")
+        self.assertEqual(payload[0]["lines"][0]["provider_observed_at"], "2026-09-12T12:00:00Z")
+        self.assertEqual(payload[0]["lines"][0]["spread"], -3.5)
+
+    def test_snapshot_normalization_is_source_aware(self):
+        payload = [{
+            "id": 7, "source": "parlay_api", "provider_event_id": "event-7",
+            "available_at": "2026-08-20T12:01:00Z",
+            "provider_observed_at": "2026-08-20T12:00:00Z",
+            "lines": [{"provider": "Book A", "spread": -7.5}],
+        }]
+        snapshots = normalize_cfbd_line_snapshots(
+            payload, captured_at="2026-08-20T12:01:00Z", source="parlay_api"
+        )
+        self.assertEqual(snapshots.iloc[0]["source"], "parlay_api")
+        self.assertEqual(snapshots.iloc[0]["provider_event_id"], "event-7")
+        self.assertEqual(snapshots.iloc[0]["available_at"], pd.Timestamp("2026-08-20T12:01:00Z"))
 
     def test_rundown_payload_maps_main_lines_to_cfbd_game_ids(self):
         games = pd.DataFrame({"game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"]})

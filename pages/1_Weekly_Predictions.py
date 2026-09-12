@@ -9,7 +9,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from utils.ui_components import render_sidebar
+from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import load_parquet
 from utils.models import load_metrics, predict_for_display, models_trained
 from utils.betting import (
@@ -32,6 +32,24 @@ def load_feature_matrix():
         return load_parquet("feature_matrix", layer="features")
     except FileNotFoundError:
         return pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def load_parlay_snapshots():
+    """Load locally captured ParlayAPI quotes without touching model inputs."""
+    try:
+        snapshots = load_parquet("line_snapshots")
+    except FileNotFoundError:
+        return pd.DataFrame()
+    if snapshots.empty or "source" not in snapshots.columns:
+        return pd.DataFrame()
+    snapshots = snapshots[snapshots["source"].eq("parlay_api")].copy()
+    if snapshots.empty:
+        return snapshots
+    snapshots["captured_at"] = pd.to_datetime(
+        snapshots["captured_at"], utc=True, errors="coerce"
+    )
+    return snapshots.dropna(subset=["game_id", "captured_at"])
 
 
 df_all = load_feature_matrix()
@@ -111,6 +129,83 @@ st.divider()
 if df_week.empty:
     st.info("No games match the current filters.")
     st.stop()
+
+# ── ParlayAPI shadow quotes ──────────────────────────────────────────────────
+parlay = load_parlay_snapshots()
+if not parlay.empty:
+    week_ids = pd.to_numeric(df_week["game_id"], errors="coerce")
+    parlay_week = parlay[
+        pd.to_numeric(parlay["game_id"], errors="coerce").isin(week_ids)
+    ].copy()
+else:
+    parlay_week = pd.DataFrame()
+
+if parlay_week.empty:
+    st.caption("ParlayAPI shadow quotes: no locally captured prices for this week.")
+else:
+    game_labels = df_week[["game_id", "away_team", "home_team"]].copy()
+    game_labels["game_id"] = pd.to_numeric(game_labels["game_id"], errors="coerce")
+    parlay_week["game_id"] = pd.to_numeric(parlay_week["game_id"], errors="coerce")
+    parlay_week = parlay_week.merge(game_labels, on="game_id", how="left", validate="many_to_one")
+    parlay_week = (
+        parlay_week.sort_values("captured_at")
+        .drop_duplicates(["game_id", "sportsbook", "market", "side"], keep="last")
+    )
+    parlay_week["Game"] = (
+        parlay_week["away_team"].astype(str)
+        + " @ "
+        + parlay_week["home_team"].astype(str)
+    )
+    parlay_week["Market"] = parlay_week["market"].astype(str).str.title()
+    parlay_week["Side"] = parlay_week["side"].astype(str).str.title()
+    parlay_week["Line"] = pd.to_numeric(parlay_week["line"], errors="coerce").map(
+        lambda value: f"{value:+.1f}" if pd.notna(value) else "—"
+    )
+    parlay_week["American Odds"] = pd.to_numeric(
+        parlay_week["odds"], errors="coerce"
+    ).map(lambda value: f"{int(value):+d}" if pd.notna(value) else "—")
+    parlay_week["Captured UTC"] = parlay_week["captured_at"].dt.strftime(
+        "%Y-%m-%d %H:%M"
+    )
+    if "provider_observed_at" in parlay_week.columns:
+        provider_time = pd.to_datetime(
+            parlay_week["provider_observed_at"], utc=True, errors="coerce"
+        )
+        parlay_week["Provider UTC"] = provider_time.dt.strftime("%Y-%m-%d %H:%M")
+        parlay_week["Provider UTC"] = parlay_week["Provider UTC"].fillna("—")
+    else:
+        parlay_week["Provider UTC"] = "—"
+    parlay_week["Live"] = parlay_week["is_live"].fillna(False).map(
+        lambda value: "Yes" if bool(value) else "No"
+    ) if "is_live" in parlay_week.columns else "No"
+    if "stale_seconds" in parlay_week.columns:
+        parlay_week["Stale Seconds"] = pd.to_numeric(
+            parlay_week["stale_seconds"], errors="coerce"
+        ).map(lambda value: f"{value:.0f}" if pd.notna(value) else "—")
+    else:
+        parlay_week["Stale Seconds"] = "—"
+
+    latest_capture = parlay_week["captured_at"].max().strftime("%Y-%m-%d %H:%M UTC")
+    with st.expander(
+        f"ParlayAPI shadow quotes · {len(parlay_week):,} latest book/market prices",
+        expanded=False,
+    ):
+        st.caption(
+            f"Latest local capture: {latest_capture}. These prices are informational only "
+            "and do not drive the model or recommendations."
+        )
+        themed_dataframe(
+            parlay_week[
+                [
+                    "Game", "sportsbook", "Market", "Side", "Line",
+                    "American Odds", "Captured UTC", "Provider UTC", "Live", "Stale Seconds",
+                ]
+            ].rename(columns={"sportsbook": "Book"})
+            .sort_values(["Game", "Book", "Market", "Side"])
+            .reset_index(drop=True),
+            width="stretch",
+            hide_index=True,
+        )
 
 for _, row in df_week.iterrows():
     home = row.get("home_team", "—")

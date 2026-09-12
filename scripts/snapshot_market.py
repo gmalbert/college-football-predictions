@@ -16,6 +16,11 @@ from utils.odds_api_io import (  # noqa: E402
     is_configured as odds_api_io_is_configured,
     to_cfbd_line_payload as odds_api_io_to_cfbd_line_payload,
 )
+from utils.parlay_api import (  # noqa: E402
+    get_ncaaf_odds as get_parlay_ncaaf_odds,
+    is_configured as parlay_is_configured,
+    to_cfbd_line_payload as parlay_to_cfbd_line_payload,
+)
 from utils.rundown_client import (  # noqa: E402
     get_ncaaf_events, is_configured as rundown_is_configured,
     to_cfbd_line_payload as rundown_to_cfbd_line_payload,
@@ -47,17 +52,32 @@ def main() -> int:
         help="Also refresh the current line consensus, feature matrix, and shadow signals",
     )
     parser.add_argument(
-        "--source", choices=("auto", "odds-api-io", "rundown", "odds", "cfbd"), default="auto",
+        "--source", choices=("auto", "odds-api-io", "rundown", "odds", "parlay", "cfbd"), default="auto",
         help="Market provider (default: try configured alternate providers; CFBD is explicit only)",
     )
     args = parser.parse_args()
     captured_at = datetime.now(timezone.utc)
-    source = "cfbd_lines"
+    source = "cfbd"
     payload = []
     games_path = PROCESSED_DIR / "games.parquet"
     games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
     if args.source == "cfbd":
         payload = _plain(get_lines(args.season))
+    elif args.source == "parlay":
+        if not parlay_is_configured():
+            print("PARLAY_API_KEY is not configured; skipping ParlayAPI snapshot")
+            return 1
+        parlay_events = get_parlay_ncaaf_odds()
+        captured_at = datetime.now(timezone.utc)
+        payload = parlay_to_cfbd_line_payload(
+            parlay_events, games, season=args.season,
+            observed_at=captured_at.isoformat(),
+        )
+        source = "parlay_api"
+        if not payload:
+            print("No matched ParlayAPI quotes returned; existing artifact unchanged")
+            return 1
+        print("Using ParlayAPI for the shadow market snapshot")
     else:
         providers = []
         if args.source in ("auto", "odds-api-io") and odds_api_io_is_configured():
@@ -85,6 +105,9 @@ def main() -> int:
         if not payload:
             print("No alternate market provider returned matched quotes; existing artifact unchanged")
             return 1
+    # Record when the response became available locally, not only when the
+    # request was initiated.  This is the cutoff-safe timestamp for research.
+    captured_at = datetime.now(timezone.utc)
     raw_path, ingestion_run_id, captured_at = save_immutable_raw_json(
         payload or [], source=source, season=args.season, captured_at=captured_at
     )
@@ -93,6 +116,7 @@ def main() -> int:
         captured_at=captured_at,
         ingestion_run_id=ingestion_run_id,
         raw_payload_path=str(raw_path.relative_to(ROOT)),
+        source=source,
     )
     if snapshots.empty:
         print(f"No line snapshots returned for {args.season}; existing artifact unchanged")
