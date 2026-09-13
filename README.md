@@ -49,7 +49,6 @@ The global model release remains **hold**, but v2.2 has a concrete target-specif
 | Model Performance | OOS calibration, baselines, feature importance and ATS by week |
 | Data Quality | Contracts, duplication, freshness, missingness and leakage warnings |
 | Total Market Signals | Closing-time total probability, OOS selections and 2026 shadow signals |
-| Settings | Data refresh, feature build and model training |
 
 ## Data flow
 

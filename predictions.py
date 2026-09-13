@@ -195,7 +195,7 @@ def home_page():
             if top.empty:
                 st.caption("No upcoming games with a positive model edge are available.")
         else:
-            st.caption("No data yet. Go to ⚙️ Settings to pull historical data.")
+            st.caption("No upcoming prediction data is currently published.")
 
     with col_b:
         st.subheader("📐 Model Accuracy")
@@ -205,7 +205,7 @@ def home_page():
             st.metric("OOS ATS Win %", f"{ats_m.get('pct', 0):.1%}",    help="Walk-forward only; 52.4% breaks even at -110")
             st.metric("ATS Record",    f"{ats_m.get('wins',0)}‑{ats_m.get('losses',0)}")
         else:
-            st.caption("Models not yet trained — go to ⚙️ Settings → Train Models.")
+            st.caption("Model evaluation metrics are not currently published.")
 
     with col_c:
         st.subheader("📊 Dataset")
@@ -219,7 +219,7 @@ def home_page():
             st.metric("Seasons", season_range, f"{len(seasons)} seasons in dataset")
             st.metric("Model",   "XGBoost + Ridge" if models_trained() else "Not trained")
         else:
-            st.caption("No data loaded. Go to ⚙️ Settings to get started.")
+            st.caption("No dataset is currently published.")
 
     # st.divider()
 
@@ -277,11 +277,6 @@ nav_sections: dict = {
         st.Page("pages/9_Data_Quality.py",        title="Data & Model Quality", icon="🛡️"),
     ],
 }
-if not _is_cloud:
-    nav_sections["Config"] = [
-        st.Page("pages/6_Settings.py", title="Settings", icon="⚙️"),
-    ]
-
 pg = st.navigation(nav_sections)
 
 # Hide hamburger / manage-app buttons on Streamlit Cloud

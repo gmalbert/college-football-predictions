@@ -18,8 +18,7 @@ college-football-predictions/
 │   ├── 2_💰_Value_Bets.py
 │   ├── 3_🏟️_Team_Explorer.py
 │   ├── 4_📈_Historical_Analysis.py
-│   ├── 5_🎯_Model_Performance.py
-│   └── 6_⚙️_Settings.py
+│   └── 5_🎯_Model_Performance.py
 ├── utils/
 │   ├── __init__.py
 │   ├── cfbd_client.py           # CFBD API wrapper
@@ -317,5 +316,5 @@ def metric_row(metrics: dict[str, tuple[str, str]]) -> None:
 | **MVP** | Home + Weekly Predictions | Week 1 |
 | **v0.2** | Value Bets + Team Explorer | Week 3 |
 | **v0.3** | Historical Analysis | Week 5 |
-| **v0.4** | Model Performance + Settings | Week 7 |
+| **v0.4** | Model Performance | Week 7 |
 | **v1.0** | Live scores, polish, mobile QA | Week 9 |

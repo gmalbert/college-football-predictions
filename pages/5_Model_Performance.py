@@ -35,7 +35,7 @@ st.title("🎯 Model Performance")
 
 if not models_trained():
     st.warning(
-        "Models not yet trained. Go to ⚙️ **Settings** → **Train Models** first."
+        "Model evaluation artifacts are not currently published."
     )
     st.stop()
 

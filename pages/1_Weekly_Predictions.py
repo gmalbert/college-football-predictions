@@ -63,8 +63,7 @@ df_all = load_feature_matrix(_artifact_mtime(FEATURES_DIR / "feature_matrix.parq
 
 if df_all.empty:
     st.warning(
-        "No prediction data found. Go to ⚙️ **Settings** and click "
-        "**Pull Historical Data** then **Train Models** to get started."
+        "No prediction data is currently published."
     )
     st.stop()
 
@@ -97,7 +96,7 @@ df_week = df_all[(df_all["season"] == season) & (df_all["week"] == week)].copy()
 if models_trained():
     df_week = predict_for_display(df_week)
 else:
-    st.info("Models not yet trained. Go to ⚙️ Settings → Train Models.")
+    st.info("Model predictions are not currently published.")
     for col in ["win_prob", "predicted_spread", "predicted_total"]:
         df_week[col] = float("nan")
 

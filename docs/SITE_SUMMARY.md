@@ -21,7 +21,7 @@ source .venv/bin/activate           # macOS/Linux
 streamlit run predictions.py
 ```
 
-Data is refreshed weekly by GitHub Actions (`weekly_pipeline.yml`). For local data refresh: run the pipeline manually via `pages/6_Settings.py` controls or call `utils/cfbd_client.py` fetch functions directly.
+Data is refreshed weekly by GitHub Actions (`weekly_pipeline.yml`). The deployed app is read-only; pipeline maintenance is performed outside the user-facing application.
 
 ## Tech Stack
 
@@ -44,7 +44,6 @@ Data is refreshed weekly by GitHub Actions (`weekly_pipeline.yml`). For local da
 | `pages/3_Team_Explorer.py` | Team card, ELO history, radar chart, schedule |
 | `pages/5_Model_Performance.py` | Brier score, calibration curve, feature importance |
 | `pages/10_Total_Market_Signals.py` | Total-side OOS validation, side gates and prospective shadow signals |
-| `pages/6_Settings.py` | API status, data refresh controls, model retraining triggers |
 | `utils/cfbd_client.py` | CFBD v5 API client — fetches games, advanced stats, recruiting |
 | `utils/feature_engine.py` | Feature matrix builder (86 features: EPA, turnovers, recruiting, form) |
 | `utils/models.py` | XGBoost win/spread/total training, ELO model, batch predictions |
