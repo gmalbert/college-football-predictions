@@ -27,7 +27,14 @@ OUT_PATH = ROOT / "data_files" / "best_bets_today.json"
 LOOKAHEAD_DAYS = 6
 
 
-def _write(bets: list[dict], notes: str = "") -> None:
+def _write(
+    bets: list[dict],
+    notes: str = "",
+    *,
+    release_decision: dict | None = None,
+) -> None:
+    release_decision = release_decision or {}
+    release_status = release_decision.get("decision", "unknown")
     payload: dict = {
         "meta": {
             "sport": SPORT,
@@ -35,9 +42,16 @@ def _write(bets: list[dict], notes: str = "") -> None:
             "model_version": MODEL_VERSION,
             "season": str(current_cfb_season(date.today())),
             "prediction_contract": "latest available line snapshot at export time",
+            "release_status": release_status,
+            "publication_mode": (
+                "validated" if release_status == "promote" else "provisional_research"
+            ),
         },
         "bets": bets,
     }
+    failed_gates = release_decision.get("failed_gates", [])
+    if failed_gates:
+        payload["meta"]["release_failed_gates"] = failed_gates
     if notes:
         payload["meta"]["notes"] = notes
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -95,10 +109,8 @@ def main() -> None:
 
     metrics = load_metrics()
     decision = metrics.get("release_decision", {})
-    if decision.get("decision") != "promote":
-        failed = ", ".join(decision.get("failed_gates", [])) or "release gates unavailable"
-        _write([], f"Model release is on hold: {failed}")
-        return
+    release_on_hold = decision.get("decision") != "promote"
+    failed = ", ".join(decision.get("failed_gates", [])) or "release gates unavailable"
 
     frame = pd.read_parquet(feature_path).drop_duplicates("game_id", keep="last")
     if "start_date" not in frame.columns:
@@ -109,7 +121,11 @@ def main() -> None:
     game_dates = frame["start_date"].dt.date
     upcoming = frame[(game_dates >= today) & (game_dates <= end)].copy()
     if upcoming.empty:
-        _write([], f"No NCAAF games in next {LOOKAHEAD_DAYS} days")
+        _write(
+            [],
+            f"No NCAAF games in next {LOOKAHEAD_DAYS} days",
+            release_decision=decision,
+        )
         return
     upcoming = predict_batch(upcoming)
 
@@ -178,7 +194,15 @@ def main() -> None:
                         )
                     )
     bets.sort(key=lambda bet: (bet["tier"] != "Elite", -float(bet["edge"])))
-    _write(bets, "" if bets else "No bets met release thresholds")
+    if bets and release_on_hold:
+        notes = f"Published provisionally while model release is on hold: {failed}"
+    elif bets:
+        notes = ""
+    else:
+        notes = "No bets met export thresholds"
+        if release_on_hold:
+            notes += f"; model release remains on hold: {failed}"
+    _write(bets, notes, release_decision=decision)
 
 
 if __name__ == "__main__":

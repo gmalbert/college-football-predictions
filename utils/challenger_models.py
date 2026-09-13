@@ -14,6 +14,43 @@ from sklearn.preprocessing import StandardScaler
 from utils.temporal import walk_forward_season_splits
 
 
+def _serialize_model(model):
+    """Persist XGBoost boosters with the native format, not Python pickle.
+
+    XGBoost's Python pickle representation is not a stable interchange format
+    across releases.  The weekly pipeline stores these wrapper objects in
+    joblib artifacts, so pickle can leave an otherwise valid booster unreadable
+    after a dependency update.
+    """
+    try:
+        import xgboost as xgb
+        if isinstance(model, xgb.Booster):
+            try:
+                payload = bytes(model.save_raw(raw_format="json"))
+            except TypeError:  # pragma: no cover - older XGBoost compatibility
+                payload = bytes(model.save_raw())
+            return {
+                "__serialized_model_type__": "xgboost_booster",
+                "payload": payload,
+            }
+    except ImportError:
+        pass
+    return model
+
+
+def _restore_model(model):
+    """Restore a model encoded by :func:`_serialize_model`."""
+    if not isinstance(model, dict) or model.get("__serialized_model_type__") != "xgboost_booster":
+        return model
+    try:
+        import xgboost as xgb
+    except ImportError as exc:  # pragma: no cover - only hit without XGBoost
+        raise RuntimeError("XGBoost is required to load this model artifact") from exc
+    booster = xgb.Booster()
+    booster.load_model(bytearray(model["payload"]))
+    return booster
+
+
 def _fallback_regression(model, frame: pd.DataFrame) -> np.ndarray:
     """Predict with either a sklearn estimator or a native XGBoost booster."""
     try:
@@ -302,15 +339,36 @@ class MarketAnchoredRegressor:
     market_sign: float
     shrinkage: float
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["residual_model"] = _serialize_model(state["residual_model"])
+        state["fallback_model"] = _serialize_model(state["fallback_model"])
+        return state
+
+    def __setstate__(self, state):
+        state = dict(state)
+        state["residual_model"] = _restore_model(state["residual_model"])
+        state["fallback_model"] = _restore_model(state["fallback_model"])
+        self.__dict__.update(state)
+
     def predict(self, X) -> np.ndarray:
         frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
-        fallback = _fallback_regression(self.fallback_model, frame)
         market_raw = pd.to_numeric(frame[self.market_feature], errors="coerce").to_numpy(float)
         valid = np.isfinite(market_raw)
+        fallback = np.full(len(frame), np.nan, dtype=float)
+        if (~valid).any():
+            fallback[~valid] = _fallback_regression(
+                self.fallback_model, frame.loc[~valid]
+            )
         if valid.any():
             correction = np.asarray(self.residual_model.predict(frame.loc[valid]), dtype=float)
             fallback[valid] = self.market_sign * market_raw[valid] + self.shrinkage * correction
         return fallback
+
+    def predict_structural(self, X) -> np.ndarray:
+        """Return the underlying structural forecast without market anchoring."""
+        frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
+        return _fallback_regression(self.fallback_model, frame)
 
 
 @dataclass
@@ -321,13 +379,32 @@ class MarketBaselineRegressor:
     market_feature: str
     market_sign: float
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["fallback_model"] = _serialize_model(state["fallback_model"])
+        return state
+
+    def __setstate__(self, state):
+        state = dict(state)
+        state["fallback_model"] = _restore_model(state["fallback_model"])
+        self.__dict__.update(state)
+
     def predict(self, X) -> np.ndarray:
         frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
-        prediction = _fallback_regression(self.fallback_model, frame)
         market = pd.to_numeric(frame[self.market_feature], errors="coerce").to_numpy(float)
         valid = np.isfinite(market)
+        prediction = np.full(len(frame), np.nan, dtype=float)
+        if (~valid).any():
+            prediction[~valid] = _fallback_regression(
+                self.fallback_model, frame.loc[~valid]
+            )
         prediction[valid] = self.market_sign * market[valid]
         return prediction
+
+    def predict_structural(self, X) -> np.ndarray:
+        """Return the underlying structural forecast without market anchoring."""
+        frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
+        return _fallback_regression(self.fallback_model, frame)
 
 
 @dataclass
@@ -337,11 +414,25 @@ class MarketBaselineClassifier:
     feature_names: tuple[str, ...]
     market_feature: str = "market_home_prob"
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["fallback_model"] = _serialize_model(state["fallback_model"])
+        return state
+
+    def __setstate__(self, state):
+        state = dict(state)
+        state["fallback_model"] = _restore_model(state["fallback_model"])
+        self.__dict__.update(state)
+
     def predict_proba(self, X) -> np.ndarray:
         frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
-        home_probability = _fallback_probability(self.fallback_model, frame)
         market = pd.to_numeric(frame[self.market_feature], errors="coerce").to_numpy(float)
         valid = np.isfinite(market)
+        home_probability = np.full(len(frame), np.nan, dtype=float)
+        if (~valid).any():
+            home_probability[~valid] = _fallback_probability(
+                self.fallback_model, frame.loc[~valid]
+            )
         home_probability[valid] = market[valid]
         home_probability = np.clip(home_probability, 1e-6, 1 - 1e-6)
         return np.column_stack([1 - home_probability, home_probability])
@@ -356,10 +447,14 @@ class MarketCalibratedClassifier:
 
     def predict_proba(self, X) -> np.ndarray:
         frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
-        fallback_home = _fallback_probability(self.fallback_model, frame)
-        fallback = np.column_stack([1 - fallback_home, fallback_home])
         market = pd.to_numeric(frame[self.market_feature], errors="coerce").to_numpy(float)
         valid = np.isfinite(market)
+        fallback_home = np.full(len(frame), np.nan, dtype=float)
+        if (~valid).any():
+            fallback_home[~valid] = _fallback_probability(
+                self.fallback_model, frame.loc[~valid]
+            )
+        fallback = np.column_stack([1 - fallback_home, fallback_home])
         if valid.any():
             calibrated = self.market_model.predict_proba(logit(market[valid]).reshape(-1, 1))
             fallback[valid] = calibrated

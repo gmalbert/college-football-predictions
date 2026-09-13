@@ -6,6 +6,7 @@ import base64
 
 from footer import add_betting_oracle_footer
 from utils.ui_components import render_sidebar
+from utils.betting import generate_spread_pick, generate_total_pick
 
 # ---------------------------------------------------------------------------
 # Page configuration — must be top-level, first Streamlit call
@@ -109,7 +110,7 @@ def home_page():
         failed = ", ".join(release.get("failed_gates", [])) or "release gates unavailable"
         st.warning(
             f"Model release status: HOLD ({failed}). Forecasts are shown for research; "
-            "automated bet export is disabled."
+            "Best Bets are published as provisional research output and are not validated recommendations."
         )
     if not model_runtime_available:
         st.info("Native model inference is unavailable in this local runtime; saved evaluation evidence remains available.")
@@ -123,27 +124,76 @@ def home_page():
 
     with col_a:
         st.subheader("Upcoming Model Deltas")
-        if not df_all.empty and "predicted_spread" in df_all.columns and "market_spread" in df_all.columns:
-            top = (
-                df_all
-                .assign(edge=lambda d: (d["predicted_spread"] + d["market_spread"]).abs())
-                .dropna(subset=["predicted_spread", "market_spread"])
-                .nlargest(3, "edge")
-            )
+        if not df_all.empty:
+            edge_columns = []
+            if {"predicted_spread", "market_spread"}.issubset(df_all.columns):
+                df_all["spread_edge"] = (
+                    df_all["predicted_spread"] + df_all["market_spread"]
+                ).abs()
+                edge_columns.append("spread_edge")
+            if {"predicted_total", "market_total"}.issubset(df_all.columns):
+                df_all["total_edge"] = (
+                    df_all["predicted_total"] - df_all["market_total"]
+                ).abs()
+                edge_columns.append("total_edge")
+
+            if edge_columns:
+                df_all["edge"] = df_all[edge_columns].max(axis=1, skipna=True)
+                df_all["edge_market"] = "—"
+                if "total_edge" in edge_columns:
+                    total_is_best = df_all["total_edge"].notna()
+                    if "spread_edge" in edge_columns:
+                        total_is_best &= (
+                            ~df_all["spread_edge"].notna()
+                            | (df_all["total_edge"] >= df_all["spread_edge"])
+                        )
+                    df_all.loc[total_is_best, "edge_market"] = "O/U"
+                if "spread_edge" in edge_columns:
+                    spread_is_best = (
+                        df_all["spread_edge"].notna()
+                        & (
+                            ~df_all["total_edge"].notna()
+                            | (df_all["spread_edge"] > df_all["total_edge"])
+                        )
+                    ) if "total_edge" in edge_columns else df_all["spread_edge"].notna()
+                    df_all.loc[spread_is_best, "edge_market"] = "Spread"
+
+                top = (
+                    df_all[df_all["edge"] > 0]
+                    .dropna(subset=["edge"])
+                    .nlargest(3, "edge")
+                )
+            else:
+                top = pd.DataFrame()
             for _, row in top.iterrows():
-                ms = row.get("predicted_spread", float("nan"))
-                bs = row.get("market_spread",    float("nan"))
                 wp = row.get("win_prob",         float("nan"))
-                if pd.notna(ms) and pd.notna(bs):
-                    edge = abs(ms + bs)
-                    st.markdown(
-                        f"**{row['away_team']} @ {row['home_team']}**  \n"
-                        f"Wk {int(row['week'])} · Edge **{edge:.1f} pts** · "
-                        f"Win prob {wp:.0%}" if pd.notna(wp) else
-                        f"Wk {int(row['week'])} · Edge **{edge:.1f} pts**"
+                edge_market = row.get("edge_market", "Edge")
+                if edge_market == "O/U" and pd.notna(row.get("predicted_total")) and pd.notna(row.get("market_total")):
+                    recommendation = generate_total_pick(
+                        row["home_team"], row["away_team"],
+                        float(row["predicted_total"]), float(row["market_total"]),
+                        game_id=int(row["game_id"]) if pd.notna(row.get("game_id")) else None,
                     )
+                elif edge_market == "Spread" and pd.notna(row.get("predicted_spread")) and pd.notna(row.get("market_spread")):
+                    recommendation = generate_spread_pick(
+                        row["home_team"], row["away_team"],
+                        float(row["predicted_spread"]), float(row["market_spread"]),
+                        game_id=int(row["game_id"]) if pd.notna(row.get("game_id")) else None,
+                    )
+                else:
+                    recommendation = None
+                summary = (
+                    f"Wk {int(row['week'])} · {edge_market} edge **{row['edge']:.1f} pts**"
+                )
+                if recommendation is not None:
+                    summary += f" · Bet **{recommendation.pick}**"
+                if pd.notna(wp):
+                    summary += f" · Win prob {wp:.0%}"
+                st.markdown(
+                    f"**{row['away_team']} @ {row['home_team']}**  \n{summary}"
+                )
             if top.empty:
-                st.caption("No upcoming games with both model and market lines are available.")
+                st.caption("No upcoming games with a positive model edge are available.")
         else:
             st.caption("No data yet. Go to ⚙️ Settings to pull historical data.")
 

@@ -73,7 +73,7 @@ jobs:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ secrets.ODDS_API_IO_BOOKMAKERS }}
           PARLAY_API_KEY: ${{ secrets.PARLAY_API_KEY }}
-        run: python scripts/snapshot_market.py
+        run: python scripts/snapshot_market.py --refresh-features
         continue-on-error: true
 
       - name: Capture ParlayAPI shadow snapshot
