@@ -45,7 +45,6 @@ from utils.feature_engine import (
 from utils.challenger_models import (
     MarketAnchoredRegressor,
     MarketBaselineClassifier,
-    MarketBaselineRegressor,
     fit_market_residual,
     walk_forward_market_residual,
 )
@@ -208,27 +207,46 @@ def train_all(force: bool = False) -> dict:
         X_sp, y_sp, df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
         model_kind="xgb" if HAS_XGB else "ridge",
     )
-    sp_oos = np.isfinite(spread_oof)
+    structural_spread_oof = spread_oof.copy()
     market_margin = -pd.to_numeric(df_sp.get("market_spread"), errors="coerce").to_numpy(dtype=float)
-    lined_spread = np.isfinite(market_margin) & np.isfinite(spread_oof)
-    spread_oof[lined_spread] = market_margin[lined_spread]
-    spread_model = MarketBaselineRegressor(
+    residual_oof, residual_folds = walk_forward_market_residual(
+        X_sp, y_sp, market_margin,
+        df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
+        kind="ridge",
+    )
+    residual_valid = np.isfinite(residual_oof) & np.isfinite(spread_oof)
+    spread_oof[residual_valid] = residual_oof[residual_valid]
+    residual_model, residual_shrinkage, residual_shrinkage_n = fit_market_residual(
+        X_sp, y_sp, market_margin,
+        df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
+        kind="ridge",
+    )
+    spread_model = MarketAnchoredRegressor(
+        residual_model=residual_model,
         fallback_model=spread_model,
         feature_names=tuple(sp_feats),
         market_feature="market_spread",
         market_sign=-1.0,
+        shrinkage=residual_shrinkage,
     )
+    sp_oos = np.isfinite(structural_spread_oof)
     spread_fold_metrics = _regression_fold_metrics(
-        y_sp, spread_oof,
+        y_sp, structural_spread_oof,
         df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
         baseline=market_margin,
     )
     sp_m = regression_metrics(
-        y_sp[sp_oos], spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
+        y_sp[sp_oos], structural_spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
     ) | {
         "folds": spread_fold_metrics, "n_samples": int(sp_oos.sum()),
-        "strategy": "market_consensus_when_available_structural_fallback",
-        "market_anchored_n": int(lined_spread.sum()),
+        "strategy": "structural_xgb_with_market_residual_shadow",
+        "market_anchored_n": int(residual_valid.sum()),
+        "residual_folds": residual_folds,
+        "final_residual_shrinkage": residual_shrinkage,
+        "final_residual_shrinkage_oos_n": residual_shrinkage_n,
+        "market_residual_metrics": regression_metrics(
+            y_sp[sp_oos], spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
+        ),
     }
     joblib.dump(spread_model, SPREAD_MODEL_PATH)
     metrics["spread_model"] = sp_m
@@ -365,7 +383,7 @@ def train_all(force: bool = False) -> dict:
     )
 
     # ── ATS backtest ────────────────────────────────────────────────────────
-    metrics["ats"] = _ats_record_oos(df_sp, spread_oof)
+    metrics["ats"] = _ats_record_oos(df_sp, structural_spread_oof)
     logger.info(
         f"  ATS record — {metrics['ats']['wins']}W "
         f"{metrics['ats']['losses']}L  "
@@ -388,7 +406,7 @@ def train_all(force: bool = False) -> dict:
         dict(zip(df_win["game_id"], win_oof))
     )
     backtest["predicted_spread_oos"] = backtest["game_id"].map(
-        dict(zip(df_sp["game_id"], spread_oof))
+        dict(zip(df_sp["game_id"], structural_spread_oof))
     )
     backtest["predicted_total_oos"] = backtest["game_id"].map(
         dict(zip(df_tot["game_id"], total_oof))
@@ -529,7 +547,13 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     else:
         try:
             X = df[SPREAD_FEATURES]
-            df["predicted_spread"] = _reg_predict(spread_m, X)
+            if hasattr(spread_m, "predict_structural"):
+                # The research UI needs to show the independent structural
+                # forecast; the market-anchored version is retained in the
+                # model wrapper for validation and release-gate accounting.
+                df["predicted_spread"] = spread_m.predict_structural(X)
+            else:
+                df["predicted_spread"] = _reg_predict(spread_m, X)
         except Exception:
             df["predicted_spread"] = float("nan")
 
@@ -647,7 +671,11 @@ def _predict_row(row: pd.Series) -> Prediction:
 
     return Prediction(
         win_prob=float(_clf_predict_proba(win_m, w_x)[0]),
-        predicted_spread=float(_reg_predict(spread_m, s_x)[0]),
+        predicted_spread=float(
+            spread_m.predict_structural(s_x)[0]
+            if hasattr(spread_m, "predict_structural")
+            else _reg_predict(spread_m, s_x)[0]
+        ),
         predicted_total=float(_reg_predict(total_m, t_x)[0]),
     )
 

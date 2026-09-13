@@ -365,6 +365,11 @@ class MarketAnchoredRegressor:
             fallback[valid] = self.market_sign * market_raw[valid] + self.shrinkage * correction
         return fallback
 
+    def predict_structural(self, X) -> np.ndarray:
+        """Return the underlying structural forecast without market anchoring."""
+        frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
+        return _fallback_regression(self.fallback_model, frame)
+
 
 @dataclass
 class MarketBaselineRegressor:
@@ -395,6 +400,11 @@ class MarketBaselineRegressor:
             )
         prediction[valid] = self.market_sign * market[valid]
         return prediction
+
+    def predict_structural(self, X) -> np.ndarray:
+        """Return the underlying structural forecast without market anchoring."""
+        frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
+        return _fallback_regression(self.fallback_model, frame)
 
 
 @dataclass

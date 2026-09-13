@@ -9,6 +9,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from utils.ui_components import render_sidebar, themed_dataframe
 from utils.storage import FEATURES_DIR, PROCESSED_DIR, load_parquet
@@ -106,7 +107,7 @@ with col1:
     confs = ["All"] + sorted(df_week["home_conference"].dropna().unique().tolist())
     sel_conf = st.selectbox("Conference", confs)
 with col2:
-    min_edge = st.slider("Min Edge (pts)", 0.0, 10.0, 0.0, 0.5)
+    min_edge = st.slider("Min Edge (spread or O/U pts)", 0.0, 10.0, 0.0, 0.5)
 with col3:
     sort_by = st.selectbox("Sort By", ["Edge (High→Low)", "Win Prob", "Game"])
 
@@ -116,8 +117,23 @@ if sel_conf != "All":
         | (df_week["away_conference"] == sel_conf)
     ]
 
+edge_columns = []
 if "predicted_spread" in df_week.columns and "market_spread" in df_week.columns:
-    df_week["edge"] = (df_week["predicted_spread"] + df_week["market_spread"]).abs()
+    df_week["spread_edge"] = (
+        df_week["predicted_spread"] + df_week["market_spread"]
+    ).abs()
+    edge_columns.append("spread_edge")
+if "predicted_total" in df_week.columns and "market_total" in df_week.columns:
+    df_week["total_edge"] = (
+        df_week["predicted_total"] - df_week["market_total"]
+    ).abs()
+    edge_columns.append("total_edge")
+
+if edge_columns:
+    # A game is actionable when either market has an edge. Use the larger
+    # available edge so the filter does not discard valid O/U opportunities
+    # merely because the spread model is anchored to the market.
+    df_week["edge"] = df_week[edge_columns].max(axis=1, skipna=True)
     if min_edge > 0:
         df_week = df_week[df_week["edge"] >= min_edge]
     if sort_by == "Edge (High→Low)":
@@ -234,6 +250,35 @@ display_consensus = build_market_consensus_from_snapshots(
 )
 display_consensus = display_consensus.set_index("game_id") if not display_consensus.empty else pd.DataFrame()
 
+
+def _browser_timezone() -> tuple[ZoneInfo, str]:
+    """Return the browser timezone and a compact regional abbreviation."""
+    regional_abbreviations = {
+        "America/New_York": "ET",
+        "America/Chicago": "CT",
+        "America/Denver": "MT",
+        "America/Los_Angeles": "PT",
+        "America/Anchorage": "AKT",
+        "Pacific/Honolulu": "HT",
+    }
+    try:
+        timezone_name = st.context.timezone
+    except Exception:
+        timezone_name = None
+    if not timezone_name:
+        return ZoneInfo("UTC"), "UTC"
+    try:
+        return ZoneInfo(timezone_name), regional_abbreviations.get(
+            timezone_name, timezone_name.rsplit("/", 1)[-1].replace("_", " ")
+        )
+    except ZoneInfoNotFoundError:
+        return ZoneInfo("UTC"), "UTC"
+
+
+browser_tz, browser_tz_name = _browser_timezone()
+kickoff_column = f"Kickoff ({browser_tz_name})"
+
+compact_rows = []
 for _, row in df_week.iterrows():
     home = row.get("home_team", "—")
     away = row.get("away_team", "—")
@@ -258,79 +303,68 @@ for _, row in df_week.iterrows():
         if pd.isna(aml):
             aml = fallback.get("away_moneyline", float("nan"))
 
-    with st.container():
-        hdr1, hdr2, hdr3 = st.columns([5, 1, 5])
-        with hdr1:
-            st.subheader(away)
-            st.caption("Away")
-        with hdr2:
-            st.markdown("### @")
-        with hdr3:
-            st.subheader(home)
-            st.caption("Home")
+    spread_rec = (
+        generate_spread_pick(home, away, ms, bs)
+        if pd.notna(ms) and pd.notna(bs) else None
+    )
+    total_rec = (
+        generate_total_pick(home, away, mt, bt)
+        if pd.notna(mt) and pd.notna(bt) else None
+    )
+    ml_rec = (
+        generate_moneyline_pick(home, away, float(wp), float(hml), float(aml))
+        if pd.notna(hml) and pd.notna(aml) and pd.notna(wp) else None
+    )
+    kickoff = pd.to_datetime(row.get("start_date"), utc=True, errors="coerce")
+    if pd.notna(kickoff):
+        kickoff = kickoff.tz_convert(browser_tz)
+    kickoff_text = (
+        f"{kickoff.strftime('%b')} {kickoff.day} · {kickoff.strftime('%I:%M %p')}"
+        if pd.notna(kickoff) else "—"
+    )
+    hs = row.get("home_score")
+    as_ = row.get("away_score")
+    result = f"{int(hs)}–{int(as_)}" if pd.notna(hs) and pd.notna(as_) else "—"
 
-        m1, m2, m3, m4, m5 = st.columns(5)
+    compact_rows.append(
+        {
+            "Game": f"{away} @ {home}",
+            kickoff_column: kickoff_text,
+            "Home win": f"{wp:.0%}" if pd.notna(wp) else "—",
+            "Model margin": f"{ms:+.1f}" if pd.notna(ms) else "—",
+            "Book spread": f"{bs:+.1f}" if pd.notna(bs) else "—",
+            "Spread edge": (
+                f"{spread_rec.edge:.1f} {CONFIDENCE_EMOJI[spread_rec.confidence]}"
+                if spread_rec else "—"
+            ),
+            "Spread pick": (
+                spread_rec.pick if spread_rec and spread_rec.confidence != Confidence.NONE
+                else "No edge" if spread_rec else "—"
+            ),
+            "Model O/U": f"{mt:.1f}" if pd.notna(mt) else "—",
+            "Book O/U": f"{bt:.1f}" if pd.notna(bt) else "—",
+            "O/U edge": (
+                f"{total_rec.edge:.1f} {CONFIDENCE_EMOJI[total_rec.confidence]}"
+                if total_rec else "—"
+            ),
+            "O/U pick": total_rec.pick if total_rec else "—",
+            "Home ML": f"{int(hml):+d}" if pd.notna(hml) else "—",
+            "Away ML": f"{int(aml):+d}" if pd.notna(aml) else "—",
+            "ML edge": f"{ml_rec.edge:.1%}" if ml_rec else "—",
+            "ML pick": ml_rec.pick if ml_rec else "—",
+            "Result": result,
+        }
+    )
 
-        # Win probability
-        if pd.notna(wp):
-            wp_color = "🟢" if wp >= 0.65 else "🟡" if wp >= 0.50 else "🔴"
-            m1.metric("Home Win Prob", f"{wp:.0%} {wp_color}")
-        else:
-            m1.metric("Home Win Prob", "—")
-
-        # Model spread vs book spread
-        if pd.notna(ms):
-            m2.metric("Model Home Margin", f"{ms:+.1f}")
-        else:
-            m2.metric("Model Spread", "—")
-
-        if pd.notna(bs):
-            m3.metric("Book Spread", f"{bs:+.1f}")
-        else:
-            m3.metric("Book Spread", "—")
-
-        # Edge
-        if pd.notna(ms) and pd.notna(bs):
-            edge_val = ms + bs
-            rec      = generate_spread_pick(home, away, ms, bs)
-            badge    = CONFIDENCE_EMOJI[rec.confidence]
-            m4.metric("Spread Edge", f"{abs(edge_val):.1f} {badge}")
-            m5.metric("Pick", rec.pick if rec.confidence.value != "none" else "No edge")
-        else:
-            m4.metric("Edge", "—")
-            m5.metric("Pick", "—")
-
-        # O/U row
-        if pd.notna(mt) or pd.notna(bt):
-            t1, t2, t3, t4 = st.columns([2, 2, 3, 3])
-            t1.metric("Model O/U", f"{mt:.1f}" if pd.notna(mt) else "—")
-            t2.metric("Book O/U",  f"{bt:.1f}" if pd.notna(bt) else "—")
-            if pd.notna(mt) and pd.notna(bt):
-                total_rec = generate_total_pick(home, away, mt, bt)
-                badge = CONFIDENCE_EMOJI[total_rec.confidence]
-                t3.metric("O/U Pick", total_rec.pick)
-                t4.metric("O/U Edge", f"{total_rec.edge:.1f} pts {badge}")
-
-        # Moneyline row
-        if pd.notna(hml) and pd.notna(aml) and pd.notna(wp):
-            ml_rec = generate_moneyline_pick(home, away, wp, float(hml), float(aml))
-            if ml_rec and ml_rec.confidence != Confidence.NONE:
-                u1, u2, u3, u4 = st.columns([2, 2, 3, 3])
-                u1.metric("Home ML", f"{int(hml):+d}")
-                u2.metric("Away ML", f"{int(aml):+d}")
-                badge = CONFIDENCE_EMOJI[ml_rec.confidence]
-                u3.metric("ML Pick", ml_rec.pick)
-                u4.metric("ML Edge", f"{ml_rec.edge:.1%} {badge}")
-
-        # Actual result (historical data)
-        hs = row.get("home_score")
-        as_ = row.get("away_score")
-        if pd.notna(hs) and pd.notna(as_):
-            st.caption(
-                f"Result: {home} {int(hs)} – {int(as_)} {away}  "
-                f"(margin {int(hs) - int(as_):+d})"
-            )
-
-        st.divider()
+st.caption(
+    f"Compact view — kickoff times shown in {browser_tz_name}. "
+    "Use the table’s horizontal scroll to see every market and recommendation."
+)
+themed_dataframe(
+    pd.DataFrame(compact_rows),
+    width="stretch",
+    height=min(640, max(140, 36 + 35 * len(compact_rows))),
+    hide_index=True,
+)
 
 add_betting_oracle_footer()

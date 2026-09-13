@@ -93,15 +93,15 @@
   },
   "spread_model": {
     "n": 11812,
-    "rmse": 17.798597140145795,
-    "mae": 13.866957060672762,
-    "bias": -0.11301196919144829,
-    "residual_std": 17.79899179680567,
+    "rmse": 17.904539560301664,
+    "mae": 13.990590048447466,
+    "bias": -0.07754572869538365,
+    "residual_std": 17.905129568915246,
     "baseline_n": 4734,
     "baseline_rmse": 15.27099073426196,
     "baseline_mae": 12.012146176594845,
-    "model_rmse_on_baseline_subset": 15.27099073426196,
-    "model_mae_on_baseline_subset": 12.012146176594845,
+    "model_rmse_on_baseline_subset": 15.576937206231763,
+    "model_mae_on_baseline_subset": 12.32062797879062,
     "folds": [
       {
         "fold": 0,
@@ -111,15 +111,15 @@
         ],
         "test_season": 2023,
         "n": 3730,
-        "rmse": 17.973564306907917,
-        "mae": 14.02086081742022,
-        "bias": -0.13269945271413064,
-        "residual_std": 17.97548418173815,
+        "rmse": 18.09228120533035,
+        "mae": 14.142709647828898,
+        "bias": -0.277088546003627,
+        "residual_std": 18.092584677097868,
         "baseline_n": 1413,
         "baseline_rmse": 15.251273252103662,
         "baseline_mae": 12.0914720452937,
-        "model_rmse_on_baseline_subset": 15.251273252103662,
-        "model_mae_on_baseline_subset": 12.0914720452937
+        "model_rmse_on_baseline_subset": 15.617421586071012,
+        "model_mae_on_baseline_subset": 12.413125362649945
       },
       {
         "fold": 1,
@@ -130,15 +130,15 @@
         ],
         "test_season": 2024,
         "n": 3799,
-        "rmse": 17.316526603311697,
-        "mae": 13.484788031043216,
-        "bias": -0.3977884445479176,
-        "residual_std": 17.314236019096512,
+        "rmse": 17.43105426205864,
+        "mae": 13.620361660315677,
+        "bias": -0.3271856089810237,
+        "residual_std": 17.43027752255415,
         "baseline_n": 1557,
         "baseline_rmse": 15.28917628154033,
         "baseline_mae": 11.921001926782274,
-        "model_rmse_on_baseline_subset": 15.28917628154033,
-        "model_mae_on_baseline_subset": 11.921001926782274
+        "model_rmse_on_baseline_subset": 15.60348778507242,
+        "model_mae_on_baseline_subset": 12.251794616317325
       },
       {
         "fold": 2,
@@ -150,15 +150,15 @@
         ],
         "test_season": 2025,
         "n": 3829,
-        "rmse": 17.41937080483804,
-        "mae": 13.662052063169003,
-        "bias": 0.40804837075553174,
-        "residual_std": 17.41686537160752,
+        "rmse": 17.520807159550394,
+        "mae": 13.79350403776564,
+        "bias": 0.5584702566455778,
+        "residual_std": 17.514191559629847,
         "baseline_n": 1597,
         "baseline_rmse": 15.062417099910355,
         "baseline_mae": 11.88134001252348,
-        "model_rmse_on_baseline_subset": 15.062417099910355,
-        "model_mae_on_baseline_subset": 11.88134001252348
+        "model_rmse_on_baseline_subset": 15.341905549173507,
+        "model_mae_on_baseline_subset": 12.196511966644033
       },
       {
         "fold": 3,
@@ -171,20 +171,68 @@
         ],
         "test_season": 2026,
         "n": 454,
-        "rmse": 22.796004661693544,
-        "mae": 17.52858782352855,
-        "bias": -1.9628795864561055,
-        "residual_std": 22.73639317261224,
+        "rmse": 22.796924952945627,
+        "mae": 17.501017087479717,
+        "bias": -1.713291530690201,
+        "residual_std": 22.75753017682097,
         "baseline_n": 167,
         "baseline_rmse": 17.135216476968562,
         "baseline_mae": 13.441616766467066,
-        "model_rmse_on_baseline_subset": 17.135216476968562,
-        "model_mae_on_baseline_subset": 13.441616766467066
+        "model_rmse_on_baseline_subset": 17.138544607946862,
+        "model_mae_on_baseline_subset": 13.36666398702892
       }
     ],
     "n_samples": 11812,
-    "strategy": "market_consensus_when_available_structural_fallback",
-    "market_anchored_n": 4734
+    "strategy": "structural_xgb_with_market_residual_shadow",
+    "market_anchored_n": 4734,
+    "residual_folds": [
+      {
+        "fold": 0,
+        "test_season": 2023,
+        "train_n": 2346,
+        "test_n": 1413,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 1459
+      },
+      {
+        "fold": 1,
+        "test_season": 2024,
+        "train_n": 3759,
+        "test_n": 1557,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 2872
+      },
+      {
+        "fold": 2,
+        "test_season": 2025,
+        "train_n": 5316,
+        "test_n": 1597,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 4429
+      },
+      {
+        "fold": 3,
+        "test_season": 2026,
+        "train_n": 6913,
+        "test_n": 167,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 6026
+      }
+    ],
+    "final_residual_shrinkage": 0.02481782404603967,
+    "final_residual_shrinkage_oos_n": 6193,
+    "market_residual_metrics": {
+      "n": 11812,
+      "rmse": 17.798597140145795,
+      "mae": 13.866957060672762,
+      "bias": -0.11301196919144829,
+      "residual_std": 17.79899179680567,
+      "baseline_n": 4734,
+      "baseline_rmse": 15.27099073426196,
+      "baseline_mae": 12.012146176594845,
+      "model_rmse_on_baseline_subset": 15.27099073426196,
+      "model_mae_on_baseline_subset": 12.012146176594845
+    }
   },
   "total_model": {
     "n": 11812,
@@ -626,12 +674,12 @@
     }
   },
   "ats": {
-    "wins": 0,
-    "losses": 0,
+    "wins": 1659,
+    "losses": 1693,
     "pushes": 78,
-    "pct": 0.0,
-    "n": 0,
-    "abstentions": 4734,
+    "pct": 0.4949,
+    "n": 3352,
+    "abstentions": 1328,
     "minimum_edge_points": 1.0,
     "scope": "walk_forward_season_oos_actionable_lined_games"
   },
@@ -667,7 +715,7 @@
     {
       "name": "spread_market_baseline",
       "passed": false,
-      "actual": 15.27099073426196,
+      "actual": 15.576937206231763,
       "threshold": "< market RMSE 15.27099073426196",
       "reason": "A spread model is not releasable when the market predicts margin better."
     },
