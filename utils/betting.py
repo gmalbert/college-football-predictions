@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from math import isfinite
 
 from utils.market import remove_vig
 
@@ -135,8 +136,23 @@ def generate_moneyline_pick(
     Return a moneyline recommendation if the model's implied win probability
     exceeds the book's implied probability by a meaningful margin.
     home_ml / away_ml: American odds (e.g., -150, +130).
+
+    Providers occasionally publish a placeholder price of zero (or another
+    malformed value) while a market is suspended. Treat that market as
+    unavailable instead of allowing one bad row to abort a full export.
     """
-    book_home_prob, book_away_prob = remove_vig([home_ml, away_ml])
+    try:
+        home_ml = float(home_ml)
+        away_ml = float(away_ml)
+    except (TypeError, ValueError):
+        return None
+    if not all(isfinite(odds) and odds != 0 for odds in (home_ml, away_ml)):
+        return None
+
+    try:
+        book_home_prob, book_away_prob = remove_vig([home_ml, away_ml])
+    except (TypeError, ValueError):
+        return None
 
     home_edge = win_prob - book_home_prob
     away_edge = (1 - win_prob) - book_away_prob
