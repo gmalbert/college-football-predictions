@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-17T15:11:01.501367+00:00",
+    "generated_at": "2026-09-17T16:07:45.990249+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -167,12 +167,12 @@
       "home_team": "Arizona",
       "away_team": "Northern Illinois",
       "bet_type": "Spread",
-      "pick": "Take Arizona -14.5",
-      "probability": 0.629858,
-      "edge": 5.9352,
+      "pick": "Take Arizona -23.8",
+      "probability": 0.623042,
+      "edge": 5.6129,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -14.5,
+      "line": -23.75,
       "league": "NCAAF"
     },
     {
@@ -240,6 +240,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401860889,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "North Texas @ Texas State",
+      "home_team": "Texas State",
+      "away_team": "North Texas",
+      "bet_type": "Spread",
+      "pick": "Take North Texas +2.8",
+      "probability": 0.603001,
+      "edge": 4.6754,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -2.75,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401862773,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T23:00:00+00:00",
@@ -285,6 +301,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -47.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856797,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T19:30:00+00:00",
+      "game": "Miami (OH) @ Cincinnati",
+      "home_team": "Cincinnati",
+      "away_team": "Miami (OH)",
+      "bet_type": "Spread",
+      "pick": "Take Cincinnati -12.0",
+      "probability": 0.588105,
+      "edge": 3.987,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -12.0,
       "league": "NCAAF"
     },
     {
@@ -365,22 +397,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -4.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401860889,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T16:00:00+00:00",
-      "game": "North Texas @ Texas State",
-      "home_team": "Texas State",
-      "away_team": "North Texas",
-      "bet_type": "Spread",
-      "pick": "Take North Texas +1.2",
-      "probability": 0.577713,
-      "edge": 3.5102,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -1.25,
       "league": "NCAAF"
     },
     {
@@ -480,22 +496,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856797,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T19:30:00+00:00",
-      "game": "Miami (OH) @ Cincinnati",
-      "home_team": "Cincinnati",
-      "away_team": "Miami (OH)",
-      "bet_type": "Spread",
-      "pick": "Take Cincinnati -2.5",
-      "probability": 0.564289,
-      "edge": 2.898,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -2.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401864508,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T17:00:00+00:00",
@@ -589,22 +589,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -4.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401869948,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T23:00:00+00:00",
-      "game": "Georgia Southern @ Jacksonville State",
-      "home_team": "Jacksonville State",
-      "away_team": "Georgia Southern",
-      "bet_type": "Spread",
-      "pick": "Take Jacksonville State +2.5",
-      "probability": 0.546852,
-      "edge": 2.1076,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 2.5,
       "league": "NCAAF"
     },
     {
