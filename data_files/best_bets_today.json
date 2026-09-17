@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-17T12:09:37.686744+00:00",
+    "generated_at": "2026-09-17T15:11:01.501367+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -15,6 +15,22 @@
     "notes": "Published provisionally while model release is on hold: win_market_baseline, spread_market_baseline, closing_line_value"
   },
   "bets": [
+    {
+      "game_id": 401858454,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "Kent State @ Ohio State",
+      "home_team": "Ohio State",
+      "away_team": "Kent State",
+      "bet_type": "Spread",
+      "pick": "Take Ohio State -32.0",
+      "probability": 0.738725,
+      "edge": 11.4489,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -32.0,
+      "league": "NCAAF"
+    },
     {
       "game_id": 401858452,
       "game_date": "2026-09-19",
@@ -48,22 +64,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858454,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T16:00:00+00:00",
-      "game": "Kent State @ Ohio State",
-      "home_team": "Ohio State",
-      "away_team": "Kent State",
-      "bet_type": "Spread",
-      "pick": "Take Ohio State -42.0",
-      "probability": 0.684384,
-      "edge": 8.5943,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -42.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401858451,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T16:00:00+00:00",
@@ -71,12 +71,12 @@
       "home_team": "Minnesota",
       "away_team": "Akron",
       "bet_type": "Spread",
-      "pick": "Take Minnesota -16.8",
-      "probability": 0.665701,
-      "edge": 7.6647,
+      "pick": "Take Minnesota -16.5",
+      "probability": 0.670768,
+      "edge": 7.9147,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -16.75,
+      "line": -16.5,
       "league": "NCAAF"
     },
     {
@@ -224,19 +224,19 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401860889,
+      "game_id": 401858227,
       "game_date": "2026-09-19",
-      "game_time": "2026-09-19T16:00:00+00:00",
-      "game": "North Texas @ Texas State",
-      "home_team": "Texas State",
-      "away_team": "North Texas",
+      "game_time": "2026-09-19T18:00:00+00:00",
+      "game": "Maine @ Boston College",
+      "home_team": "Boston College",
+      "away_team": "Maine",
       "bet_type": "Spread",
-      "pick": "Take North Texas +2.8",
-      "probability": 0.603001,
-      "edge": 4.6754,
+      "pick": "Take Maine +38.5",
+      "probability": 0.604128,
+      "edge": 4.7278,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -2.75,
+      "line": -38.5,
       "league": "NCAAF"
     },
     {
@@ -368,6 +368,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401860889,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "North Texas @ Texas State",
+      "home_team": "Texas State",
+      "away_team": "North Texas",
+      "bet_type": "Spread",
+      "pick": "Take North Texas +1.2",
+      "probability": 0.577713,
+      "edge": 3.5102,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -1.25,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401867804,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T20:00:00+00:00",
@@ -496,22 +512,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858227,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T18:00:00+00:00",
-      "game": "Maine @ Boston College",
-      "home_team": "Boston College",
-      "away_team": "Maine",
-      "bet_type": "Spread",
-      "pick": "Take Boston College -28.0",
-      "probability": 0.562688,
-      "edge": 2.8252,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -28.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401871047,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T22:30:00+00:00",
@@ -557,22 +557,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 18.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401858471,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T20:00:00+00:00",
-      "game": "Northern Iowa @ Iowa",
-      "home_team": "Iowa",
-      "away_team": "Northern Iowa",
-      "bet_type": "Spread",
-      "pick": "Take Iowa -39.5",
-      "probability": 0.551059,
-      "edge": 2.2979,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -39.5,
       "league": "NCAAF"
     },
     {
