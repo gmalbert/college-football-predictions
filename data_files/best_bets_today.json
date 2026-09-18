@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-18T12:08:10.063183+00:00",
+    "generated_at": "2026-09-18T15:09:29.991096+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -29,6 +29,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -32.0,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856803,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T23:00:00+00:00",
+      "game": "Murray State @ Oklahoma State",
+      "home_team": "Oklahoma State",
+      "away_team": "Murray State",
+      "bet_type": "Spread",
+      "pick": "Take Murray State +56.0",
+      "probability": 0.733434,
+      "edge": 11.159,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -56.0,
       "league": "NCAAF"
     },
     {
@@ -71,12 +87,12 @@
       "home_team": "Oregon",
       "away_team": "Portland State",
       "bet_type": "Spread",
-      "pick": "Take Portland State +51.5",
-      "probability": 0.674152,
-      "edge": 8.0825,
+      "pick": "Take Portland State +52.0",
+      "probability": 0.684149,
+      "edge": 8.5825,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -51.5,
+      "line": -52.0,
       "league": "NCAAF"
     },
     {
@@ -192,6 +208,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401856793,
+      "game_date": "2026-09-20",
+      "game_time": "2026-09-20T02:30:00+00:00",
+      "game": "Northern Illinois @ Arizona",
+      "home_team": "Arizona",
+      "away_team": "Northern Illinois",
+      "bet_type": "Spread",
+      "pick": "Take Arizona -13.5",
+      "probability": 0.623381,
+      "edge": 5.6289,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -13.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401866423,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T23:00:00+00:00",
@@ -205,22 +237,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 5.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401856793,
-      "game_date": "2026-09-20",
-      "game_time": "2026-09-20T02:30:00+00:00",
-      "game": "Northern Illinois @ Arizona",
-      "home_team": "Arizona",
-      "away_team": "Northern Illinois",
-      "bet_type": "Spread",
-      "pick": "Take Arizona -23.8",
-      "probability": 0.611825,
-      "edge": 5.0865,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -23.75,
       "league": "NCAAF"
     },
     {
@@ -416,22 +432,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856687,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T23:00:00+00:00",
-      "game": "Florida @ Auburn",
-      "home_team": "Auburn",
-      "away_team": "Florida",
-      "bet_type": "Spread",
-      "pick": "Take Auburn +12.0",
-      "probability": 0.587586,
-      "edge": 3.9631,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 12.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401862710,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T22:00:00+00:00",
@@ -512,6 +512,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401866638,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T17:00:00+00:00",
+      "game": "Princeton @ Bryant",
+      "home_team": "Bryant",
+      "away_team": "Princeton",
+      "bet_type": "Spread",
+      "pick": "Take Bryant +2.5",
+      "probability": 0.568932,
+      "edge": 3.1093,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 2.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401864508,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T17:00:00+00:00",
@@ -525,6 +541,22 @@
       "tier": "Elite",
       "odds": -4.5,
       "line": null,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401867805,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "Brown @ New Haven",
+      "home_team": "New Haven",
+      "away_team": "Brown",
+      "bet_type": "Spread",
+      "pick": "Take New Haven +9.5",
+      "probability": 0.563106,
+      "edge": 2.8442,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 9.5,
       "league": "NCAAF"
     },
     {
@@ -573,22 +605,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 3.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401856692,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T23:45:00+00:00",
-      "game": "Kennesaw State @ Tennessee",
-      "home_team": "Tennessee",
-      "away_team": "Kennesaw State",
-      "bet_type": "Spread",
-      "pick": "Take Kennesaw State +35.0",
-      "probability": 0.557448,
-      "edge": 2.5873,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -35.0,
       "league": "NCAAF"
     },
     {
