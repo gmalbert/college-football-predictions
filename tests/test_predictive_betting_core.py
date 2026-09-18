@@ -270,6 +270,10 @@ class MarketTests(unittest.TestCase):
         self.assertIsNotNone(recommendation)
         self.assertIn("Home", recommendation.pick)
 
+    def test_moneyline_pick_skips_invalid_provider_prices(self):
+        self.assertIsNone(generate_moneyline_pick("Home", "Away", 0.62, 0, -110))
+        self.assertIsNone(generate_moneyline_pick("Home", "Away", 0.62, -150, float("nan")))
+
     def test_spread_and_total_settlement(self):
         home = settle_bet(
             market=Market.SPREAD, side=Side.HOME, home_score=28, away_score=20,
