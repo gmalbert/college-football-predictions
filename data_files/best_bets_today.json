@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-19T12:08:22.993933+00:00",
+    "generated_at": "2026-09-19T15:08:25.389523+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -112,6 +112,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401866424,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T19:30:00+00:00",
+      "game": "Stonehill @ Massachusetts",
+      "home_team": "Massachusetts",
+      "away_team": "Stonehill",
+      "bet_type": "Spread",
+      "pick": "Take Massachusetts -30.5",
+      "probability": 0.692173,
+      "edge": 8.9887,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -30.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401864507,
       "game_date": "2026-09-20",
       "game_time": "2026-09-20T02:30:00+00:00",
@@ -205,22 +221,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 21.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401866424,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T19:30:00+00:00",
-      "game": "Stonehill @ Massachusetts",
-      "home_team": "Massachusetts",
-      "away_team": "Stonehill",
-      "bet_type": "Spread",
-      "pick": "Take Massachusetts -32.5",
-      "probability": 0.649539,
-      "edge": 6.8769,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -32.5,
       "league": "NCAAF"
     },
     {
@@ -352,6 +352,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858229,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "North Carolina @ Clemson",
+      "home_team": "Clemson",
+      "away_team": "North Carolina",
+      "bet_type": "Spread",
+      "pick": "Take North Carolina +3.0",
+      "probability": 0.598504,
+      "edge": 4.4669,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -3.0,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401860889,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T16:00:00+00:00",
@@ -416,22 +432,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858229,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T16:00:00+00:00",
-      "game": "North Carolina @ Clemson",
-      "home_team": "Clemson",
-      "away_team": "North Carolina",
-      "bet_type": "Total",
-      "pick": "Over 43.5",
-      "probability": 0.601901,
-      "edge": 4.3125,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 43.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856793,
       "game_date": "2026-09-20",
       "game_time": "2026-09-20T02:30:00+00:00",
@@ -445,6 +445,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -33.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858229,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T16:00:00+00:00",
+      "game": "North Carolina @ Clemson",
+      "home_team": "Clemson",
+      "away_team": "North Carolina",
+      "bet_type": "Total",
+      "pick": "Over 43.5",
+      "probability": 0.601387,
+      "edge": 4.2903,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 43.5,
       "league": "NCAAF"
     },
     {
@@ -493,6 +509,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 14.25,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858471,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T20:00:00+00:00",
+      "game": "Northern Iowa @ Iowa",
+      "home_team": "Iowa",
+      "away_team": "Northern Iowa",
+      "bet_type": "Spread",
+      "pick": "Take Iowa -37.5",
+      "probability": 0.587207,
+      "edge": 3.9457,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -37.5,
       "league": "NCAAF"
     },
     {
@@ -736,22 +768,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401866424,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T19:30:00+00:00",
-      "game": "Stonehill @ Massachusetts",
-      "home_team": "Massachusetts",
-      "away_team": "Stonehill",
-      "bet_type": "Total",
-      "pick": "Over 49.5",
-      "probability": 0.582659,
-      "edge": 3.4848,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 49.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866640,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T22:00:00+00:00",
@@ -765,6 +781,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 43.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401866424,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T19:30:00+00:00",
+      "game": "Stonehill @ Massachusetts",
+      "home_team": "Massachusetts",
+      "away_team": "Stonehill",
+      "bet_type": "Total",
+      "pick": "Over 49.5",
+      "probability": 0.58057,
+      "edge": 3.3955,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 49.5,
       "league": "NCAAF"
     },
     {
@@ -824,8 +856,8 @@
       "away_team": "Buffalo",
       "bet_type": "Total",
       "pick": "Over 49.5",
-      "probability": 0.573704,
-      "edge": 3.1026,
+      "probability": 0.571889,
+      "edge": 3.0254,
       "tier": "Strong",
       "odds": -110.0,
       "line": 49.5,
@@ -909,22 +941,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 42.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401858471,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T20:00:00+00:00",
-      "game": "Northern Iowa @ Iowa",
-      "home_team": "Iowa",
-      "away_team": "Northern Iowa",
-      "bet_type": "Spread",
-      "pick": "Take Iowa -38.5",
-      "probability": 0.565338,
-      "edge": 2.9457,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -38.5,
       "league": "NCAAF"
     },
     {
@@ -1072,22 +1088,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858471,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T20:00:00+00:00",
-      "game": "Northern Iowa @ Iowa",
-      "home_team": "Iowa",
-      "away_team": "Northern Iowa",
-      "bet_type": "Total",
-      "pick": "Over 47.5",
-      "probability": 0.562385,
-      "edge": 2.6218,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 47.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401868009,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T22:00:00+00:00",
@@ -1104,22 +1104,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401862773,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T23:00:00+00:00",
-      "game": "Western Michigan @ Rice",
-      "home_team": "Rice",
-      "away_team": "Western Michigan",
-      "bet_type": "Spread",
-      "pick": "Take Rice +9.5",
-      "probability": 0.558095,
-      "edge": 2.6167,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 9.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866639,
       "game_date": "2026-09-19",
       "game_time": "2026-09-19T17:00:00+00:00",
@@ -1133,6 +1117,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 15.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858471,
+      "game_date": "2026-09-19",
+      "game_time": "2026-09-19T20:00:00+00:00",
+      "game": "Northern Iowa @ Iowa",
+      "home_team": "Iowa",
+      "away_team": "Northern Iowa",
+      "bet_type": "Total",
+      "pick": "Over 47.5",
+      "probability": 0.560562,
+      "edge": 2.5446,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 47.5,
       "league": "NCAAF"
     },
     {
@@ -1357,22 +1357,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -3.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401858456,
-      "game_date": "2026-09-19",
-      "game_time": "2026-09-19T16:00:00+00:00",
-      "game": "Buffalo @ Penn State",
-      "home_team": "Penn State",
-      "away_team": "Buffalo",
-      "bet_type": "Spread",
-      "pick": "Take Buffalo +40.5",
-      "probability": 0.54486,
-      "edge": 2.0176,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -40.5,
       "league": "NCAAF"
     }
   ]
