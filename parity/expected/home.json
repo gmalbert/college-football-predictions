@@ -1,0 +1,80 @@
+{
+  "page_file": "predictions.py",
+  "exceptions": [],
+  "titles": [
+    "🏈 College Football Predictions"
+  ],
+  "subheaders": [
+    "Upcoming Model Deltas",
+    "📐 Model Accuracy",
+    "📊 Dataset"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Brier Score",
+      "value": "0.1632",
+      "delta": ""
+    },
+    {
+      "label": "Spread RMSE",
+      "value": "17.90 pts",
+      "delta": ""
+    },
+    {
+      "label": "OOS ATS Win %",
+      "value": "49.5%",
+      "delta": ""
+    },
+    {
+      "label": "ATS Record",
+      "value": "1659‑1693",
+      "delta": ""
+    },
+    {
+      "label": "Games",
+      "value": "21,197",
+      "delta": ""
+    },
+    {
+      "label": "Teams",
+      "value": "915",
+      "delta": ""
+    },
+    {
+      "label": "Seasons",
+      "value": "2021–2026",
+      "delta": "6 seasons in dataset"
+    },
+    {
+      "label": "Model",
+      "value": "XGBoost + Ridge",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1659‑1693",
+      "delta": "49.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1632",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Artifact release 1f5d8ecc15b2 · 2026-09-12T20:08:29.582591+00:00",
+    "No upcoming games with a positive model edge are available."
+  ],
+  "alerts": [
+    {
+      "kind": "warning",
+      "text": "Model release status: HOLD (win_market_baseline, spread_market_baseline, closing_line_value). Forecasts are shown for research; Best Bets are published as provisional research output and are not validated recommendations."
+    }
+  ],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": []
+}

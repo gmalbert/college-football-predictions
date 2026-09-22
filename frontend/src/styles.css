@@ -1,0 +1,693 @@
+/* ---------------------------------------------------------------------------
+   Tailgate Edge — React parity build.
+
+   Colour tokens are taken verbatim from utils/ui_components.py
+   (THEMES["day"] / TABLE_STYLE_PRESETS["Frost"]["day"]) and
+   .streamlit/config.toml so the React app renders the same Frost theme the
+   Streamlit app does.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Streamlit ships Source Sans / Source Code Pro as variable webfonts and
+   declares them under the family names "Source Sans" and "Source Code Pro".
+   The same files are bundled here (frontend/public/fonts) with identical
+   @font-face rules, so both stacks rasterise text with the same font rather
+   than falling back to the system sans stack.
+   --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Source Sans";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/SourceSansVF-Upright.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Sans";
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+  src: url("/fonts/SourceSansVF-Italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/SourceCodeVF-Upright.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+  src: url("/fonts/SourceCodeVF-Italic.woff2") format("woff2");
+}
+
+:root {
+  --bg: #eef4fb;
+  --sidebar: #d8e8f5;
+  --card: #ffffff;
+  --text: #1a2b3c;
+  --secondary-text: #4a6e8a;
+  --accent: #2b7cb8;
+  --border: #aecde6;
+  --link: #1a5f96;
+  --header: #eef4fb;
+  --nav-active-bg: #2b7cb8;
+  --nav-active-text: #ffffff;
+  --metric-label: #4a6e8a;
+  --metric-value: #1a2b3c;
+
+  /* TABLE_STYLE_PRESETS["Frost"]["day"] */
+  --table-bg: #f7fbff;
+  --table-alt-bg: #edf4ff;
+  --table-header-bg: #d7e7fc;
+
+  /* Measured from the live Streamlit sidebar at a 1440px viewport. */
+  --sidebar-width: 18.75rem;
+  /* Exactly Streamlit's stack, so both apps use the same bundled webfont. */
+  --font: "Source Sans", sans-serif;
+  --mono: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+[data-theme="night"] {
+  --bg: #0f172a;
+  --sidebar: #111827;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --secondary-text: #cbd5e1;
+  --accent: #f59e0b;
+  --border: #334155;
+  --link: #fbbf24;
+  --header: #0f172a;
+  --nav-active-bg: #1e3a5f;
+  --nav-active-text: #f1f5f9;
+  --metric-label: #cbd5e1;
+  --metric-value: #f1f5f9;
+  --table-bg: #16202b;
+  --table-alt-bg: #111a25;
+  --table-header-bg: #1c3046;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a,
+a:visited {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ layout */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex: 0 0 var(--sidebar-width);
+  background-color: var(--sidebar);
+  /* Streamlit reserves the top strip for its sidebar header, so the nav lands
+     at the same y offset. */
+  padding: 4.75rem 1rem 3rem 1rem;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  width: 200px;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 1rem auto;
+}
+
+.sidebar .stMetric {
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-user-content {
+  padding-top: 1.5rem;
+}
+
+.sidebar-nav {
+  margin: 0;
+  /* stSidebarNavSeparator: the 17px strip Streamlit leaves between the nav and
+     the page's own sidebar content. */
+  padding-bottom: 1.0625rem;
+}
+
+/* Streamlit wraps each link in a 32px container and leaves a 2px gap between
+   them, so the pitch is 34px. */
+.sidebar-nav [data-testid="stSidebarNavItems"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* Streamlit's stNavSectionHeader: 14px, weight 500, sentence case. */
+.nav-section-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0.5rem 0.25rem 0.25rem 0.25rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  margin: 0.125rem;
+  border-radius: 0.5rem;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1.75rem;
+}
+
+.nav-link:hover {
+  background-color: rgba(43, 124, 184, 0.12);
+}
+
+.nav-link.active {
+  background-color: var(--nav-active-bg);
+  color: var(--nav-active-text);
+  font-weight: 600;
+}
+
+.nav-link .nav-icon {
+  margin-right: 0.5rem;
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0;
+  background-color: var(--bg);
+  /* Measured from Streamlit: 96px top, 80px sides, 160px bottom. */
+  padding: 6rem 5rem 10rem 5rem;
+}
+
+.block-container {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Streamlit lays the main column out as a flex column with a 1rem gap rather
+   than giving each element a bottom margin. */
+.block-container > * + * {
+  margin-top: 1rem;
+}
+
+/* ---------------------------------------------------------------- headings */
+
+h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 1.25rem 0 1rem 0;
+  margin: 0;
+  color: var(--text);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0.75rem 0 1rem 0;
+  margin: 0;
+  color: var(--text);
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0.75rem 0 1rem 0;
+  margin: 0;
+  color: var(--text);
+}
+
+p {
+  margin: 0 0 0.75rem 0;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+/* ----------------------------------------------------------------- metrics */
+
+.stMetric {
+  padding: 0;
+  margin: 0;
+}
+
+.stMetricLabel {
+  font-size: 0.875rem;
+  /* Measured: Streamlit's label block is 24px tall for a 14px font. */
+  line-height: 1.7;
+  color: var(--metric-label);
+  margin: 0;
+}
+
+.stMetricValue {
+  font-size: 2.25rem;
+  font-weight: 400;
+  /* Measured: 52px tall for a 36px font. */
+  line-height: 1.444;
+  color: var(--metric-value);
+  margin: 0;
+}
+
+.stMetricDelta {
+  font-size: 0.875rem;
+  color: var(--secondary-text);
+  margin: 0;
+}
+
+/* Streamlit colours a numeric delta and prefixes a direction arrow. The arrow
+   is generated content so it stays out of the text layer (and out of the
+   parity comparison). */
+.stMetricDelta.positive {
+  color: rgb(9, 171, 59);
+}
+
+.stMetricDelta.negative {
+  color: rgb(255, 43, 43);
+}
+
+.stMetricDelta.positive::before {
+  content: "↑";
+  margin-right: 0.15rem;
+}
+
+.stMetricDelta.negative::before {
+  content: "↓";
+  margin-right: 0.15rem;
+}
+
+.metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  /* Vertical rhythm comes from `.block-container > * + *`. */
+  margin: 0;
+}
+
+/* Each metric owns an equal share of the row, but never shrinks below a
+   readable width — it wraps to the next line instead of squeezing digits. */
+.metric-row > .stMetric {
+  flex: 1 1 0;
+  min-width: 6.5rem;
+}
+
+/* Streamlit's metric block is 76px tall and its elements sit on a 92px pitch. */
+.metric-stack > .stMetric {
+  margin-bottom: 1rem;
+}
+
+.metric-stack > .stMetric:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------- captions */
+
+.stCaption {
+  font-size: 0.8125rem;
+  color: var(--secondary-text);
+  /* Streamlit pairs a 1rem flex gap with a -1rem caption margin.  Here the
+     rhythm comes from `.block-container > * + *` instead, so a negative margin
+     would simply pull the next element up into this one. */
+  margin: 0;
+  line-height: 1.5;
+}
+
+.stCaption code {
+  font-family: var(--mono);
+  background-color: rgba(0, 0, 0, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+/* ------------------------------------------------------------------ alerts */
+
+.stAlert {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  line-height: 1.6;
+}
+
+.stAlert-icon {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.stAlert-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.stAlert code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+}
+
+.stAlert.warning {
+  background-color: rgba(255, 227, 93, 0.2);
+  color: #805a00;
+}
+
+.stAlert.info {
+  background-color: rgba(28, 131, 225, 0.1);
+  color: #004280;
+}
+
+.stAlert.error {
+  background-color: rgba(255, 43, 43, 0.09);
+  color: #7d353b;
+}
+
+.stAlert.success {
+  background-color: rgba(33, 195, 84, 0.1);
+  color: #177233;
+}
+
+/* ----------------------------------------------------------------- columns */
+
+.row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.row > * {
+  min-width: 0;
+}
+
+.col {
+  flex: 1 1 0;
+}
+
+/* --------------------------------------------------------------- dataframes */
+
+.stDataFrame {
+  margin: 0;
+}
+
+.df-scroll {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--table-bg);
+}
+
+table.df {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  background-color: var(--table-bg);
+  color: var(--text);
+}
+
+table.df th {
+  background-color: var(--table-header-bg);
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table.df td {
+  background-color: var(--table-bg);
+  color: var(--text);
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid rgba(174, 205, 230, 0.5);
+  white-space: nowrap;
+}
+
+table.df tbody tr:nth-child(even) td {
+  background-color: var(--table-alt-bg);
+}
+
+.df-empty {
+  color: var(--secondary-text);
+  font-size: 0.8125rem;
+  padding: 0.5rem;
+}
+
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 8rem;
+}
+
+.progress-track {
+  flex: 1 1 auto;
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: rgba(43, 124, 184, 0.18);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+}
+
+/* -------------------------------------------------------------------- tabs */
+
+.stTabs {
+  margin-top: 0.5rem;
+}
+
+.tablist {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+  background-color: var(--bg);
+}
+
+.tablist button {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 8px 18px;
+  margin-bottom: -2px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--secondary-text);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tablist button:hover {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+.tablist button[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  font-weight: 700;
+}
+
+.tabpanel {
+  padding-top: 0.75rem;
+}
+
+/* ---------------------------------------------------------------- expander */
+
+.stExpander {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  margin: 0;
+  background-color: transparent;
+}
+
+.stExpander summary {
+  cursor: pointer;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+}
+
+.stExpander summary::-webkit-details-marker {
+  display: none;
+}
+
+.stExpander summary::before {
+  content: "▶";
+  font-size: 0.6rem;
+  color: var(--secondary-text);
+  transition: transform 0.15s;
+}
+
+.stExpander[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.stExpander-body {
+  padding: 0 0.9rem 0.75rem 0.9rem;
+}
+
+/* ----------------------------------------------------------------- widgets */
+
+.stSelectbox,
+.stSlider,
+.stNumberInput,
+.stTextInput {
+  margin-bottom: 0.75rem;
+}
+
+.stWidgetLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.stSelectbox select,
+.stTextInput input,
+.stNumberInput input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  min-height: 2.4rem;
+}
+
+.stSlider input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.stSlider-value {
+  font-size: 0.8125rem;
+  color: var(--secondary-text);
+}
+
+/* ------------------------------------------------------------------- charts */
+
+.stPlotlyChart {
+  margin: 0;
+  background-color: transparent;
+}
+
+/* ------------------------------------------------------------------- footer */
+
+.betting-oracle-footer {
+  text-align: center;
+  padding: 20px 0;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 40px;
+}
+
+.betting-oracle-footer .powered {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+  font-family: sans-serif;
+}
+
+.betting-oracle-footer .powered a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.betting-oracle-footer .tagline {
+  margin: 0 0 15px 0;
+  font-size: 12px;
+  color: #888;
+  font-family: sans-serif;
+}
+
+.betting-oracle-footer img {
+  height: 60px;
+  width: auto;
+  border: none;
+}
+
+/* ------------------------------------------------------------------- states */
+
+.loading,
+.page-error {
+  padding: 2rem 0;
+  color: var(--secondary-text);
+  font-size: 0.9375rem;
+}
+
+.page-error {
+  color: #7d353b;
+}
+
+.markdown-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8125rem;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.markdown-table th,
+.markdown-table td {
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-table th {
+  background-color: var(--table-header-bg);
+  font-weight: 600;
+}

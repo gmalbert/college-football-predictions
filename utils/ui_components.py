@@ -1,6 +1,7 @@
 """utils/ui_components.py — Reusable Streamlit UI components."""
 from __future__ import annotations
 import datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -109,9 +110,41 @@ TABLE_STYLE_PRESETS: dict[str, dict[str, dict[str, str]]] = {
 }
 
 
+_BROWSER_TIMEZONE_ABBREVIATIONS = {
+    "America/New_York": "ET",
+    "America/Chicago": "CT",
+    "America/Denver": "MT",
+    "America/Los_Angeles": "PT",
+    "America/Anchorage": "AKT",
+    "Pacific/Honolulu": "HT",
+}
+
+
+def browser_timezone() -> tuple[ZoneInfo, str]:
+    """Return the browser timezone and a compact regional abbreviation.
+
+    Streamlit exposes the browser's IANA timezone through ``st.context``.
+    Headless runs and older Streamlit versions may not provide it, so UTC is a
+    deterministic fallback for those environments.
+    """
+    try:
+        timezone_name = st.context.timezone
+    except Exception:
+        timezone_name = None
+    if not timezone_name:
+        return ZoneInfo("UTC"), "UTC"
+    try:
+        return ZoneInfo(timezone_name), _BROWSER_TIMEZONE_ABBREVIATIONS.get(
+            timezone_name, timezone_name.rsplit("/", 1)[-1].replace("_", " ")
+        )
+    except ZoneInfoNotFoundError:
+        return ZoneInfo("UTC"), "UTC"
+
+
 def _auto_theme_name() -> str:
-    """Return 'day' between 06:00 and 21:59, else 'night'."""
-    hour = datetime.datetime.now().hour
+    """Return 'day' between 06:00 and 21:59 in the browser's local time."""
+    browser_tz, _ = browser_timezone()
+    hour = datetime.datetime.now(browser_tz).hour
     return "day" if 6 <= hour < 22 else "night"
 
 
@@ -398,20 +431,21 @@ def themed_dataframe(df, **kwargs) -> None:
     preset      = TABLE_STYLE_PRESETS.get(table_style, {}).get(theme_name, {})
     theme       = THEMES.get(theme_name, THEMES["day"])
 
-    tbl     = "transparent"
-    tbl_alt = "transparent"
-    th_bg   = "transparent"
+    tbl     = preset.get("table_bg", theme.get("table_bg", theme["card"]))
+    tbl_alt = preset.get("table_alt_bg", theme.get("table_alt_bg", tbl))
+    th_bg   = preset.get("table_header_bg", theme.get("table_header_bg", tbl))
     tx      = theme["text"]
-
-    def _row_style(row):
-        return [f"background-color: transparent; color: {tx}"] * len(row)
 
     styled = (
         df.style
-        .apply(_row_style, axis=1)
+        .set_properties(**{"background-color": tbl, "color": tx})
         .set_table_styles([
             {"selector": "th", "props": f"background-color: {th_bg}; color: {tx};"},
-            {"selector": "td", "props": f"color: {tx};"},
+            {"selector": "td", "props": f"background-color: {tbl}; color: {tx};"},
+            {
+                "selector": "tbody tr:nth-child(even) td",
+                "props": f"background-color: {tbl_alt}; color: {tx};",
+            },
         ])
     )
     st.dataframe(styled, **kwargs)

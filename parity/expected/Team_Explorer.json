@@ -1,0 +1,194 @@
+{
+  "page_file": "pages/3_Team_Explorer.py",
+  "exceptions": [],
+  "titles": [
+    "🏟️ Team Explorer"
+  ],
+  "subheaders": [
+    "Alabama",
+    "Team Efficiency Quadrant",
+    "Schedule & Results"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Record",
+      "value": "1‑11",
+      "delta": ""
+    },
+    {
+      "label": "Conference",
+      "value": "SEC",
+      "delta": ""
+    },
+    {
+      "label": "SP+",
+      "value": "17.6",
+      "delta": ""
+    },
+    {
+      "label": "Talent",
+      "value": "974",
+      "delta": ""
+    },
+    {
+      "label": "Games",
+      "value": "12",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1659‑1693",
+      "delta": "49.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1632",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Offense EPA/play vs Defense EPA/play across all teams. Selected team highlighted in red."
+  ],
+  "alerts": [],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": [
+    {
+      "columns": [
+        "Wk",
+        "Opponent",
+        "H/A",
+        "Result",
+        "Margin",
+        "Book",
+        "ATS",
+        "Model"
+      ],
+      "rows": [
+        [
+          1,
+          "East Carolina",
+          "H",
+          "W 48‑10",
+          "+38",
+          "—",
+          "—",
+          "+28.7"
+        ],
+        [
+          2,
+          "Kentucky",
+          "A",
+          "—",
+          "—",
+          "—",
+          "—",
+          "-9.7"
+        ],
+        [
+          3,
+          "Florida State",
+          "H",
+          "—",
+          "—",
+          "-17.5",
+          "—",
+          "+15.4"
+        ],
+        [
+          4,
+          "South Carolina",
+          "H",
+          "—",
+          "—",
+          "—",
+          "—",
+          "+17.3"
+        ],
+        [
+          5,
+          "Mississippi State",
+          "A",
+          "—",
+          "—",
+          "—",
+          "—",
+          "-13.9"
+        ],
+        [
+          6,
+          "Georgia",
+          "H",
+          "—",
+          "—",
+          "—",
+          "—",
+          "-5.3"
+        ],
+        [
+          7,
+          "Tennessee",
+          "A",
+          "—",
+          "—",
+          "—",
+          "—",
+          "-3.7"
+        ],
+        [
+          8,
+          "Texas A&M",
+          "H",
+          "—",
+          "—",
+          "—",
+          "—",
+          "+10.6"
+        ],
+        [
+          10,
+          "LSU",
+          "A",
+          "—",
+          "—",
+          "—",
+          "—",
+          "-3.4"
+        ],
+        [
+          11,
+          "Vanderbilt",
+          "A",
+          "—",
+          "—",
+          "—",
+          "—",
+          "+1.2"
+        ],
+        [
+          12,
+          "Chattanooga",
+          "H",
+          "—",
+          "—",
+          "—",
+          "—",
+          "+25.7"
+        ],
+        [
+          13,
+          "Auburn",
+          "H",
+          "—",
+          "—",
+          "—",
+          "—",
+          "+21.9"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "page_file": "pages/2_Value_Bets.py",
+  "exceptions": [],
+  "titles": [
+    "💰 Value Bets"
+  ],
+  "subheaders": [
+    "All Value Bets",
+    "💸 Bankroll Simulator"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Total Bets",
+      "value": "39",
+      "delta": ""
+    },
+    {
+      "label": "Record",
+      "value": "N/A",
+      "delta": ""
+    },
+    {
+      "label": "Win Rate",
+      "value": "—",
+      "delta": ""
+    },
+    {
+      "label": "Strong Edge Tier",
+      "value": "19",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1659‑1693",
+      "delta": "49.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1632",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Games where the model's projected line disagrees materially with the sportsbook.",
+    "Settled games use season walk-forward predictions; unplayed games use the current full-history model.",
+    "The bankroll chart is a scenario tool. It does not infer cover probability from edge points.",
+    "No completed bets to simulate — check back once the season has results."
+  ],
+  "alerts": [
+    {
+      "kind": "warning",
+      "text": "Research mode only: the model release is on hold (win_market_baseline, spread_market_baseline, closing_line_value). Do not interpret point differences as validated betting recommendations."
+    }
+  ],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": [
+    {
+      "columns": [
+        "Week",
+        "Game",
+        "Bet Type",
+        "Model",
+        "Book",
+        "Edge",
+        "Edge Tier",
+        "Pick",
+        "Result"
+      ],
+      "rows": [
+        [
+          2,
+          "Campbell @ Florida",
+          "Spread",
+          "+41.8",
+          "-50.5",
+          8.7,
+          "STRONG",
+          "Take Campbell +50.5",
+          "—"
+        ],
+        [
+          2,
+          "Iowa State @ Iowa",
+          "Spread",
+          "-6.2",
+          "+14.2",
+          8.1,
+          "STRONG",
+          "Take Iowa +14.2",
+          "—"
+        ],
+        [
+          2,
+          "Montana State @ Nevada",
+          "Spread",
+          "-10.4",
+          "+3.8",
+          6.7,
+          "STRONG",
+          "Take Montana State -3.8",
+          "—"
+        ],
+        [
+          2,
+          "Louisiana Tech @ LSU",
+          "Spread",
+          "+28.6",
+          "-35.0",
+          6.4,
+          "STRONG",
+          "Take Louisiana Tech +35.0",
+          "—"
+        ],
+        [
+          3,
+          "Miami @ Wake Forest",
+          "Spread",
+          "-16.2",
+          "+22.5",
+          6.3,
+          "STRONG",
+          "Take Wake Forest +22.5",
+          "—"
+        ],
+        [
+          2,
+          "Jacksonville State @ Ohio",
+          "Spread",
+          "-3.2",
+          "-2.0",
+          5.2,
+          "STRONG",
+          "Take Jacksonville State +2.0",
+          "—"
+        ],
+        [
+          2,
+          "Bowling Green @ Nebraska",
+          "Spread",
+          "+25.5",
+          "-30.5",
+          5.0,
+          "STRONG",
+          "Take Bowling Green +30.5",
+          "—"
+        ],
+        [
+          2,
+          "Illinois State @ Northern Illinois",
+          "Spread",
+          "-8.0",
+          "+3.0",
+          5.0,
+          "STRONG",
+          "Take Illinois State -3.0",
+          "—"
+        ],
+        [
+          2,
+          "Texas Tech @ Oregon State",
+          "Spread",
+          "-30.5",
+          "+25.5",
+          5.0,
+          "STRONG",
+          "Take Texas Tech -25.5",
+          "—"
+        ],
+        [
+          2,
+          "Valparaiso @ Murray State",
+          "Spread",
+          "+20.4",
+          "-15.5",
+          4.9,
+          "STRONG",
+          "Take Murray State -15.5",
+          "—"
+        ],
+        [
+          2,
+          "New Haven @ South Dakota State",
+          "Spread",
+          "+38.1",
+          "-42.5",
+          4.4,
+          "STRONG",
+          "Take New Haven +42.5",
+          "—"
+        ],
+        [
+          2,
+          "Texas Southern @ UTEP",
+          "Spread",
+          "+30.4",
+          "-26.5",
+          3.9,
+          "STRONG",
+          "Take UTEP -26.5",
+          "—"
+        ],
+        [
+          2,
+          "Navy @ Florida Atlantic",
+          "Spread",
+          "-8.0",
+          "+4.2",
+          3.8,
+          "STRONG",
+          "Take Navy -4.2",
+          "—"
+        ],
+        [
+          2,
+          "Fordham @ Coastal Carolina",
+          "Spread",
+          "+39.2",
+          "-35.5",
+          3.7,
+          "STRONG",
+          "Take Coastal Carolina -35.5",
+          "—"
+        ],
+        [
+          2,
+          "Southern Miss @ Auburn",
+          "Spread",
+          "+29.1",
+          "-32.5",
+          3.4,
+          "STRONG",
+          "Take Southern Miss +32.5",
+          "—"
+        ],
+        [
+          2,
+          "Western Carolina @ Cincinnati",
+          "Spread",
+          "+38.6",
+          "-35.5",
+          3.1,
+          "STRONG",
+          "Take Cincinnati -35.5",
+          "—"
+        ],
+        [
+          3,
+          "SMU @ Louisville",
+          "Spread",
+          "-1.6",
+          "-1.5",
+          3.1,
+          "STRONG",
+          "Take SMU +1.5",
+          "—"
+        ],
+        [
+          2,
+          "UT Rio Grande Valley @ Nicholls",
+          "Spread",
+          "-8.6",
+          "+5.5",
+          3.1,
+          "STRONG",
+          "Take UT Rio Grande Valley -5.5",
+          "—"
+        ],
+        [
+          2,
+          "Middle Tennessee @ Marshall",
+          "Spread",
+          "+10.0",
+          "-13.0",
+          3.0,
+          "MODERATE",
+          "Take Middle Tennessee +13.0",
+          "—"
+        ],
+        [
+          2,
+          "Georgia State @ Kennesaw State",
+          "Spread",
+          "+5.0",
+          "-8.0",
+          3.0,
+          "STRONG",
+          "Take Georgia State +8.0",
+          "—"
+        ],
+        [
+          3,
+          "North Carolina @ Clemson",
+          "Spread",
+          "+5.6",
+          "-8.5",
+          2.9,
+          "MODERATE",
+          "Take North Carolina +8.5",
+          "—"
+        ],
+        [
+          3,
+          "Syracuse @ Pittsburgh",
+          "Spread",
+          "+7.6",
+          "-10.5",
+          2.9,
+          "MODERATE",
+          "Take Syracuse +10.5",
+          "—"
+        ],
+        [
+          2,
+          "Southeast Missouri State @ Southern Illinois",
+          "Spread",
+          "+10.3",
+          "-7.5",
+          2.8,
+          "MODERATE",
+          "Take Southern Illinois -7.5",
+          "—"
+        ],
+        [
+          2,
+          "Stephen F. Austin @ Abilene Christian",
+          "Spread",
+          "-5.1",
+          "+2.5",
+          2.6,
+          "MODERATE",
+          "Take Stephen F. Austin -2.5",
+          "—"
+        ],
+        [
+          2,
+          "Arkansas @ Utah",
+          "Spread",
+          "+9.9",
+          "-12.5",
+          2.6,
+          "MODERATE",
+          "Take Arkansas +12.5",
+          "—"
+        ],
+        [
+          2,
+          "Southern @ Houston",
+          "Spread",
+          "+48.9",
+          "-51.5",
+          2.6,
+          "MODERATE",
+          "Take Southern +51.5",
+          "—"
+        ],
+        [
+          2,
+          "San Diego State @ UCLA",
+          "Spread",
+          "+16.1",
+          "-13.5",
+          2.6,
+          "MODERATE",
+          "Take UCLA -13.5",
+          "—"
+        ],
+        [
+          2,
+          "Charleston Southern @ The Citadel",
+          "Spread",
+          "-0.1",
+          "-2.5",
+          2.6,
+          "MODERATE",
+          "Take Charleston Southern +2.5",
+          "—"
+        ],
+        [
+          2,
+          "Western Illinois @ Wisconsin",
+          "Spread",
+          "+40.0",
+          "-42.5",
+          2.5,
+          "MODERATE",
+          "Take Western Illinois +42.5",
+          "—"
+        ],
+        [
+          2,
+          "Louisiana @ USC",
+          "Spread",
+          "+28.0",
+          "-30.5",
+          2.5,
+          "MODERATE",
+          "Take Louisiana +30.5",
+          "—"
+        ],
+        [
+          2,
+          "San Diego @ Idaho State",
+          "Spread",
+          "+20.0",
+          "-22.5",
+          2.5,
+          "MODERATE",
+          "Take San Diego +22.5",
+          "—"
+        ],
+        [
+          2,
+          "Grambling @ TCU",
+          "Spread",
+          "+42.1",
+          "-44.5",
+          2.4,
+          "MODERATE",
+          "Take Grambling +44.5",
+          "—"
+        ],
+        [
+          2,
+          "Incarnate Word @ Northern Arizona",
+          "Spread",
+          "+2.2",
+          "-4.5",
+          2.3,
+          "MODERATE",
+          "Take Incarnate Word +4.5",
+          "—"
+        ],
+        [
+          2,
+          "Stonehill @ New Hampshire",
+          "Spread",
+          "+10.2",
+          "-12.5",
+          2.3,
+          "MODERATE",
+          "Take Stonehill +12.5",
+          "—"
+        ],
+        [
+          2,
+          "West Georgia @ Arkansas State",
+          "Spread",
+          "+29.3",
+          "-31.5",
+          2.2,
+          "MODERATE",
+          "Take West Georgia +31.5",
+          "—"
+        ],
+        [
+          2,
+          "Buffalo @ Florida International",
+          "Spread",
+          "+8.2",
+          "-10.2",
+          2.1,
+          "MODERATE",
+          "Take Buffalo +10.2",
+          "—"
+        ],
+        [
+          2,
+          "North Dakota State @ Air Force",
+          "Spread",
+          "-4.1",
+          "+2.0",
+          2.1,
+          "MODERATE",
+          "Take North Dakota State -2.0",
+          "—"
+        ],
+        [
+          2,
+          "New Mexico State @ Hawai'i",
+          "Spread",
+          "+5.4",
+          "-7.5",
+          2.1,
+          "MODERATE",
+          "Take New Mexico State +7.5",
+          "—"
+        ],
+        [
+          3,
+          "Florida State @ Alabama",
+          "Spread",
+          "+15.4",
+          "-17.5",
+          2.1,
+          "MODERATE",
+          "Take Florida State +17.5",
+          "—"
+        ]
+      ]
+    }
+  ]
+}

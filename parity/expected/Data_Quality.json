@@ -1,0 +1,158 @@
+{
+  "page_file": "pages/9_Data_Quality.py",
+  "exceptions": [],
+  "titles": [
+    "🛡️ Data & Model Quality"
+  ],
+  "subheaders": [],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Passing",
+      "value": "10",
+      "delta": ""
+    },
+    {
+      "label": "Warnings",
+      "value": "6",
+      "delta": ""
+    },
+    {
+      "label": "Failures",
+      "value": "0",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1659‑1693",
+      "delta": "49.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1632",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Release-contract checks for grain, point-in-time safety, freshness, and evaluation scope.",
+    "Release 1f5d8ecc15b2 · SHADOW · generated 2026-09-12T20:08:29.582591+00:00"
+  ],
+  "alerts": [
+    {
+      "kind": "info",
+      "text": "A warning does not automatically block the dashboard. A failed grain, point-in-time, or out-of-sample evaluation check should block model promotion."
+    }
+  ],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": [
+    {
+      "columns": [
+        "Status",
+        "Check",
+        "Details",
+        "Value"
+      ],
+      "rows": [
+        [
+          "✅ Pass",
+          "games_contract",
+          "Contract passed",
+          "21197"
+        ],
+        [
+          "✅ Pass",
+          "feature_matrix_contract",
+          "Contract passed",
+          "21197"
+        ],
+        [
+          "✅ Pass",
+          "team_game_stats_contract",
+          "Contract passed",
+          "15136"
+        ],
+        [
+          "✅ Pass",
+          "feature_game_coverage",
+          "Feature artifact covers 21,197 of 21,197 unique games",
+          "1.0"
+        ],
+        [
+          "✅ Pass",
+          "current_season_schedule",
+          "Latest scheduled season is 2026; current year is 2026",
+          "2026"
+        ],
+        [
+          "⚠️ Warning",
+          "unsafe_exploration_columns",
+          "Season aggregates may remain for UI exploration but are excluded from production feature lists: sp_plus_diff, off_epa_diff, fpi_diff, srs_diff, ppa_off_diff",
+          "5"
+        ],
+        [
+          "✅ Pass",
+          "release_metadata",
+          "Release metadata is present",
+          "1f5d8ecc15b24ab2b756656be1010f37"
+        ],
+        [
+          "⚠️ Warning",
+          "empty_raw_cache",
+          "102 empty JSON caches; new ingestion code ignores and does not create empty caches",
+          "102"
+        ],
+        [
+          "✅ Pass",
+          "market_snapshot_history",
+          "Timestamped market history contains 66,227 quotes; movement and CLV require forward collection",
+          "66227"
+        ],
+        [
+          "⚠️ Warning",
+          "context_feature_observations",
+          "No timestamped contextual source has been ingested",
+          "0"
+        ],
+        [
+          "✅ Pass",
+          "model_evaluation_scope",
+          "Evaluation scope is walk_forward_season_oos",
+          "walk_forward_season_oos"
+        ],
+        [
+          "⚠️ Warning",
+          "model_release_decision",
+          "Release decision is hold; failed gates: win_market_baseline, spread_market_baseline, closing_line_value",
+          "hold"
+        ],
+        [
+          "✅ Pass",
+          "oos_prediction_artifact",
+          "OOS artifact has 21,197 rows and 0 duplicate games",
+          "21197"
+        ],
+        [
+          "✅ Pass",
+          "model_manifests",
+          "Found 4 model artifact manifests",
+          "4"
+        ],
+        [
+          "⚠️ Warning",
+          "best_bets_freshness",
+          "Best-bets export age is 236.6 hours",
+          "236.55711529972223"
+        ],
+        [
+          "⚠️ Warning",
+          "shadow_total_freshness",
+          "Shadow-total export age is 240.8 hours",
+          "240.81694781444443"
+        ]
+      ]
+    }
+  ]
+}

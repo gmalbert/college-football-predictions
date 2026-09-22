@@ -9,7 +9,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 
-from utils.cfbd_client import get_win_probability_chart, get_games
+from utils.cfbd_client import get_games, get_win_probability_chart, parse_win_probability_rows
 from utils.config import get_secret
 from utils.ui_components import render_sidebar, themed_dataframe
 
@@ -94,28 +94,7 @@ if not wp_data:
     st.stop()
 
 # ── parse WP data ─────────────────────────────────────────────────────────────
-rows: list[dict] = []
-for i, p in enumerate(wp_data):
-    if isinstance(p, dict):
-        home_wp = p.get("homeWinProb") or p.get("home_win_prob")
-        play_num = p.get("playNumber") or p.get("play_number") or i
-        home_score = p.get("homeScore") or p.get("home_score")
-        away_score = p.get("awayScore") or p.get("away_score")
-        play_text  = p.get("playText")  or p.get("play_text", "")
-    else:
-        home_wp    = getattr(p, "home_win_prob", None) or getattr(p, "homeWinProb", None)
-        play_num   = getattr(p, "play_number", i) or i
-        home_score = getattr(p, "home_score", None)
-        away_score = getattr(p, "away_score", None)
-        play_text  = getattr(p, "play_text", "")
-    if home_wp is not None:
-        rows.append({
-            "play": int(play_num),
-            "home_wp": float(home_wp),
-            "home_score": home_score,
-            "away_score": away_score,
-            "play_text": str(play_text),
-        })
+rows = parse_win_probability_rows(wp_data)
 
 if not rows:
     st.warning("Win probability data could not be parsed.")

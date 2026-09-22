@@ -9,9 +9,8 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from pathlib import Path
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from utils.ui_components import render_sidebar, themed_dataframe
+from utils.ui_components import browser_timezone, render_sidebar, themed_dataframe
 from utils.storage import FEATURES_DIR, PROCESSED_DIR, load_parquet
 from utils.odds_ingestion import build_market_consensus_from_snapshots
 from utils.models import load_metrics, predict_for_display, models_trained
@@ -250,31 +249,7 @@ display_consensus = build_market_consensus_from_snapshots(
 display_consensus = display_consensus.set_index("game_id") if not display_consensus.empty else pd.DataFrame()
 
 
-def _browser_timezone() -> tuple[ZoneInfo, str]:
-    """Return the browser timezone and a compact regional abbreviation."""
-    regional_abbreviations = {
-        "America/New_York": "ET",
-        "America/Chicago": "CT",
-        "America/Denver": "MT",
-        "America/Los_Angeles": "PT",
-        "America/Anchorage": "AKT",
-        "Pacific/Honolulu": "HT",
-    }
-    try:
-        timezone_name = st.context.timezone
-    except Exception:
-        timezone_name = None
-    if not timezone_name:
-        return ZoneInfo("UTC"), "UTC"
-    try:
-        return ZoneInfo(timezone_name), regional_abbreviations.get(
-            timezone_name, timezone_name.rsplit("/", 1)[-1].replace("_", " ")
-        )
-    except ZoneInfoNotFoundError:
-        return ZoneInfo("UTC"), "UTC"
-
-
-browser_tz, browser_tz_name = _browser_timezone()
+browser_tz, browser_tz_name = browser_timezone()
 kickoff_column = f"Kickoff ({browser_tz_name})"
 
 compact_rows = []

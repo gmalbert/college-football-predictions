@@ -1,0 +1,22 @@
+{
+  "name": "tailgate-edge-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FastAPI + React parity build of the Tailgate Edge Streamlit dashboard",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "plotly.js-dist-min": "^2.35.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}

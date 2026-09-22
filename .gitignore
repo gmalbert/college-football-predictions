@@ -26,4 +26,18 @@ data_files/raw/
 .venv312
 .kilo
 .vscode
+.commandcode
 *code-workspace
+
+# Local git worktrees (each is a full checkpoint of the app)
+.worktrees/
+
+# FastAPI + React parity build
+frontend/node_modules/
+frontend/dist/
+.playwright/
+parity/parity_report.json
+parity/benchmark_report.json
+parity/statistics.json
+parity/diffs/
+parity/*.log
