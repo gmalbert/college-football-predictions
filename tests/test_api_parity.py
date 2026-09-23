@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import py_compile
+import subprocess
 import sys
 from pathlib import Path
 
@@ -386,6 +387,96 @@ def test_cors_middleware_only_when_origins_configured(monkeypatch: pytest.Monkey
     # With no origins configured the middleware is absent, so no CORS headers.
     response = client.get("/api/home", headers={"Origin": allowed})
     assert "access-control-allow-origin" not in response.headers
+
+
+# ---------------------------------------------------------------------------
+# Deployment shape
+# ---------------------------------------------------------------------------
+
+
+def test_streamlit_is_not_required_on_the_api_path() -> None:
+    """Every API module must import with ``streamlit`` blocked.
+
+    ``utils/config.py`` used to do ``import streamlit as st`` at module scope,
+    which pulled a 256 MB dependency chain (streamlit, altair, pydeck,
+    protobuf, ...) into the API image purely so ``get_secret`` could read
+    ``st.secrets``. It now imports lazily. This test exists so a future change
+    cannot quietly reintroduce it.
+    """
+    result = subprocess.run(
+        [sys.executable, str(PROJECT_ROOT / "scripts" / "check_streamlit_free.py")],
+        cwd=str(PROJECT_ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "16/16 modules import without streamlit" in result.stdout
+
+
+def test_get_secret_falls_back_to_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Without a Streamlit runtime, secrets come from environment variables.
+
+    ``_streamlit_secrets`` is stubbed to None because a local
+    ``.streamlit/secrets.toml`` otherwise takes precedence over the environment
+    (which is the correct production behaviour, tested separately below).
+    """
+    from utils import config
+
+    monkeypatch.setattr(config, "_streamlit_secrets", lambda: None)
+    monkeypatch.setenv("CFBD_API_KEY", "env-token")
+    assert config.get_secret("cfbd", "api_key") == "env-token"
+
+
+def test_get_secret_prefers_streamlit_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    """When a Streamlit runtime is present, its secrets win over the env."""
+    from utils import config
+
+    monkeypatch.setattr(
+        config, "_streamlit_secrets", lambda: {"cfbd": {"api_key": "from-secrets"}}
+    )
+    monkeypatch.setenv("CFBD_API_KEY", "env-token")
+    assert config.get_secret("cfbd", "api_key") == "from-secrets"
+
+
+def test_get_secret_accepts_the_cbbd_typo_variant(monkeypatch: pytest.MonkeyPatch) -> None:
+    from utils import config
+
+    monkeypatch.setattr(config, "_streamlit_secrets", lambda: None)
+    monkeypatch.delenv("CFBD_API_KEY", raising=False)
+    monkeypatch.setenv("CBBD_API_KEY", "typo-token")
+    assert config.get_secret("cfbd", "api_key") == "typo-token"
+
+
+def test_get_secret_raises_a_useful_error_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    from utils import config
+
+    monkeypatch.setattr(config, "_streamlit_secrets", lambda: None)
+    monkeypatch.delenv("CFBD_API_KEY", raising=False)
+    monkeypatch.delenv("CBBD_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="CFBD_API_KEY"):
+        config.get_secret("cfbd", "api_key")
+
+
+def test_config_does_not_import_streamlit_at_module_scope() -> None:
+    """A module-scope import in utils/config.py is what cost 256 MB."""
+    source = (PROJECT_ROOT / "utils" / "config.py").read_text(encoding="utf-8")
+    top_level = [
+        line for line in source.splitlines()
+        if line.startswith("import ") or line.startswith("from ")
+    ]
+    assert not any("streamlit" in line for line in top_level), top_level
+
+
+def test_api_requirements_exclude_streamlit() -> None:
+    """requirements-api.txt must not pull streamlit back in."""
+    text = (PROJECT_ROOT / "requirements-api.txt").read_text(encoding="utf-8")
+    declared = [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    assert not any(line.lower().startswith("streamlit") for line in declared)
+    assert "-r requirements.txt" not in text
 
 
 def test_cache_clear_roundtrip() -> None:

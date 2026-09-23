@@ -129,6 +129,51 @@ secured instance (API key + admin token)
 
 ---
 
+## Deployment
+
+### Three requirement files
+
+| File | Installs | For |
+|---|---|---|
+| `requirements.txt` | streamlit, cfbd, sklearn, xgboost, … | the Streamlit app (Streamlit Cloud) |
+| `requirements-api.txt` | fastapi, uvicorn, pandas, numpy, pyarrow, sklearn, xgboost, plotly, Pillow, cfbd | the FastAPI backend **only** |
+| `requirements-web.txt` | both of the above + pytest + playwright | local development and the parity harness |
+
+The API deliberately does not install Streamlit. `utils/config.py` imports it
+lazily inside `get_secret()` — the one place it was needed — so the whole API
+path runs without it. Verified two ways:
+
+```bash
+python scripts/check_streamlit_free.py   # imports every module with streamlit blocked
+python scripts/check_api_isolated.py     # builds a venv from requirements-api.txt
+                                         # and asserts streamlit is absent
+```
+
+Measured effect: **786 MB → 530 MB**. Dropping Streamlit also drops altair,
+pydeck, protobuf, watchdog, jsonschema, referencing, rpds-py and more.
+
+### Where this can run
+
+The backend is a long-lived Python process holding ~530 MB of numerical
+libraries (scipy 119 MB, pyarrow 86 MB, pandas 68 MB, xgboost 57 MB, plotly
+52 MB, scikit-learn 45 MB) plus ~8 MB of Parquet and model artifacts, and it
+keeps an in-memory cache of the derived frames.
+
+| Platform | Backend? | Notes |
+|---|---|---|
+| **Render** | **Yes** | Long-running process, cache persists, the build step can run npm. Build: `pip install -r requirements-api.txt && npm ci --prefix frontend && npm run build --prefix frontend`. Start: `python -m api` with `TAILGATE_HOST=0.0.0.0`. |
+| Vercel | No (as-is) | Serverless bundles cap around 250 MB; this is ~530 MB. Functions are also stateless, so the warm cache — worth 3.84× — would not survive, making every request take the ~5.6 s cold path. |
+| Cloudflare Pages | No | Workers are V8 isolates with no CPython and no native numpy/pandas/scipy/xgboost. Python Workers run on Pyodide/WASM, which cannot load native extensions. |
+
+Hosting the SPA statically on either of the latter two is fine; only the
+backend is the problem. To run the whole thing on Cloudflare Pages you would
+precompute the page payloads to static JSON and drop the API — the approach
+`docs/FEATURE_PROPOSALS_2026.md` (D7) already proposes. The data is small
+enough for it: ~8 MB of artifacts expands to roughly 5 seasons × 16 weeks ×
+~105 KB ≈ 8 MB of payloads.
+
+---
+
 ## How parity is verified
 
 Two independent checks run on every verification pass, because no single
@@ -291,13 +336,20 @@ regressions but were simply a different application.
 
 The application is feature-complete and verified; the packaging is not.
 
-- **Not committed.** `api/`, `frontend/`, `parity/`, `scripts/` and the two new
-  test files are all still untracked.
-- **No Dockerfile or CI workflow.** `frontend/dist/` is gitignored, so a fresh
-  clone serves a JSON notice at `/` until `npm ci && npm run build` runs. The
-  API itself works immediately — verified by
-  `scripts/check_no_build.py`.
+- **No Dockerfile, and it is probably not needed.** Render's native Python
+  runtime can run a build command, so Docker only earns its place if the target
+  turns out to be a container platform. See the deployment table above.
 - **No reverse proxy.** TLS, compression and (if wanted) site-wide
   authentication belong in front of the API, not in it.
-- **No committed branch or PR.**
+- **`frontend/dist` is gitignored**, so whatever hosts this must run
+  `npm ci && npm run build` before serving. Verified by
+  `scripts/check_no_build.py`: the API works immediately on a fresh clone, but
+  `/` returns a JSON notice until the frontend is built.
+- **Parity harness needs a Streamlit server**, so it can only run in an
+  environment with `requirements-web.txt` installed. If the Streamlit app is
+  retired, either drop the harness or point it at a snapshot.
+- Six planning docs in `docs/` are still untracked
+  (`FEATURE_PROPOSALS_2026`, `MODEL_IMPROVEMENT_PLAN`, `OPS_AND_TESTING_ROADMAP`,
+  `PARLAY_API_*`, `UI_UX_ENHANCEMENTS`).
+
 

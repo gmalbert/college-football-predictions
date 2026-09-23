@@ -1,30 +1,28 @@
-# FastAPI + React parity build — additional runtime and test dependencies.
+# Local development: everything needed to run both front ends and the full test
+# suite, including the parity harness.
 #
-# Install on top of the Streamlit stack:
 #     python -m pip install -r requirements-web.txt
+#     python -m playwright install chromium
 #
-# The API imports `utils/` directly (including utils/config.py and
-# utils/ui_components.py, which import streamlit), so the Streamlit
-# requirements come first.
+# The three requirement files exist because the two deployments need different
+# things:
+#
+#     requirements.txt      the Streamlit app (Streamlit Cloud)
+#     requirements-api.txt  the FastAPI backend only — no streamlit at all
+#     requirements-web.txt  this file: both, plus the test tooling
+#
+# The parity harness compares the React build against a live Streamlit server,
+# so it needs streamlit installed. The API itself does not: utils/config.py
+# imports streamlit lazily, and scripts/check_api_isolated.py proves the whole
+# API runs in a venv that has no streamlit at all.
 
 -r requirements.txt
-
-# --- API server -------------------------------------------------------------
-# fastapi 0.118 is the newest release that still accepts pydantic v1, which
-# cfbd 5.27 pins (cfbd requires pydantic<2). It also allows the
-# starlette>=0.46 that streamlit 1.63 requires.
-fastapi==0.118.0
-uvicorn>=0.30.0
-httpx>=0.27.0
-
-# api/main.py uses Pillow directly to downscale data_files/logo.png before
-# serving it through /api/logo. It currently also arrives transitively via
-# streamlit, but it is a direct import and is pinned here so that stays true.
-Pillow>=10.0.0
+-r requirements-api.txt
 
 # --- Tests ------------------------------------------------------------------
 pytest>=8.0.0
 playwright>=1.45.0
+httpx>=0.27.0
 
 # After installing, fetch the browser used by the Playwright suites:
 #     python -m playwright install chromium
