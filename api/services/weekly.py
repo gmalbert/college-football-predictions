@@ -4,6 +4,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from api.columns import FEATURE_MATRIX_COLUMNS, LINE_SNAPSHOT_COLUMNS
 from api.data import FEATURES_DIR, PROCESSED_DIR, artifact, parquet
 from api.jsonutil import jsonable, records
 from api.services.common import resolve_timezone
@@ -21,7 +22,9 @@ from utils.storage import FEATURES_DIR
 
 def load_feature_matrix() -> pd.DataFrame:
     try:
-        return parquet("feature_matrix", layer="features")
+        return parquet(
+            "feature_matrix", layer="features", columns=FEATURE_MATRIX_COLUMNS
+        )
     except FileNotFoundError:
         return pd.DataFrame()
 
@@ -29,7 +32,7 @@ def load_feature_matrix() -> pd.DataFrame:
 def load_market_snapshots() -> pd.DataFrame:
     """Retained market quotes for display only — never model inputs."""
     try:
-        snapshots = parquet("line_snapshots")
+        snapshots = parquet("line_snapshots", columns=LINE_SNAPSHOT_COLUMNS)
     except FileNotFoundError:
         return pd.DataFrame()
     if snapshots.empty:

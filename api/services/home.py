@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import DATA_DIR, parquet, read_json
 from api.jsonutil import fmt_int, fmt_pct, fmt_pct1, jsonable
 from utils.betting import generate_spread_pick, generate_total_pick
@@ -35,25 +36,42 @@ except Exception:  # noqa: BLE001 - parity with the Streamlit guard
 
 def _load_dataset() -> pd.DataFrame:
     try:
-        return parquet("feature_matrix", layer="features")
+        return parquet(
+            "feature_matrix", layer="features", columns=FEATURE_MATRIX_COLUMNS
+        )
     except FileNotFoundError:
         return pd.DataFrame()
 
 
 def _load_summary() -> pd.DataFrame:
-    df = _load_dataset().copy()
+    """Return the upcoming games with predictions attached.
+
+    The upstream feature matrix is ~21k rows x 150 columns and only a handful
+    of rows are actually upcoming. Subsetting *before* copying keeps this from
+    materialising a second full copy of the artifact — which measured at
+    +128 MB of resident memory in scripts/measure_memory.py.
+    """
+    full = _load_dataset()
+    if full.empty:
+        return full
+
     try:
-        if "home_margin" in df.columns:
-            df = df[pd.to_numeric(df["home_margin"], errors="coerce").isna()].copy()
-        elif {"home_score", "away_score"}.issubset(df.columns):
-            df = df[df["home_score"].isna() | df["away_score"].isna()].copy()
-        if "start_date" in df.columns:
-            starts = pd.to_datetime(df["start_date"], utc=True, errors="coerce")
+        if "home_margin" in full.columns:
+            upcoming = pd.to_numeric(full["home_margin"], errors="coerce").isna()
+        elif {"home_score", "away_score"}.issubset(full.columns):
+            upcoming = full["home_score"].isna() | full["away_score"].isna()
+        else:
+            upcoming = pd.Series(False, index=full.index)
+
+        if "start_date" in full.columns:
+            starts = pd.to_datetime(full["start_date"], utc=True, errors="coerce")
             now = pd.Timestamp.now(tz="UTC")
-            df = df[starts.isna() | (starts >= now - pd.Timedelta(hours=6))].copy()
-        if models_trained() and not df.empty:
-            df = predict_batch(df)
-        return df
+            upcoming = upcoming & (starts.isna() | (starts >= now - pd.Timedelta(hours=6)))
+
+        subset = full.loc[upcoming].copy()
+        if subset.empty or not models_trained():
+            return subset
+        return predict_batch(subset)
     except (KeyError, TypeError):
         return pd.DataFrame()
 

@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from api.charts import figure_json
+from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import parquet
 from api.jsonutil import records
 from utils.models import models_trained, predict_for_display
@@ -20,7 +21,11 @@ def load_all() -> dict[str, pd.DataFrame]:
         ("ratings", "processed"),
     ]:
         try:
-            out[name] = parquet(name, layer=layer)
+            out[name] = parquet(
+                name,
+                layer=layer,
+                columns=FEATURE_MATRIX_COLUMNS if name == "feature_matrix" else None,
+            )
         except FileNotFoundError:
             out[name] = pd.DataFrame()
     return out

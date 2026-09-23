@@ -5,13 +5,16 @@ import pandas as pd
 import plotly.express as px
 
 from api.charts import figure_json
+from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import parquet
 from api.jsonutil import records
 
 
 def load_data() -> pd.DataFrame:
     try:
-        fm = parquet("feature_matrix", layer="features").drop_duplicates("game_id")
+        fm = parquet(
+            "feature_matrix", layer="features", columns=FEATURE_MATRIX_COLUMNS
+        ).drop_duplicates("game_id")
         try:
             backtest = parquet("model_backtest", layer="features")
             oos = backtest[["game_id", "predicted_spread_oos"]].drop_duplicates("game_id")

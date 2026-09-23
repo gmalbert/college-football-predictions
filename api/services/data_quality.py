@@ -3,14 +3,43 @@ from __future__ import annotations
 
 import pandas as pd
 
+from api.columns import (
+    AUDIT_FEATURE_MATRIX_COLUMNS,
+    GAMES_COLUMNS,
+    LINE_SNAPSHOT_COLUMNS,
+)
+from api.data import parquet
 from api.jsonutil import records
 from utils.release import load_current_release
 from utils.repo_audit import run_repository_audit
 
+# The artifacts the audit inspects. Handing it the API's own cached frames
+# avoids reading and materialising a second copy of each. The projections must
+# include every column the audit reasons about — see
+# api/columns.AUDIT_FEATURE_MATRIX_COLUMNS for why that is easy to get wrong.
+AUDITED_ARTIFACTS: dict[str, tuple[str, str, list[str] | None]] = {
+    "games": ("games", "processed", GAMES_COLUMNS),
+    "feature_matrix": ("feature_matrix", "features", AUDIT_FEATURE_MATRIX_COLUMNS),
+    "team_game_stats": ("team_game_stats", "processed", None),
+    "line_snapshots": ("line_snapshots", "processed", LINE_SNAPSHOT_COLUMNS),
+    "feature_observations": ("feature_observations", "processed", None),
+    "model_backtest": ("model_backtest", "features", None),
+}
+
+
+def _cached_frames() -> dict[str, pd.DataFrame]:
+    frames: dict[str, pd.DataFrame] = {}
+    for key, (name, layer, columns) in AUDITED_ARTIFACTS.items():
+        try:
+            frames[key] = parquet(name, layer=layer, columns=columns)
+        except FileNotFoundError:
+            continue
+    return frames
+
 
 def build_data_quality() -> dict:
     """Return the Data & Model Quality payload."""
-    report = run_repository_audit()
+    report = run_repository_audit(frames=_cached_frames())
     release = load_current_release()
     summary = report["summary"]
 

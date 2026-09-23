@@ -37,13 +37,6 @@ def _metric_better(value, baseline) -> bool:
         return False
 
 
-def load_fm() -> pd.DataFrame:
-    try:
-        return parquet("feature_matrix", layer="features")
-    except FileNotFoundError:
-        return pd.DataFrame()
-
-
 def load_backtest() -> pd.DataFrame:
     try:
         return parquet("model_backtest", layer="features")

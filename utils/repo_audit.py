@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from typing import Mapping
 
 import pandas as pd
 
@@ -53,17 +54,40 @@ def _contract_checks(report) -> list[AuditCheck]:
     return checks
 
 
-def run_repository_audit(root: str | Path | None = None) -> dict:
+def run_repository_audit(
+    root: str | Path | None = None,
+    *,
+    frames: Mapping[str, pd.DataFrame] | None = None,
+) -> dict:
+    """Audit the published artifacts.
+
+    ``frames`` lets a caller that already holds these artifacts hand them over
+    instead of having them read again. The API keeps every one of them in its
+    own mtime-keyed cache, and re-reading them here materialised a second full
+    copy of the feature matrix — measured at +119 MB of resident memory in
+    scripts/measure_memory.py.
+
+    Keys match the artifact names used by ``utils.storage.load_parquet``:
+    ``games``, ``feature_matrix``, ``team_game_stats``, ``line_snapshots``,
+    ``feature_observations`` and ``model_backtest``.
+    """
     root_path = Path(root) if root is not None else DATA_DIR.parent
     data_path = root_path / "data_files"
     checks: list[AuditCheck] = []
+    supplied = frames or {}
+
+    def _frame(name: str, path: Path) -> pd.DataFrame:
+        cached = supplied.get(name)
+        if cached is not None:
+            return cached
+        return pd.read_parquet(path) if path.exists() else pd.DataFrame()
 
     games_path = data_path / "processed" / "games.parquet"
     feature_path = data_path / "features" / "feature_matrix.parquet"
     team_stats_path = data_path / "processed" / "team_game_stats.parquet"
-    games = pd.read_parquet(games_path) if games_path.exists() else pd.DataFrame()
-    features = pd.read_parquet(feature_path) if feature_path.exists() else pd.DataFrame()
-    team_stats = pd.read_parquet(team_stats_path) if team_stats_path.exists() else pd.DataFrame()
+    games = _frame("games", games_path)
+    features = _frame("feature_matrix", feature_path)
+    team_stats = _frame("team_game_stats", team_stats_path)
 
     if games.empty:
         checks.append(AuditCheck("games_available", "fail", "games.parquet is missing or empty"))
@@ -134,7 +158,7 @@ def run_repository_audit(root: str | Path | None = None) -> dict:
     )
 
     snapshots_path = data_path / "processed" / "line_snapshots.parquet"
-    snapshots = pd.read_parquet(snapshots_path) if snapshots_path.exists() else pd.DataFrame()
+    snapshots = _frame("line_snapshots", snapshots_path)
     checks.append(
         AuditCheck(
             "market_snapshot_history",
@@ -146,7 +170,7 @@ def run_repository_audit(root: str | Path | None = None) -> dict:
     )
 
     observations_path = data_path / "processed" / "feature_observations.parquet"
-    observations = pd.read_parquet(observations_path) if observations_path.exists() else pd.DataFrame()
+    observations = _frame("feature_observations", observations_path)
     checks.append(
         AuditCheck(
             "context_feature_observations",
@@ -180,7 +204,7 @@ def run_repository_audit(root: str | Path | None = None) -> dict:
     )
 
     backtest_path = data_path / "features" / "model_backtest.parquet"
-    backtest = pd.read_parquet(backtest_path) if backtest_path.exists() else pd.DataFrame()
+    backtest = _frame("model_backtest", backtest_path)
     duplicate_backtests = (
         int(backtest["game_id"].duplicated().sum())
         if not backtest.empty and "game_id" in backtest.columns else 0

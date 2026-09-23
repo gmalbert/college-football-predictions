@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from api.charts import figure_json
+from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import parquet
 from api.jsonutil import records
 from utils.betting import (
@@ -22,7 +23,9 @@ from utils.models import load_metrics, models_trained, predict_for_display
 
 def load_data() -> pd.DataFrame:
     try:
-        return parquet("feature_matrix", layer="features")
+        return parquet(
+            "feature_matrix", layer="features", columns=FEATURE_MATRIX_COLUMNS
+        )
     except FileNotFoundError:
         return pd.DataFrame()
 
