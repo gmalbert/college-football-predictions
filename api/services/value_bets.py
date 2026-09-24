@@ -1,4 +1,4 @@
-"""Value Bets — mirrors ``pages/2_Value_Bets.py``."""
+﻿"""Value Bets — mirrors ``pages/2_Value_Bets.py``."""
 from __future__ import annotations
 
 import pandas as pd
@@ -18,7 +18,7 @@ from utils.betting import (
     kelly_fraction,
     simulate_bankroll,
 )
-from utils.models import load_metrics, models_trained, predict_for_display
+from utils.model_artifacts import load_metrics, models_trained, predict_for_display
 
 
 def load_data() -> pd.DataFrame:

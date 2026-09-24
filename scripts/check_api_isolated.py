@@ -56,17 +56,18 @@ def main() -> int:
 
     checks: list[bool] = []
 
-    # 1. streamlit must genuinely not be installed.
-    probe = run([python, "-c", "import streamlit"],
-                label="streamlit is absent (ModuleNotFoundError expected)",
-                expect_failure=True)
-    checks.append(probe.returncode != 0)
+    # 1. Neither the ML stack nor streamlit may be installed.
+    for heavy in ("streamlit", "sklearn", "xgboost", "scipy"):
+        probe = run([python, "-c", f"import {heavy}"],
+                    label=f"{heavy} is absent",
+                    expect_failure=True)
+        checks.append(probe.returncode != 0)
 
-    # 2. The API imports and serves without it.
+    # 2. The API imports and serves without them.
     checks.append(
         run([python, "-c",
              "import api.main; print(len(api.main.app.routes), 'routes')"],
-            label="api.main imports with no streamlit").returncode == 0
+            label="api.main imports with no ML stack").returncode == 0
     )
 
     # 3. Every page service actually produces a payload.

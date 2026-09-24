@@ -183,7 +183,7 @@ async def _record_timing(request, call_next):
 def _sidebar_metrics() -> dict:
     """Mirror ``utils.ui_components.render_sidebar``'s live metric block."""
     try:
-        from utils.models import load_metrics, models_trained
+        from utils.model_artifacts import load_metrics, models_trained
 
         if not models_trained():
             return {"metrics": []}

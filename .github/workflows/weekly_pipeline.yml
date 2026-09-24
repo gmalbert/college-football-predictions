@@ -92,6 +92,15 @@ jobs:
       - name: Train prediction models
         run: python -m utils.models --force
 
+      # Materialise every forecast and diagnostic the dashboard shows. The site
+      # reads these artifacts and never runs inference or loads a model — that
+      # is what lets the API deploy without scikit-learn or XGBoost.
+      - name: Export upcoming predictions
+        run: python scripts/export_upcoming_predictions.py
+
+      - name: Export model diagnostics
+        run: python scripts/export_model_diagnostics.py
+
       # ── export best bets ─────────────────────────────────────────────────────
       - name: Export best bets for Sports Picks Grid
         run: python scripts/export_best_bets.py

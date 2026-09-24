@@ -1,4 +1,10 @@
-"""Model Performance — mirrors ``pages/5_Model_Performance.py``."""
+﻿"""Model Performance — mirrors ``pages/5_Model_Performance.py``.
+
+Every number and both diagnostic charts come from artifacts the weekly
+workflow produced: the metrics JSON, ``model_backtest.parquet`` and
+``model_diagnostics.json``. Nothing here loads scikit-learn or XGBoost, so the
+API can deploy without the training stack.
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -9,21 +15,11 @@ from api.charts import figure_json
 from api.data import parquet
 from api.jsonutil import jsonable, records
 from utils.feature_engine import SPREAD_FEATURES, TOTAL_FEATURES
-from utils.models import WIN_MODEL_PATH, load_metrics, load_models, models_trained
-
-try:
-    from sklearn.calibration import calibration_curve
-
-    HAS_SKLEARN = True
-except ImportError:  # pragma: no cover
-    HAS_SKLEARN = False
-
-try:
-    import xgboost as xgb
-
-    HAS_XGB = True
-except ImportError:  # pragma: no cover
-    HAS_XGB = False
+from utils.model_artifacts import (
+    load_metrics,
+    load_model_diagnostics,
+    models_trained,
+)
 
 
 def _metric_better(value, baseline) -> bool:
@@ -44,18 +40,19 @@ def load_backtest() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def _calibration_figure(backtest: pd.DataFrame) -> dict | None:
-    df_cal = backtest.dropna(subset=["win_prob_oos", "home_win"]).copy()
-    if df_cal.empty:
+def _calibration_figure(points: dict | None) -> dict | None:
+    """Plot the reliability curve the workflow computed."""
+    if not points or not points.get("available"):
         return None
-    probs = df_cal["win_prob_oos"].to_numpy()
-    y_true = df_cal["home_win"].values.astype(int)
-    frac_pos, mean_pred = calibration_curve(y_true, probs, n_bins=10, strategy="uniform")
+    mean_predicted = points.get("mean_predicted") or []
+    fraction_positive = points.get("fraction_positive") or []
+    if not mean_predicted or len(mean_predicted) != len(fraction_positive):
+        return None
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=mean_pred, y=frac_pos,
+            x=mean_predicted, y=fraction_positive,
             mode="lines+markers",
             line=dict(color="#D4001C", width=2),
             marker=dict(size=8),
@@ -122,28 +119,22 @@ def _ats_week_figure(backtest: pd.DataFrame) -> dict | None:
     return figure_json(fig)
 
 
-def _importance(model, features: list[str]) -> pd.DataFrame:
-    if model is None:
+def _importance(entry: dict | None, features: list[str]) -> pd.DataFrame:
+    """Build an importance frame from the pipeline's exported record.
+
+    The extraction happens in scripts/export_model_diagnostics.py, so this page
+    never loads the models — which is what keeps scikit-learn and XGBoost out
+    of the API's dependencies.
+    """
+    if not entry or not entry.get("available"):
         return pd.DataFrame()
-    if HAS_XGB and isinstance(model, xgb.Booster):
-        raw_imp = model.get_score(importance_type="gain")
-        return pd.DataFrame(
-            [
-                {
-                    "Feature": feature,
-                    "Importance": raw_imp.get(feature, raw_imp.get(f"f{i}", 0)),
-                }
-                for i, feature in enumerate(features)
-            ]
-        ).sort_values("Importance", ascending=True)
-    try:
-        coefs = abs(model.named_steps["ridge"].coef_)
-        used_feats = model.named_steps["imputer"].get_feature_names_out(features)
-        return pd.DataFrame(
-            {"Feature": used_feats, "Importance": coefs}
-        ).sort_values("Importance")
-    except Exception:  # noqa: BLE001 - parity with the Streamlit fallback
+    names = entry.get("features") or features
+    values = entry.get("importances") or []
+    if len(names) != len(values):
         return pd.DataFrame()
+    return pd.DataFrame({"Feature": names, "Importance": values}).sort_values(
+        "Importance", ascending=True
+    )
 
 
 def _importance_figure(imp_df: pd.DataFrame) -> dict | None:
@@ -286,16 +277,15 @@ def build_model_performance() -> dict:
         gates["threshold"] = gates["threshold"].map(str)
 
     backtest = load_backtest()
-    models = load_models()
+    diagnostics = load_model_diagnostics()
+    calibration_points = diagnostics.get("calibration")
+    importance = diagnostics.get("feature_importance") or {}
 
-    calibration = None
-    if not backtest.empty and HAS_SKLEARN:
-        calibration = _calibration_figure(backtest)
-
+    calibration = _calibration_figure(calibration_points)
     ats_week = _ats_week_figure(backtest)
 
-    spread_imp = _importance(models.get("spread"), SPREAD_FEATURES)
-    total_imp = _importance(models.get("total"), TOTAL_FEATURES)
+    spread_imp = _importance(importance.get("spread"), SPREAD_FEATURES)
+    total_imp = _importance(importance.get("total"), TOTAL_FEATURES)
 
     return {
         **base,
@@ -373,5 +363,5 @@ def build_model_performance() -> dict:
             {"label": "Total model samples", "value": f"{total_m.get('n_samples'):,}" if total_m.get("n_samples") else "—", "delta": None, "help": None},
         ],
         "footer": True,
-        "meta": jsonable({"win_model_path": WIN_MODEL_PATH.name}),
+        "meta": jsonable({"model_version": metrics.get("model_version")}),
     }

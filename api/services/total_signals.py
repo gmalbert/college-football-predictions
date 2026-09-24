@@ -1,4 +1,4 @@
-"""Total Market Signals — mirrors ``pages/10_Total_Market_Signals.py``."""
+﻿"""Total Market Signals — mirrors ``pages/10_Total_Market_Signals.py``."""
 from __future__ import annotations
 
 import json
@@ -8,7 +8,7 @@ import pandas as pd
 
 from api.data import DATA_DIR, parquet
 from api.jsonutil import records
-from utils.models import load_metrics
+from utils.model_artifacts import load_metrics
 
 SHADOW_PATH = DATA_DIR / "shadow_total_signals.json"
 

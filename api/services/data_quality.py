@@ -8,15 +8,19 @@ from api.columns import (
     GAMES_COLUMNS,
     LINE_SNAPSHOT_COLUMNS,
 )
-from api.data import parquet
+from api.data import DATA_DIR, parquet, read_json
 from api.jsonutil import records
 from utils.release import load_current_release
-from utils.repo_audit import run_repository_audit
+from utils.repo_audit import merge_live_checks, run_repository_audit
 
-# The artifacts the audit inspects. Handing it the API's own cached frames
-# avoids reading and materialising a second copy of each. The projections must
-# include every column the audit reasons about — see
-# api/columns.AUDIT_FEATURE_MATRIX_COLUMNS for why that is easy to get wrong.
+# The weekly workflow runs the same audit and commits its output here
+# (scripts/audit_pipeline.py --output). Serving that report means the page does
+# no artifact reads at all in the normal case — the checks are already computed
+# and this is just a small JSON read.
+AUDIT_REPORT_PATH = DATA_DIR / "audit_report.json"
+
+# Only used when no report has been published yet (e.g. before the first
+# pipeline run after a checkout).
 AUDITED_ARTIFACTS: dict[str, tuple[str, str, list[str] | None]] = {
     "games": ("games", "processed", GAMES_COLUMNS),
     "feature_matrix": ("feature_matrix", "features", AUDIT_FEATURE_MATRIX_COLUMNS),
@@ -37,9 +41,22 @@ def _cached_frames() -> dict[str, pd.DataFrame]:
     return frames
 
 
+def _audit_report() -> dict:
+    """The pipeline's audit, with only the live-state checks recomputed.
+
+    Everything else is a property of the committed artifacts, so it is read
+    from the report the workflow published rather than recomputed — which is
+    what keeps this page from loading six Parquet files per request.
+    """
+    published = read_json(AUDIT_REPORT_PATH, default={})
+    if isinstance(published, dict) and published.get("checks"):
+        return merge_live_checks(published, DATA_DIR)
+    return run_repository_audit(frames=_cached_frames())
+
+
 def build_data_quality() -> dict:
     """Return the Data & Model Quality payload."""
-    report = run_repository_audit(frames=_cached_frames())
+    report = _audit_report()
     release = load_current_release()
     summary = report["summary"]
 

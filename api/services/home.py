@@ -1,4 +1,4 @@
-"""Home page — mirrors ``predictions.py::home_page``."""
+﻿"""Home page — mirrors ``predictions.py::home_page``."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,7 +14,7 @@ from utils.release import load_current_release
 LOGO_PATH = Path(DATA_DIR).parent / "data_files" / "logo.png"
 
 try:  # pragma: no cover - mirrors the Streamlit fallback for locked runtimes
-    from utils.models import load_metrics, models_trained, predict_batch
+    from utils.model_artifacts import attach_predictions, load_metrics, models_trained
 
     MODEL_RUNTIME_AVAILABLE = True
 except Exception:  # noqa: BLE001 - parity with the Streamlit guard
@@ -30,7 +30,7 @@ except Exception:  # noqa: BLE001 - parity with the Streamlit guard
     def models_trained() -> bool:  # type: ignore[misc]
         return False
 
-    def predict_batch(frame: pd.DataFrame) -> pd.DataFrame:  # type: ignore[misc]
+    def attach_predictions(frame: pd.DataFrame) -> pd.DataFrame:  # type: ignore[misc]
         return frame
 
 
@@ -71,7 +71,8 @@ def _load_summary() -> pd.DataFrame:
         subset = full.loc[upcoming].copy()
         if subset.empty or not models_trained():
             return subset
-        return predict_batch(subset)
+        # Predictions come from the pipeline artifact, not from live inference.
+        return attach_predictions(subset)
     except (KeyError, TypeError):
         return pd.DataFrame()
 

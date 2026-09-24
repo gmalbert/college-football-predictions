@@ -1,4 +1,4 @@
-"""Team Explorer — mirrors ``pages/3_Team_Explorer.py``."""
+﻿"""Team Explorer — mirrors ``pages/3_Team_Explorer.py``."""
 from __future__ import annotations
 
 import pandas as pd
@@ -9,7 +9,7 @@ from api.charts import figure_json
 from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import parquet
 from api.jsonutil import records
-from utils.models import models_trained, predict_for_display
+from utils.model_artifacts import models_trained, predict_for_display
 
 
 def load_all() -> dict[str, pd.DataFrame]:

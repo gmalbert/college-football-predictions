@@ -1,4 +1,4 @@
-"""Weekly Predictions — mirrors ``pages/1_Weekly_Predictions.py``."""
+﻿"""Weekly Predictions — mirrors ``pages/1_Weekly_Predictions.py``."""
 from __future__ import annotations
 
 import numpy as np
@@ -15,7 +15,7 @@ from utils.betting import (
     generate_spread_pick,
     generate_total_pick,
 )
-from utils.models import load_metrics, models_trained, predict_for_display
+from utils.model_artifacts import load_metrics, models_trained, predict_for_display
 from utils.odds_ingestion import build_market_consensus_from_snapshots
 from utils.storage import FEATURES_DIR
 

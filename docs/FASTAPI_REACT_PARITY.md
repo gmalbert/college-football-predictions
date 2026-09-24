@@ -136,41 +136,53 @@ secured instance (API key + admin token)
 | File | Installs | For |
 |---|---|---|
 | `requirements.txt` | streamlit, cfbd, sklearn, xgboost, … | the Streamlit app (Streamlit Cloud) |
-| `requirements-api.txt` | fastapi, uvicorn, pandas, numpy, pyarrow, sklearn, xgboost, plotly, Pillow, cfbd | the FastAPI backend **only** |
+| `requirements-api.txt` | fastapi, uvicorn, pandas, numpy, pyarrow, plotly, Pillow, cfbd | the FastAPI backend **only** |
 | `requirements-web.txt` | both of the above + pytest + playwright | local development and the parity harness |
 
-The API deliberately does not install Streamlit. `utils/config.py` imports it
-lazily inside `get_secret()` — the one place it was needed — so the whole API
-path runs without it. Verified two ways:
+### Everything expensive happens in the workflow
+
+The site serves artifacts; it does not compute them. That is what lets the API
+drop Streamlit, scikit-learn, XGBoost and scipy entirely — from ~530 MB of
+dependencies down to ~300 MB — and take its resident set from 546 MB to 249 MB.
+
+| What the page shows | Where it comes from |
+|---|---|
+| Forecasts for unplayed games | `features/upcoming_predictions.parquet` (`export_upcoming_predictions.py`) |
+| Predictions for completed games | walk-forward OOS columns in `features/model_backtest.parquet` |
+| Calibration curve | `models/model_diagnostics.json` (`export_model_diagnostics.py`) |
+| Feature importances | `models/model_diagnostics.json` |
+| Data Quality checks | `audit_report.json` (`audit_pipeline.py --output`) |
+| Saved metrics, backtest, manifests | `models/model_metrics.json`, `features/model_backtest.parquet` |
+
+Nothing on the API path calls `predict_batch`, `load_models`, or any
+`sklearn.calibration` helper. Four checks keep that true:
 
 ```bash
-python scripts/check_streamlit_free.py   # imports every module with streamlit blocked
-python scripts/check_api_isolated.py     # builds a venv from requirements-api.txt
-                                         # and asserts streamlit is absent
+python scripts/check_ml_free.py        # 14/14 modules import with sklearn,
+                                       # xgboost, scipy and streamlit blocked
+python scripts/check_api_isolated.py   # builds a venv from requirements-api.txt,
+                                       # asserts they are absent, builds every page
+python scripts/check_streamlit_free.py # the streamlit half of the same idea
+python scripts/measure_memory.py       # staged resident-memory breakdown
 ```
 
-Measured effect: **786 MB → 530 MB**. Dropping Streamlit also drops altair,
-pydeck, protobuf, watchdog, jsonschema, referencing, rpds-py and more.
+**Live-state checks are still recomputed.** Most audit checks are properties of
+the committed Parquet artifacts, so the published report is served as-is. Four
+are not — the two freshness ages, `release_metadata` (reads
+`current_release.json`) and `empty_raw_cache` (globs the raw directory) — and
+`merge_live_checks` recomputes those at view time so the page never reports an
+age or a release id that was true only when the workflow last ran.
 
 ### Where this can run
 
-The backend is a long-lived Python process holding ~530 MB of numerical
-libraries (scipy 119 MB, pyarrow 86 MB, pandas 68 MB, xgboost 57 MB, plotly
-52 MB, scikit-learn 45 MB) plus ~8 MB of Parquet and model artifacts, and it
-keeps an in-memory cache of the derived frames.
+The backend is now a long-lived Python process holding ~300 MB of dependencies
+(pandas 68 MB, pyarrow 86 MB, plotly 52 MB, numpy 35 MB) plus ~8 MB of artifacts.
 
 | Platform | Backend? | Notes |
 |---|---|---|
-| **Render** | **Yes** | Long-running process, cache persists, the build step can run npm. Build: `pip install -r requirements-api.txt && npm ci --prefix frontend && npm run build --prefix frontend`. Start: `python -m api` with `TAILGATE_HOST=0.0.0.0`. |
-| Vercel | No (as-is) | Serverless bundles cap around 250 MB; this is ~530 MB. Functions are also stateless, so the warm cache — worth 3.84× — would not survive, making every request take the ~5.6 s cold path. |
-| Cloudflare Pages | No | Workers are V8 isolates with no CPython and no native numpy/pandas/scipy/xgboost. Python Workers run on Pyodide/WASM, which cannot load native extensions. |
-
-Hosting the SPA statically on either of the latter two is fine; only the
-backend is the problem. To run the whole thing on Cloudflare Pages you would
-precompute the page payloads to static JSON and drop the API — the approach
-`docs/FEATURE_PROPOSALS_2026.md` (D7) already proposes. The data is small
-enough for it: ~8 MB of artifacts expands to roughly 5 seasons × 16 weeks ×
-~105 KB ≈ 8 MB of payloads.
+| **Render** | **Yes** | Fits the 512 MB free/$7 tiers with room to spare. Build: `pip install -r requirements-api.txt && npm ci --prefix frontend && npm run build --prefix frontend`. Start: `python -m api` with `TAILGATE_HOST=0.0.0.0`. |
+| Vercel | Marginal | The Python function limit is 500 MB uncompressed and this is now well under it — but functions are stateless, so the warm cache would not survive and every request would take the cold path. |
+| Cloudflare Pages | No | Workers are V8 isolates capped at 128 MB with no CPython or native extensions. |
 
 ---
 

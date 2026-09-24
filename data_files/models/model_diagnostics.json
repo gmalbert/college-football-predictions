@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-09-23T20:59:12.766960+00:00",
+  "model_version": "2.2.0",
+  "calibration": {
+    "available": true,
+    "n_bins": 10,
+    "n_samples": 11812,
+    "mean_predicted": [
+      0.05514679313840446,
+      0.1537093387225069,
+      0.2501656125849174,
+      0.3490163583698655,
+      0.4511208739424083,
+      0.556425407423015,
+      0.6495529769169514,
+      0.7527278126229847,
+      0.8488342310407041,
+      0.9503604964730127
+    ],
+    "fraction_positive": [
+      0.05612244897959184,
+      0.1640530759951749,
+      0.29285714285714287,
+      0.35085714285714287,
+      0.4627016129032258,
+      0.553306342780027,
+      0.6568791946308725,
+      0.7352716143840857,
+      0.8489687292082502,
+      0.9613686534216336
+    ]
+  },
+  "feature_importance": {
+    "spread": {
+      "available": false,
+      "reason": "MarketAnchoredRegressor exposes no intrinsic feature importance (AttributeError)"
+    },
+    "total": {
+      "available": false,
+      "reason": "MarketAnchoredRegressor exposes no intrinsic feature importance (AttributeError)"
+    }
+  }
+}

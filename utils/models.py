@@ -51,18 +51,22 @@ from utils.challenger_models import (
 from utils.evaluation import evaluate_release_gates, probability_metrics, regression_metrics
 from utils.market import remove_vig
 from utils.model_registry import create_manifest, promotion_decision, save_manifest
+from utils import model_artifacts as _artifacts
+from utils.model_artifacts import (
+    METRICS_PATH,
+    MODEL_VERSION,
+    SPREAD_MODEL_PATH,
+    TOTAL_COVER_MODEL_PATH,
+    TOTAL_MODEL_PATH,
+    WIN_MODEL_PATH,
+    load_metrics,
+    models_trained,
+)
 from utils.storage import MODELS_DIR, load_parquet, save_parquet
 from utils.temporal import walk_forward_season_splits
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-WIN_MODEL_PATH    = MODELS_DIR / "win_prob_model.joblib"
-SPREAD_MODEL_PATH = MODELS_DIR / "spread_model.joblib"
-TOTAL_MODEL_PATH  = MODELS_DIR / "total_model.joblib"
-TOTAL_COVER_MODEL_PATH = MODELS_DIR / "total_cover_model.joblib"
-METRICS_PATH      = MODELS_DIR / "model_metrics.json"
-MODEL_VERSION     = "2.2.0"
 TOTAL_COVER_C = 0.005
 TOTAL_COVER_EDGE = 0.075
 
@@ -572,55 +576,34 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+PREDICTION_COLUMNS = (
+    "win_prob",
+    "predicted_spread",
+    "predicted_total",
+    "total_over_prob",
+)
+
+UPCOMING_PREDICTIONS_ARTIFACT = "upcoming_predictions"
+
+
+def completed_mask(frame: pd.DataFrame) -> pd.Series:
+    """True where a game already has a result."""
+    return _artifacts.completed_mask(frame)
+
+
+def load_upcoming_predictions() -> pd.DataFrame | None:
+    """Load the pipeline-materialised predictions for unplayed games."""
+    return _artifacts.load_upcoming_predictions()
+
+
+def attach_predictions(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return ``frame`` with pipeline predictions attached (no inference)."""
+    return _artifacts.attach_predictions(frame)
+
+
 def predict_for_display(df: pd.DataFrame) -> pd.DataFrame:
-    """Return honest predictions for mixed historical/upcoming UI slices.
-
-    Completed games receive their saved season walk-forward predictions. Only
-    unplayed games are scored by the final model fitted on all available history.
-    ``prediction_scope`` makes that distinction visible to callers.
-    """
-    result = df.copy()
-    prediction_columns = [
-        "win_prob", "predicted_spread", "predicted_total", "total_over_prob"
-    ]
-    for column in prediction_columns:
-        result[column] = np.nan
-    result["prediction_scope"] = "unavailable"
-
-    if "home_margin" in result.columns:
-        completed = pd.to_numeric(result["home_margin"], errors="coerce").notna()
-    elif {"home_score", "away_score"}.issubset(result.columns):
-        completed = result["home_score"].notna() & result["away_score"].notna()
-    else:
-        completed = pd.Series(False, index=result.index)
-
-    upcoming = ~completed
-    if upcoming.any() and models_trained():
-        scored = predict_batch(result.loc[upcoming])
-        result.loc[upcoming, prediction_columns] = scored[prediction_columns].to_numpy()
-        result.loc[upcoming, "prediction_scope"] = "future_full_fit"
-
-    if completed.any() and "game_id" in result.columns:
-        try:
-            backtest = load_parquet("model_backtest", layer="features")
-        except FileNotFoundError:
-            backtest = pd.DataFrame()
-        if not backtest.empty and "game_id" in backtest.columns:
-            oos_columns = {
-                "win_prob_oos": "win_prob",
-                "predicted_spread_oos": "predicted_spread",
-                "predicted_total_oos": "predicted_total",
-                "total_over_prob_oos": "total_over_prob",
-            }
-            available = ["game_id", *[c for c in oos_columns if c in backtest.columns]]
-            lookup = backtest[available].drop_duplicates("game_id").set_index("game_id")
-            for source, target in oos_columns.items():
-                if source in lookup.columns:
-                    mapped = result.loc[completed, "game_id"].map(lookup[source])
-                    result.loc[completed, target] = mapped.to_numpy()
-            has_oos = result.loc[completed, prediction_columns].notna().any(axis=1)
-            result.loc[has_oos.index[has_oos], "prediction_scope"] = "walk_forward_oos"
-    return result
+    """Return honest predictions for mixed historical/upcoming UI slices."""
+    return _artifacts.predict_for_display(df)
 
 
 def load_models() -> dict:
@@ -638,19 +621,13 @@ def load_models() -> dict:
 
 
 def load_metrics() -> dict:
-    if METRICS_PATH.exists():
-        with open(METRICS_PATH) as fh:
-            return json.load(fh)
-    return {}
+    """Re-exported from utils.model_artifacts."""
+    return _artifacts.load_metrics()
 
 
 def models_trained() -> bool:
-    return all(
-        p.exists() for p in [
-            WIN_MODEL_PATH, SPREAD_MODEL_PATH, TOTAL_MODEL_PATH,
-            TOTAL_COVER_MODEL_PATH,
-        ]
-    )
+    """Re-exported from utils.model_artifacts."""
+    return _artifacts.models_trained()
 
 
 # ─────────────────────────────── private helpers ─────────────────────────────

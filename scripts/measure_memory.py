@@ -66,8 +66,10 @@ def main() -> int:
     print("=== resident memory by stage ===\n")
     current = stage("bare interpreter", 0.0)
 
-    # The heavy native libraries, in the order the API pulls them in.
-    for module in ("numpy", "pandas", "pyarrow", "scipy", "sklearn", "xgboost", "plotly"):
+    # The native libraries the API actually pulls in, in load order. Note the
+    # absence of scikit-learn / XGBoost / scipy: the API serves pipeline
+    # artifacts rather than running models, so those are not dependencies.
+    for module in ("numpy", "pandas", "pyarrow", "plotly"):
         try:
             __import__(module)
             current = stage(f"+ import {module}", current)

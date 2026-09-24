@@ -17,6 +17,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
@@ -413,11 +414,63 @@ def test_streamlit_is_not_required_on_the_api_path() -> None:
     assert "16/16 modules import without streamlit" in result.stdout
 
 
+def test_ml_stack_is_not_required_on_the_api_path() -> None:
+    """Every API module must import with sklearn, XGBoost, scipy and streamlit blocked.
+
+    The API serves forecasts the workflow precomputed; it does not train, infer
+    or load a model. This test is what keeps the deployment dependency set —
+    and therefore the memory footprint and the container size — from creeping
+    back up.
+    """
+    result = subprocess.run(
+        [sys.executable, str(PROJECT_ROOT / "scripts" / "check_ml_free.py")],
+        cwd=str(PROJECT_ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "14/14 modules import without" in result.stdout
+
+
+def test_predict_for_display_does_not_run_inference(monkeypatch: pytest.MonkeyPatch) -> None:
+    """It must read artifacts, never call predict_batch."""
+    import utils.model_artifacts as artifacts
+
+    called = {"n": 0}
+
+    def _forbidden(*args, **kwargs):  # pragma: no cover - must not run
+        called["n"] += 1
+        raise AssertionError("predict_for_display ran model inference")
+
+    import utils.models as models_module
+
+    monkeypatch.setattr(models_module, "predict_batch", _forbidden, raising=False)
+    monkeypatch.setattr(artifacts, "load_upcoming_predictions", lambda: None, raising=False)
+
+    frame = pd.DataFrame(
+        {"game_id": [1, 2], "home_margin": [7.0, None], "home_score": [31, None],
+         "away_score": [24, None]}
+    )
+    result = artifacts.predict_for_display(frame)
+
+    assert called["n"] == 0
+    assert set(result["prediction_scope"]) <= {"unavailable", "walk_forward_oos"}
+
+
+def test_upcoming_predictions_artifact_is_used() -> None:
+    """The artifact the workflow writes has to be the source of forecasts."""
+    import utils.model_artifacts as artifacts
+
+    lookup = artifacts.load_upcoming_predictions()
+    if lookup is None:
+        pytest.skip("upcoming_predictions.parquet not published in this checkout")
+    assert "game_id" not in lookup.columns  # it is the index
+    for column in artifacts.PREDICTION_COLUMNS:
+        assert column in lookup.columns, column
+
+
 def test_get_secret_falls_back_to_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     """Without a Streamlit runtime, secrets come from environment variables.
-
-    ``_streamlit_secrets`` is stubbed to None because a local
-    ``.streamlit/secrets.toml`` otherwise takes precedence over the environment
     (which is the correct production behaviour, tested separately below).
     """
     from utils import config

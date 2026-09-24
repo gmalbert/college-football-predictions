@@ -50,7 +50,7 @@ def home_page():
     from utils.storage import load_parquet
     from utils.release import load_current_release
     try:
-        from utils.models import load_metrics, models_trained, predict_batch
+        from utils.models import attach_predictions, load_metrics, models_trained
         model_runtime_available = True
     except Exception:
         # Keep the read-only dashboard available when a local Windows policy
@@ -65,7 +65,7 @@ def home_page():
         def models_trained():
             return False
 
-        def predict_batch(frame):
+        def attach_predictions(frame):
             return frame
 
     @st.cache_data(ttl=3600)
@@ -88,7 +88,7 @@ def home_page():
                 now = pd.Timestamp.now(tz="UTC")
                 df = df[starts.isna() | (starts >= now - pd.Timedelta(hours=6))].copy()
             if models_trained() and not df.empty:
-                df = predict_batch(df)
+                df = attach_predictions(df)
             return df
         except (KeyError, TypeError):
             return pd.DataFrame()
