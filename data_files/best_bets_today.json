@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-24T12:09:34.246310+00:00",
+    "generated_at": "2026-09-24T15:10:24.712934+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -112,6 +112,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858464,
+      "game_date": "2026-09-26",
+      "game_time": "2026-09-26T21:00:00+00:00",
+      "game": "Nebraska @ Michigan State",
+      "home_team": "Michigan State",
+      "away_team": "Nebraska",
+      "bet_type": "Spread",
+      "pick": "Take Nebraska -4.0",
+      "probability": 0.60373,
+      "edge": 4.7478,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 4.0,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401862785,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T21:00:00+00:00",
@@ -141,22 +157,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 2.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401858464,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T21:00:00+00:00",
-      "game": "Nebraska @ Michigan State",
-      "home_team": "Michigan State",
-      "away_team": "Nebraska",
-      "bet_type": "Spread",
-      "pick": "Take Nebraska -5.5",
-      "probability": 0.583555,
-      "edge": 3.8088,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 5.5,
       "league": "NCAAF"
     },
     {
@@ -240,22 +240,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858234,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T02:30:00+00:00",
-      "game": "Clemson @ California",
-      "home_team": "California",
-      "away_team": "Clemson",
-      "bet_type": "Spread",
-      "pick": "Take Clemson -0.0",
-      "probability": 0.571096,
-      "edge": 3.2342,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 0.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866425,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T16:00:00+00:00",
@@ -301,22 +285,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -7.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401856806,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T20:00:00+00:00",
-      "game": "Houston @ Georgia Southern",
-      "home_team": "Georgia Southern",
-      "away_team": "Houston",
-      "bet_type": "Spread",
-      "pick": "Take Houston -18.5",
-      "probability": 0.564529,
-      "edge": 2.9327,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 18.5,
       "league": "NCAAF"
     },
     {
@@ -413,22 +381,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -23.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401860896,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T16:00:00+00:00",
-      "game": "Colorado State @ UTSA",
-      "home_team": "UTSA",
-      "away_team": "Colorado State",
-      "bet_type": "Spread",
-      "pick": "Take Colorado State +13.5",
-      "probability": 0.546708,
-      "edge": 2.1183,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -13.5,
       "league": "NCAAF"
     }
   ]
