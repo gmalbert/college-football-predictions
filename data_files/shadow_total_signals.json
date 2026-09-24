@@ -1,34 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-09-24T16:08:12.157041+00:00",
+    "generated_at": "2026-09-24T20:06:40.360080+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
     "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "e2bcdc8fb17d49b798f136ae23032247",
+    "release_id": "5bc0baecb8e84fa58ffc4c6461f2cdf5",
     "model_version": "2.2.0",
     "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": [
-    {
-      "game_id": 401869941,
-      "game": "Liberty @ Coastal Carolina",
-      "kickoff": "2026-09-24T23:30:00+00:00",
-      "side": "over",
-      "market_total": 50.5,
-      "prediction_time": "2026-09-24T16:08:12.003000+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 50.5,
-      "taken_odds": -110.0,
-      "source_snapshot_at": "2026-09-24T16:07:32.059978+00:00",
-      "ingestion_run_id": "a08a1de8ab4843c9bcd3e4f9fe41dd21",
-      "over_probability": 0.617288,
-      "selected_probability": 0.617288,
-      "probability_edge": 0.117288,
-      "opening_total": 50.5,
-      "line_move": 0.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
