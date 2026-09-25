@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-23T21:08:57.222824+00:00",
+  "generated_at": "2026-09-22T06:15:38.311395+00:00",
   "summary": {
-    "pass": 10,
-    "warn": 6,
+    "pass": 12,
+    "warn": 4,
     "fail": 0
   },
   "checks": [
@@ -10,24 +10,24 @@
       "name": "games_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 21197
+      "value": 21196
     },
     {
       "name": "feature_matrix_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 21197
+      "value": 21196
     },
     {
       "name": "team_game_stats_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 15136
+      "value": 15656
     },
     {
       "name": "feature_game_coverage",
       "status": "pass",
-      "message": "Feature artifact covers 21,197 of 21,197 unique games",
+      "message": "Feature artifact covers 21,196 of 21,196 unique games",
       "value": 1.0
     },
     {
@@ -46,7 +46,7 @@
       "name": "release_metadata",
       "status": "pass",
       "message": "Release metadata is present",
-      "value": "1f5d8ecc15b24ab2b756656be1010f37"
+      "value": "4572ce4bd3964aeeacd95ec77f35903c"
     },
     {
       "name": "empty_raw_cache",
@@ -57,8 +57,8 @@
     {
       "name": "market_snapshot_history",
       "status": "pass",
-      "message": "Timestamped market history contains 66,227 quotes; movement and CLV require forward collection",
-      "value": 66227
+      "message": "Timestamped market history contains 146,124 quotes; movement and CLV require forward collection",
+      "value": 146124
     },
     {
       "name": "context_feature_observations",
@@ -81,8 +81,8 @@
     {
       "name": "oos_prediction_artifact",
       "status": "pass",
-      "message": "OOS artifact has 21,197 rows and 0 duplicate games",
-      "value": 21197
+      "message": "OOS artifact has 21,196 rows and 0 duplicate games",
+      "value": 21196
     },
     {
       "name": "model_manifests",
@@ -92,17 +92,17 @@
     },
     {
       "name": "best_bets_freshness",
-      "status": "warn",
-      "message": "Best-bets export age is 260.8 hours",
-      "value": 260.75431805333335
+      "status": "pass",
+      "message": "Best-bets export age is 0.0 hours",
+      "value": 0.0007636127777777778
     },
     {
       "name": "shadow_total_freshness",
-      "status": "warn",
-      "message": "Shadow-total export age is 265.0 hours",
-      "value": 265.01415056083334
+      "status": "pass",
+      "message": "Shadow-total export age is 0.0 hours",
+      "value": 0.00032476194444444443
     }
   ],
-  "release_status": "hold",
-  "strict_failures": 2
+  "release_status": "shadow",
+  "strict_failures": 0
 }
