@@ -77,6 +77,15 @@ def test_secrets_are_not_stored_in_the_blueprint(service: dict) -> None:
     assert "value" not in env["CFBD_API_KEY"]
 
 
+def test_region_is_pinned(service: dict) -> None:
+    """Render cannot move a service between regions after creation.
+
+    Leaving this out means every re-create silently takes the dashboard default,
+    which is how the service ended up in Oregon while its users were elsewhere.
+    """
+    assert service.get("region") in {"oregon", "ohio", "virginia", "frankfurt", "singapore"}
+
+
 def test_every_env_var_has_a_key(service: dict) -> None:
     """Render rejects the blueprint if an env var entry is missing its key."""
     for item in service["envVars"]:
