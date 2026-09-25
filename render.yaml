@@ -31,6 +31,11 @@ services:
     name: tailgate-edge
     runtime: python
     plan: free
+    # Pinned on purpose. Render cannot change a service's region after creation,
+    # so without this a re-create silently lands wherever the dashboard defaults
+    # to (Oregon, in practice). Valid values: oregon, ohio, virginia, frankfurt,
+    # singapore.
+    region: virginia
     branch: main
     autoDeploy: true
     healthCheckPath: /api/health
