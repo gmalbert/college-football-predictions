@@ -532,6 +532,19 @@ def test_api_requirements_exclude_streamlit() -> None:
     assert "-r requirements.txt" not in text
 
 
+def test_settings_use_paas_port() -> None:
+    """Render and most PaaS platforms inject PORT and expect the app to bind it."""
+    assert load_settings({"PORT": "10000"}).port == 10000
+
+
+def test_settings_prefer_the_explicit_port() -> None:
+    assert load_settings({"PORT": "10000", "TAILGATE_PORT": "9000"}).port == 9000
+
+
+def test_settings_ignore_an_invalid_paas_port() -> None:
+    assert load_settings({"PORT": "not-a-port"}).port == 8000
+
+
 def test_cache_clear_roundtrip() -> None:
     """The cache can still be cleared in-process (used by the benchmark)."""
     client.get("/api/home")
