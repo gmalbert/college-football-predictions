@@ -5,6 +5,7 @@ from datetime import date
 import io
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import joblib
@@ -58,6 +59,7 @@ from utils.temporal import (
 from utils.challenger_models import MarketBaselineClassifier, MarketBaselineRegressor
 import utils.fetch_historical as fetch_historical
 import utils.cfbd_client as cfbd_client
+import utils.ui_components as ui_components
 
 
 class _ConstantClassifier:
@@ -123,6 +125,39 @@ class IngestionTests(unittest.TestCase):
         with patch.object(cfbd_client, "get_secret", return_value="   "):
             with self.assertRaisesRegex(ValueError, "CFBD_API_KEY is empty"):
                 cfbd_client._api_key()
+
+    def test_cfbd_win_probability_parser_accepts_sdk_and_raw_shapes(self):
+        rows = cfbd_client.parse_win_probability_rows([
+            {
+                "homeWinProbability": 0.0,
+                "playNumber": 0,
+                "homeScore": 0,
+                "awayScore": 0,
+                "playText": "Kickoff",
+            },
+            SimpleNamespace(
+                home_win_probability=75,
+                play_number=12,
+                home_score=7,
+                away_score=3,
+                play_text="Touchdown",
+            ),
+        ])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["play"], 0)
+        self.assertEqual(rows[0]["home_wp"], 0.0)
+        self.assertEqual(rows[1]["home_wp"], 0.75)
+        self.assertEqual(rows[1]["home_score"], 7)
+
+    def test_browser_timezone_uses_streamlit_context(self):
+        with patch.object(
+            ui_components.st,
+            "context",
+            SimpleNamespace(timezone="America/Los_Angeles"),
+        ):
+            timezone, abbreviation = ui_components.browser_timezone()
+        self.assertEqual(timezone.key, "America/Los_Angeles")
+        self.assertEqual(abbreviation, "PT")
 
     def test_partial_partition_upsert_preserves_history(self):
         with tempfile.TemporaryDirectory() as directory:

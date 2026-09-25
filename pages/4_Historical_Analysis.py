@@ -40,7 +40,7 @@ def load_data():
 df = load_data()
 
 if df.empty:
-    st.warning("No data available. Go to ⚙️ **Settings** and pull historical data first.")
+    st.warning("No historical data is currently published.")
     st.stop()
 
 # ── season filter ─────────────────────────────────────────────────────────────

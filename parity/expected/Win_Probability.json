@@ -1,0 +1,1213 @@
+{
+  "page_file": "pages/7_Win_Probability.py",
+  "exceptions": [],
+  "titles": [
+    "📈 In-Game Win Probability"
+  ],
+  "subheaders": [],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Tulsa Win Prob",
+      "value": "100.0%",
+      "delta": ""
+    },
+    {
+      "label": "Abilene Christian Win Prob",
+      "value": "0.0%",
+      "delta": ""
+    },
+    {
+      "label": "Final Score",
+      "value": "Tulsa 35 – 7 Abilene Christian",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1631",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Play-by-play home-team win probability from the CFBD model. Select a season and week, then pick a game.",
+    "Game ID: `401762457`"
+  ],
+  "alerts": [],
+  "markdown": [],
+  "expanders": [
+    "Raw play data"
+  ],
+  "dataframes": [
+    {
+      "columns": [
+        "play",
+        "home_wp",
+        "home_score",
+        "away_score",
+        "play_text"
+      ],
+      "rows": [
+        [
+          0,
+          0.5844969749450684,
+          0,
+          0,
+          "Stone Earle run for 4 yds to the ACU 29"
+        ],
+        [
+          1,
+          0.5798459649085999,
+          0,
+          0,
+          "Jordon Vaughn run for 1 yd to the ACU 30"
+        ],
+        [
+          2,
+          0.5836846828460693,
+          0,
+          0,
+          "Stone Earle sacked by Byron Turner Jr. for a loss of 2 yards to the ACU 28"
+        ],
+        [
+          3,
+          0.5830122828483582,
+          0,
+          0,
+          "Hugo Nash punt for 42 yds, fair catch by Zion Booker at the TLSA 30"
+        ],
+        [
+          4,
+          0.5830122828483582,
+          0,
+          0,
+          "Hugo Nash punt for 42 yds, fair catch by Zion Booker at the TLSA 30"
+        ],
+        [
+          5,
+          0.6106348037719727,
+          0,
+          0,
+          "Kirk Francis pass complete to Braylin Presley for 13 yds to the TLSA 43 for a 1ST down"
+        ],
+        [
+          6,
+          0.6354966163635254,
+          0,
+          0,
+          "Kirk Francis pass complete to Braylin Presley for 6 yds to the TLSA 37"
+        ],
+        [
+          7,
+          0.5657556056976318,
+          0,
+          0,
+          "Kirk Francis pass complete to Mekhi Miller for 8 yds to the TLSA 45"
+        ],
+        [
+          8,
+          0.5928313732147217,
+          0,
+          0,
+          "Kirk Francis pass incomplete to Dominic Richardson"
+        ],
+        [
+          9,
+          0.5663371086120605,
+          0,
+          0,
+          "Angus Davies punt for 46 yds , Tyson Williams returns for 1 yd to the ACU 10"
+        ],
+        [
+          10,
+          0.5508996248245239,
+          0,
+          0,
+          "Jordon Vaughn run for 9 yds to the ACU 19"
+        ],
+        [
+          11,
+          0.5398300886154175,
+          0,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 26 yds to the ACU 45 for a 1ST down"
+        ],
+        [
+          12,
+          0.515446126461029,
+          0,
+          0,
+          "Stone Earle run for 7 yds to the TLSA 48"
+        ],
+        [
+          13,
+          0.48865145444869995,
+          0,
+          0,
+          "Stone Earle sacked by J'Dan Burnett for a loss of 2 yards to the 50 yard line"
+        ],
+        [
+          14,
+          0.524432897567749,
+          0,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 7 yds to the TLSA 43 for a 1ST down"
+        ],
+        [
+          15,
+          0.49153897166252136,
+          0,
+          0,
+          "Jordon Vaughn run for 2 yds to the TLSA 41"
+        ],
+        [
+          16,
+          0.48394832015037537,
+          0,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 8 yds to the TLSA 33 for a 1ST down"
+        ],
+        [
+          17,
+          0.4604267477989197,
+          0,
+          0,
+          "Stone Earle run for 12 yds to the TLSA 21 for a 1ST down"
+        ],
+        [
+          18,
+          0.4542514383792877,
+          0,
+          0,
+          "Jordon Vaughn run for 6 yds to the TLSA 15"
+        ],
+        [
+          19,
+          0.4476464092731476,
+          0,
+          0,
+          "Rovaughn Banks Jr. run for 2 yds to the TLSA 13"
+        ],
+        [
+          20,
+          0.4714328348636627,
+          0,
+          0,
+          "Rovaughn Banks Jr. run for 3 yds to the TLSA 10 for a 1ST down"
+        ],
+        [
+          21,
+          0.45289352536201477,
+          0,
+          0,
+          "Stone Earle pass incomplete to Rovaughn Banks Jr."
+        ],
+        [
+          22,
+          0.4615233540534973,
+          0,
+          0,
+          "Stone Earle pass incomplete to J.J. Henry"
+        ],
+        [
+          23,
+          0.49138951301574707,
+          0,
+          0,
+          "Stone Earle run for 9 yds to the TLSA 1"
+        ],
+        [
+          24,
+          0.5714626312255859,
+          0,
+          0,
+          "Stone Earle run for a loss of 2 yards to the TLSA 3"
+        ],
+        [
+          25,
+          0.5202450752258301,
+          0,
+          0,
+          "Dominic Richardson run for 4 yds to the TLSA 7"
+        ],
+        [
+          26,
+          0.5227224826812744,
+          0,
+          0,
+          "Dominic Richardson run for 5 yds to the TLSA 12"
+        ],
+        [
+          27,
+          0.5356107950210571,
+          0,
+          0,
+          "Dominic Richardson run for 4 yds to the TLSA 16 for a 1ST down"
+        ],
+        [
+          28,
+          0.5344648957252502,
+          0,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 36 yds to the ACU 48 for a 1ST down"
+        ],
+        [
+          29,
+          0.6077790260314941,
+          0,
+          0,
+          "Kirk Francis pass incomplete to Braylin Presley"
+        ],
+        [
+          30,
+          0.5964586734771729,
+          0,
+          0,
+          "Kirk Francis pass complete to Micah Tease for 8 yds to the ACU 40"
+        ],
+        [
+          31,
+          0.600928783416748,
+          0,
+          0,
+          "Braylin Presley run for no gain to the ACU 40"
+        ],
+        [
+          32,
+          0.5859355330467224,
+          0,
+          0,
+          "Dominic Richardson run for 15 yds to the ACU 25 for a 1ST down"
+        ],
+        [
+          33,
+          0.6299731731414795,
+          0,
+          0,
+          "Kirk Francis pass complete to Dominic Richardson for 6 yds to the ACU 19"
+        ],
+        [
+          34,
+          0.6234354376792908,
+          0,
+          0,
+          "Ajay Allen run for 3 yds to the ACU 16"
+        ],
+        [
+          35,
+          0.60155189037323,
+          0,
+          0,
+          "Ajay Allen run for 4 yds to the ACU 12 for a 1ST down"
+        ],
+        [
+          36,
+          0.6762384176254272,
+          0,
+          0,
+          "Kirk Francis pass incomplete to Josh Smith"
+        ],
+        [
+          37,
+          0.6678820252418518,
+          0,
+          0,
+          "Kirk Francis pass complete to Braylin Presley for no gain to the ACU 12"
+        ],
+        [
+          38,
+          0.7852783203125,
+          7,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 12 yds for a TD (Seth Morgan KICK)"
+        ],
+        [
+          39,
+          0.7674850225448608,
+          7,
+          0,
+          "Stone Earle pass complete to Jordon Vaughn for 9 yds to the ACU 34"
+        ],
+        [
+          40,
+          0.7502211928367615,
+          7,
+          0,
+          "Jordon Vaughn run for 4 yds to the ACU 38 for a 1ST down"
+        ],
+        [
+          41,
+          0.7492679953575134,
+          7,
+          0,
+          "Stone Earle pass complete to Javon Gipson for 42 yds to the TLSA 20 for a 1ST down"
+        ],
+        [
+          42,
+          0.6850621104240417,
+          7,
+          0,
+          "(00:18) No Huddle-Shotgun Earle,Stone pass incomplete deep left to Dudley,Dallas thrown to TULSA00 PENALTY TULSA Pass Interference (Green,Elijah) 15 yards from TULSA20 to TULSA05, 1ST DOWN. NO PLAY."
+        ],
+        [
+          43,
+          0.6800145506858826,
+          7,
+          0,
+          "Jordon Vaughn run for 3 yds to the TLSA 2"
+        ],
+        [
+          44,
+          0.6716497540473938,
+          7,
+          0,
+          "Jordon Vaughn run for 1 yd to the TLSA 1"
+        ],
+        [
+          45,
+          0.6643091440200806,
+          7,
+          0,
+          "Jordon Vaughn run for a loss of 1 yard to the TLSA 2"
+        ],
+        [
+          46,
+          0.7069475650787354,
+          7,
+          0,
+          "Stone Earle run for 1 yd to the TLSA 1"
+        ],
+        [
+          47,
+          0.7714287042617798,
+          7,
+          0,
+          "Dominic Richardson run for 2 yds to the TLSA 3"
+        ],
+        [
+          48,
+          0.7702322602272034,
+          7,
+          0,
+          "Dominic Richardson run for 4 yds to the TLSA 7"
+        ],
+        [
+          49,
+          0.7603402137756348,
+          7,
+          0,
+          "Kirk Francis pass complete to Jacob Emmers for 3 yds to the TLSA 10"
+        ],
+        [
+          50,
+          0.7849363088607788,
+          7,
+          0,
+          "Angus Davies punt for 80 yds"
+        ],
+        [
+          51,
+          0.7723609805107117,
+          7,
+          0,
+          "Rovaughn Banks Jr. run for 4 yds to the ACU 14"
+        ],
+        [
+          52,
+          0.7722402215003967,
+          7,
+          0,
+          "Stone Earle pass complete to J.J. Henry for a loss of 1 yard to the ACU 13"
+        ],
+        [
+          53,
+          0.783400297164917,
+          7,
+          0,
+          "Rovaughn Banks Jr. run for no gain to the ACU 13"
+        ],
+        [
+          54,
+          0.7912406325340271,
+          7,
+          0,
+          "Hugo Nash punt for 47 yds , Zion Booker returns for 9 yds to the TLSA 49"
+        ],
+        [
+          55,
+          0.8086425065994263,
+          7,
+          0,
+          "Kirk Francis pass complete to Jacob Emmers for 7 yds to the ACU 44"
+        ],
+        [
+          56,
+          0.8121824264526367,
+          7,
+          0,
+          "Dominic Richardson run for 4 yds to the ACU 40 for a 1ST down"
+        ],
+        [
+          57,
+          0.8134829998016357,
+          7,
+          0,
+          "Dominic Richardson run for 11 yds to the ACU 29 for a 1ST down"
+        ],
+        [
+          58,
+          0.8206579685211182,
+          7,
+          0,
+          "(09:23) No Huddle-Shotgun Francis,Kirk pass incomplete deep right to Miller,Mekhi thrown to ACU00 PENALTY ACU Pass Interference (Malaska,Jocelyn) 15 yards from ACU29 to ACU14, 1ST DOWN. NO PLAY."
+        ],
+        [
+          59,
+          0.8240402340888977,
+          7,
+          0,
+          "Braylin Presley run for 4 yds to the ACU 10"
+        ],
+        [
+          60,
+          0.8202816247940063,
+          7,
+          0,
+          "Kirk Francis pass incomplete to Zion Booker"
+        ],
+        [
+          61,
+          0.8115836381912231,
+          7,
+          0,
+          "Kirk Francis pass incomplete to Landen Lucas"
+        ],
+        [
+          62,
+          0.8456889986991882,
+          10,
+          0,
+          "Seth Morgan 28 yd FG GOOD"
+        ],
+        [
+          63,
+          0.8156890273094177,
+          10,
+          0,
+          "Jordon Vaughn run for 3 yds to the ACU 33"
+        ],
+        [
+          64,
+          0.8087911009788513,
+          10,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 5 yds to the ACU 38"
+        ],
+        [
+          65,
+          0.8096272945404053,
+          10,
+          0,
+          "Stone Earle run for 4 yds to the ACU 42 for a 1ST down"
+        ],
+        [
+          66,
+          0.806708037853241,
+          10,
+          0,
+          "Stone Earle pass complete to Bryan Henry for 3 yds to the ACU 45"
+        ],
+        [
+          67,
+          0.7986812591552734,
+          10,
+          0,
+          "Stone Earle pass complete to Luke Moffitt for 1 yd to the ACU 46"
+        ],
+        [
+          68,
+          0.8186973929405212,
+          10,
+          0,
+          "Stone Earle sacked by Byron Turner Jr. for a loss of 9 yards to the ACU 37"
+        ],
+        [
+          69,
+          0.8531472682952881,
+          10,
+          0,
+          "Hugo Nash punt for 40 yds"
+        ],
+        [
+          70,
+          0.8292651772499084,
+          10,
+          0,
+          "Dominic Richardson run for 3 yds to the TLSA 26"
+        ],
+        [
+          71,
+          0.8011316061019897,
+          10,
+          0,
+          "Dominic Richardson run for 5 yds to the TLSA 31"
+        ],
+        [
+          72,
+          0.8207257390022278,
+          10,
+          0,
+          "Kirk Francis run for 6 yds to the TLSA 37 for a 1ST down"
+        ],
+        [
+          73,
+          0.8332335948944092,
+          10,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 6 yds to the TLSA 43"
+        ],
+        [
+          74,
+          0.8372205495834351,
+          10,
+          0,
+          "Braylin Presley run for 10 yds to the ACU 47 for a 1ST down"
+        ],
+        [
+          75,
+          0.8375006318092346,
+          10,
+          0,
+          "Braylin Presley run for 11 yds to the ACU 36 for a 1ST down"
+        ],
+        [
+          76,
+          0.8405982255935669,
+          10,
+          0,
+          "Dominic Richardson run for 5 yds to the ACU 31"
+        ],
+        [
+          77,
+          0.8458184003829956,
+          10,
+          0,
+          "PENALTY TULSA False Start (Booker,Zion) 5 yards from ACU31 to ACU36. NO PLAY."
+        ],
+        [
+          78,
+          0.8424926996231079,
+          10,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 1 yd to the ACU 35"
+        ],
+        [
+          79,
+          0.8485518097877502,
+          10,
+          0,
+          "Dominic Richardson run for 2 yds to the ACU 33"
+        ],
+        [
+          80,
+          0.8426873683929443,
+          10,
+          0,
+          "PENALTY TULSA False Start (East,Cam) 5 yards from ACU33 to ACU38. NO PLAY."
+        ],
+        [
+          81,
+          0.8270173072814941,
+          10,
+          0,
+          "Angus Davies punt for 28 yds"
+        ],
+        [
+          82,
+          0.8520032167434692,
+          10,
+          0,
+          "Jordon Vaughn run for 7 yds to the ACU 17"
+        ],
+        [
+          83,
+          0.819076418876648,
+          10,
+          0,
+          "Jordon Vaughn run for no gain to the ACU 17"
+        ],
+        [
+          84,
+          0.8566612601280212,
+          10,
+          0,
+          "Kirk Francis pass incomplete to Zion Booker"
+        ],
+        [
+          85,
+          0.8411778807640076,
+          10,
+          0,
+          "Kirk Francis pass complete to Micah Tease for 24 yds to the TLSA 49 for a 1ST down"
+        ],
+        [
+          86,
+          0.8734893202781677,
+          10,
+          0,
+          "Dominic Richardson run for no gain to the TLSA 49"
+        ],
+        [
+          87,
+          0.8701145052909851,
+          10,
+          0,
+          "Dominic Richardson run for 6 yds to the ACU 45"
+        ],
+        [
+          88,
+          0.8688812255859375,
+          10,
+          0,
+          "Kirk Francis pass incomplete to Micah Tease"
+        ],
+        [
+          89,
+          0.8468321561813354,
+          10,
+          0,
+          "Kirk Francis run for 6 yds to the ACU 39 for a 1ST down"
+        ],
+        [
+          90,
+          0.8750038743019104,
+          10,
+          0,
+          "Kirk Francis pass complete to Josh Smith for 15 yds to the ACU 24 for a 1ST down"
+        ],
+        [
+          91,
+          0.8768647313117981,
+          10,
+          0,
+          "Ajay Allen run for 2 yds to the ACU 22"
+        ],
+        [
+          92,
+          0.8662441372871399,
+          10,
+          0,
+          "Kirk Francis pass incomplete to Micah Tease"
+        ],
+        [
+          93,
+          0.85068678855896,
+          10,
+          0,
+          "Ajay Allen run for no gain to the ACU 22"
+        ],
+        [
+          94,
+          0.8915061950683594,
+          13,
+          0,
+          "Seth Morgan 40 yd FG GOOD"
+        ],
+        [
+          95,
+          0.8639920949935913,
+          13,
+          0,
+          "Jordon Vaughn run for 1 yd to the TLSA 48"
+        ],
+        [
+          96,
+          0.8710675239562988,
+          13,
+          0,
+          "Stone Earle pass complete to Javon Gipson for 6 yds to the TLSA 42"
+        ],
+        [
+          97,
+          0.8743628859519958,
+          13,
+          0,
+          "Stone Earle run for a loss of 1 yard to the TLSA 43"
+        ],
+        [
+          98,
+          0.8849707245826721,
+          13,
+          0,
+          "Hugo Nash punt for 37 yds, fair catch by Zion Booker at the TLSA 6"
+        ],
+        [
+          99,
+          0.9108496904373169,
+          13,
+          0,
+          "(10:08) Shotgun Richardson,Dominic rush middle for 7 yards gain to the TULSA13 (Shaffer,Will; Plumley,Dorian) PENALTY TULSA Holding (Lucas,Landen) 3 yards from TULSA06 to TULSA03. NO PLAY."
+        ],
+        [
+          100,
+          0.9068045616149902,
+          13,
+          0,
+          "Dominic Richardson run for no gain to the TLSA 3"
+        ],
+        [
+          101,
+          0.8969943523406982,
+          13,
+          0,
+          "Dominic Richardson run for 6 yds to the TLSA 9"
+        ],
+        [
+          102,
+          0.9094960689544678,
+          13,
+          0,
+          "PENALTY TULSA False Start (Hill,Sean) 5 yards from TULSA09 to TULSA04. NO PLAY."
+        ],
+        [
+          103,
+          0.8927398324012756,
+          13,
+          0,
+          "Braylin Presley run for 4 yds to the TLSA 8"
+        ],
+        [
+          104,
+          0.8968838453292847,
+          13,
+          0,
+          "Angus Davies punt for 49 yds, punt out-of-bounds at the TLSA 40 , Tyson Williams returns for 17 yds to the TLSA 40"
+        ],
+        [
+          105,
+          0.8740684986114502,
+          13,
+          0,
+          "Stone Earle sacked by J'Dan Burnett for a loss of 5 yards to the TLSA 45"
+        ],
+        [
+          106,
+          0.880885124206543,
+          13,
+          0,
+          "Rovaughn Banks Jr. run for 7 yds to the TLSA 38"
+        ],
+        [
+          107,
+          0.885067343711853,
+          13,
+          0,
+          "Stone Earle pass incomplete to Dallas Dudley"
+        ],
+        [
+          108,
+          0.9009484648704529,
+          13,
+          0,
+          "Hugo Nash punt for 30 yds, fair catch by Zion Booker at the TLSA 8"
+        ],
+        [
+          109,
+          0.9216294288635254,
+          13,
+          0,
+          "Dominic Richardson run for 3 yds to the TLSA 11"
+        ],
+        [
+          110,
+          0.9155157804489136,
+          13,
+          0,
+          "Kirk Francis pass complete to Jacob Emmers for 14 yds to the TLSA 25 for a 1ST down"
+        ],
+        [
+          111,
+          0.9137679934501647,
+          13,
+          0,
+          "Kirk Francis pass incomplete to Micah Tease"
+        ],
+        [
+          112,
+          0.9082507491111755,
+          13,
+          0,
+          "Kirk Francis pass incomplete to Zion Booker"
+        ],
+        [
+          113,
+          0.9025116562843323,
+          13,
+          0,
+          "(05:37) No Huddle-Shotgun Francis,Kirk pass incomplete deep left to Smith,Josh thrown to ACU42 broken up by West,Harold PENALTY ACU Illegal Substitution 5 yards from TULSA25 to TULSA30. NO PLAY."
+        ],
+        [
+          114,
+          0.9064249992370605,
+          13,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 7 yds to the TLSA 37 for a 1ST down"
+        ],
+        [
+          115,
+          0.9264303445816039,
+          13,
+          0,
+          "Kirk Francis pass complete to Zion Booker for 5 yds to the TLSA 42"
+        ],
+        [
+          116,
+          0.9316110610961913,
+          13,
+          0,
+          "Braylin Presley run for 1 yd to the TLSA 43"
+        ],
+        [
+          117,
+          0.9782254695892332,
+          21,
+          0,
+          "Dominic Richardson 57 Yd Run (Braylin Presley Pass to Kirk Francis for Two-Point Conversion)"
+        ],
+        [
+          118,
+          0.9845750927925109,
+          21,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 5 yds to the ACU 30"
+        ],
+        [
+          119,
+          0.978625059127807,
+          21,
+          0,
+          "Rovaughn Banks Jr. run for 2 yds to the ACU 32"
+        ],
+        [
+          120,
+          0.9829239249229419,
+          21,
+          0,
+          "PENALTY ACU False Start (Lynch,Colter) 5 yards from ACU32 to ACU27. NO PLAY."
+        ],
+        [
+          121,
+          0.990871250629422,
+          21,
+          0,
+          "Stone Earle pass incomplete to Javon Gipson"
+        ],
+        [
+          122,
+          1.0,
+          21,
+          0,
+          "Hugo Nash punt for 44 yds, fair catch by Zion Booker at the TLSA 29"
+        ],
+        [
+          123,
+          0.9802289009094189,
+          21,
+          0,
+          "Kirk Francis run for a loss of 2 yards to the TLSA 27"
+        ],
+        [
+          124,
+          0.9616700410842841,
+          21,
+          0,
+          "Tulsa Penalty, Intentional Grounding (Kirk Francis) to the TLSA 19"
+        ],
+        [
+          125,
+          0.9478427171706908,
+          21,
+          0,
+          "Kirk Francis pass complete to Micah Tease for 10 yds to the TLSA 29"
+        ],
+        [
+          126,
+          0.9472692012786533,
+          21,
+          0,
+          "Braylin Presley run for 16 yds to the TLSA 45 for a 1ST down"
+        ],
+        [
+          127,
+          0.9928138256072498,
+          21,
+          0,
+          "Dominic Richardson run for 1 yd to the TLSA 46"
+        ],
+        [
+          128,
+          0.9914728403091276,
+          21,
+          0,
+          "Kirk Francis pass complete to Micah Tease for 27 yds to the ACU 27 for a 1ST down"
+        ],
+        [
+          129,
+          1.0,
+          21,
+          0,
+          "Dominic Richardson run for 5 yds to the ACU 22"
+        ],
+        [
+          130,
+          1.0,
+          28,
+          0,
+          "Kirk Francis pass complete to Brody Foley for 22 yds for a TD (Seth Morgan KICK)"
+        ],
+        [
+          131,
+          0.9959919452638629,
+          28,
+          0,
+          "Jordon Vaughn run for 10 yds to the ACU 35 for a 1ST down"
+        ],
+        [
+          132,
+          0.9835139512899985,
+          28,
+          0,
+          "Stone Earle pass incomplete to J.J. Henry"
+        ],
+        [
+          133,
+          0.9900727271898409,
+          28,
+          0,
+          "Stone Earle pass complete to J.J. Henry for 4 yds to the ACU 39"
+        ],
+        [
+          134,
+          0.9929456710295799,
+          28,
+          0,
+          "Stone Earle pass intercepted Elijah Green return for 4 yds to the ACU 45"
+        ],
+        [
+          135,
+          0.9929456710295799,
+          28,
+          0,
+          "Stone Earle pass intercepted Elijah Green return for 4 yds to the ACU 45"
+        ],
+        [
+          136,
+          1.0,
+          28,
+          0,
+          "Ajay Allen run for 5 yds to the ACU 40"
+        ],
+        [
+          137,
+          1.0,
+          28,
+          0,
+          "Kirk Francis pass incomplete to Mekhi Miller"
+        ],
+        [
+          138,
+          1.0,
+          35,
+          0,
+          "Ajay Allen run for 40 yds for a TD (Seth Morgan KICK)"
+        ],
+        [
+          139,
+          0.9987025258632938,
+          35,
+          0,
+          "Rovaughn Banks Jr. run for 4 yds to the ACU 29"
+        ],
+        [
+          140,
+          0.9945024239776095,
+          35,
+          0,
+          "Stone Earle run for 5 yds to the ACU 34"
+        ],
+        [
+          141,
+          0.9938509427906859,
+          35,
+          0,
+          "Stone Earle run for 21 yds to the TLSA 45 for a 1ST down"
+        ],
+        [
+          142,
+          0.9790511073897435,
+          35,
+          0,
+          "Stone Earle sacked by Byron Turner Jr. for a loss of 10 yards to the ACU 45"
+        ],
+        [
+          143,
+          0.9895394304220949,
+          35,
+          0,
+          "Rovaughn Banks Jr. run for 1 yd to the ACU 46"
+        ],
+        [
+          144,
+          1.0,
+          35,
+          0,
+          "PENALTY TULSA Offside (Cooper,Ty) 5 yards from ACU46 to TULSA49. NO PLAY."
+        ],
+        [
+          145,
+          0.9970870018107659,
+          35,
+          0,
+          "(09:21) No Huddle-Shotgun Earle,Stone rush middle for 5 yards gain to the TULSA44 (Anglin,Josh) PENALTY TULSA Offside (Hjelle,Joe) 5 yards from TULSA49 to TULSA44. NO PLAY."
+        ],
+        [
+          146,
+          0.9962573021120394,
+          35,
+          0,
+          "Stone Earle pass complete to Javon Gipson for 25 yds to the TLSA 19 for a 1ST down"
+        ],
+        [
+          147,
+          0.972701510504086,
+          35,
+          0,
+          "Stone Earle run for 4 yds to the TLSA 15"
+        ],
+        [
+          148,
+          0.9726017930856695,
+          35,
+          0,
+          "Jordon Vaughn run for 2 yds to the TLSA 13 Jordon Vaughn fumbled, recovered by ACU Colter Lynch"
+        ],
+        [
+          149,
+          0.9844494640962118,
+          35,
+          0,
+          "Jordon Vaughn run for 2 yds to the TLSA 11"
+        ],
+        [
+          150,
+          1.0,
+          35,
+          7,
+          "Stone Earle run for 11 yds for a TD (Kyler Meschi KICK)"
+        ],
+        [
+          151,
+          0.9913066738206835,
+          35,
+          7,
+          "Ajay Allen run for 3 yds to the TLSA 28"
+        ],
+        [
+          152,
+          0.9953791618167582,
+          35,
+          7,
+          "Ajay Allen run for 8 yds to the TLSA 36 for a 1ST down"
+        ],
+        [
+          153,
+          1.0,
+          35,
+          7,
+          "Kelvin Washington run for 6 yds to the TLSA 42"
+        ],
+        [
+          154,
+          1.0,
+          35,
+          7,
+          "Stephen Kittleman pass incomplete to Josh Smith"
+        ],
+        [
+          155,
+          0.9978800392299659,
+          35,
+          7,
+          "Stephen Kittleman pass complete to Jacob Emmers for 9 yds to the ACU 49 for a 1ST down"
+        ],
+        [
+          156,
+          1.0,
+          35,
+          7,
+          "Kelvin Washington run for 2 yds to the ACU 47"
+        ],
+        [
+          157,
+          0.9997235175228159,
+          35,
+          7,
+          "(03:10) Shotgun Kittleman,Stephen pass complete short right to Miller,Mekhi caught at ACU30, for 25 yards to the ACU22 (West,Harold; Oku,Christian) PENALTY TULSA Ineligible Downfield on Pass (McClure,Evan) 5 yards from ACU47 to TULSA48. NO PLAY."
+        ],
+        [
+          158,
+          0.9874565316513533,
+          35,
+          7,
+          "Stephen Kittleman pass complete to Calvin Johnson II for 9 yds to the ACU 43"
+        ],
+        [
+          159,
+          0.9672863695004931,
+          35,
+          7,
+          "Ajay Allen run for 2 yds to the ACU 41"
+        ],
+        [
+          160,
+          0.9410425331316719,
+          35,
+          7,
+          "Kelvin Washington run for 3 yds to the ACU 38 for a 1ST down"
+        ],
+        [
+          161,
+          0.995710129145229,
+          35,
+          7,
+          "run for a loss of 2 yards to the ACU 40"
+        ],
+        [
+          162,
+          1.0,
+          35,
+          7,
+          "(01:07) Kneel down by Tulsa at ACU42 for loss of 2 yards."
+        ],
+        [
+          163,
+          0.9647667575642394,
+          35,
+          7,
+          "(00:34) Kneel down by Tulsa at ACU43 for loss of 1 yard."
+        ],
+        [
+          164,
+          1.0,
+          35,
+          7,
+          "Game ended"
+        ]
+      ]
+    }
+  ]
+}

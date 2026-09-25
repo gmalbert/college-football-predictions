@@ -44,8 +44,7 @@ df_all = load_data()
 
 if df_all.empty or not models_trained():
     st.warning(
-        "No data or models found. Go to ⚙️ **Settings** → "
-        "**Pull Historical Data** → **Train Models**."
+        "No published data or model artifacts are currently available."
     )
     st.stop()
 

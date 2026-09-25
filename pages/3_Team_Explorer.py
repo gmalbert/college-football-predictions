@@ -41,7 +41,7 @@ fm   = data["feature_matrix"]
 
 if fm.empty:
     st.warning(
-        "No data available. Go to ⚙️ **Settings** and pull historical data first."
+        "No team data is currently published."
     )
     st.stop()
 

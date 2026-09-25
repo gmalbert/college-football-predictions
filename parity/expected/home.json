@@ -1,0 +1,82 @@
+{
+  "page_file": "predictions.py",
+  "exceptions": [],
+  "titles": [
+    "🏈 College Football Predictions"
+  ],
+  "subheaders": [
+    "Upcoming Model Deltas",
+    "📐 Model Accuracy",
+    "📊 Dataset"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Brier Score",
+      "value": "0.1631",
+      "delta": ""
+    },
+    {
+      "label": "Spread RMSE",
+      "value": "18.05 pts",
+      "delta": ""
+    },
+    {
+      "label": "OOS ATS Win %",
+      "value": "50.5%",
+      "delta": ""
+    },
+    {
+      "label": "ATS Record",
+      "value": "1792‑1758",
+      "delta": ""
+    },
+    {
+      "label": "Games",
+      "value": "21,196",
+      "delta": ""
+    },
+    {
+      "label": "Teams",
+      "value": "915",
+      "delta": ""
+    },
+    {
+      "label": "Seasons",
+      "value": "2021–2026",
+      "delta": "6 seasons in dataset"
+    },
+    {
+      "label": "Model",
+      "value": "XGBoost + Ridge",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1631",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Artifact release 991c44c52635 · 2026-09-25T20:06:19.080673+00:00"
+  ],
+  "alerts": [
+    {
+      "kind": "warning",
+      "text": "Model release status: HOLD (win_market_baseline, spread_market_baseline, closing_line_value). Forecasts are shown for research; Best Bets are published as provisional research output and are not validated recommendations."
+    }
+  ],
+  "markdown": [
+    "**South Florida @ Bowling Green** Wk 4 · Spread edge **7.7 pts** · Bet **Take South Florida -17.5** · Win prob 13%",
+    "**Notre Dame @ Purdue** Wk 4 · Spread edge **7.0 pts** · Bet **Take Notre Dame -27.5** · Win prob 5%",
+    "**Bucknell @ Pittsburgh** Wk 4 · Spread edge **7.0 pts** · Bet **Take Bucknell +52.5** · Win prob 98%",
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": []
+}

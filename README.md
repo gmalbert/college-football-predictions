@@ -1,5 +1,7 @@
 # College football predictions
 
+<img src="data_files/logo.png" alt="College football predictions logo" width="200">
+
 A Streamlit research application for college-football forecasting, market comparison, and leakage-safe betting analysis. It ingests CFBD data, builds point-in-time features, trains win/margin/total models, persists season walk-forward predictions, and exposes model and data-quality dashboards.
 
 ## Current validated baseline
@@ -49,7 +51,6 @@ The global model release remains **hold**, but v2.2 has a concrete target-specif
 | Model Performance | OOS calibration, baselines, feature importance and ATS by week |
 | Data Quality | Contracts, duplication, freshness, missingness and leakage warnings |
 | Total Market Signals | Closing-time total probability, OOS selections and 2026 shadow signals |
-| Settings | Data refresh, feature build and model training |
 
 ## Data flow
 

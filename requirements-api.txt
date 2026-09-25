@@ -1,0 +1,47 @@
+# Runtime dependencies for the FastAPI backend ONLY.
+#
+# Deliberately a small subset of the Streamlit app's requirements. The API reads
+# the artifacts the weekly workflow publishes and serves them as JSON. It does
+# not train, does not run inference, and does not load a model:
+#
+#   * forecasts come from features/upcoming_predictions.parquet and the
+#     walk-forward predictions in features/model_backtest.parquet
+#   * the calibration curve and feature importances come from
+#     models/model_diagnostics.json
+#   * secrets come from the environment; utils/config.py imports streamlit
+#     lazily and tolerates its absence
+#
+# So neither streamlit, scikit-learn, XGBoost nor scipy is needed. Those four
+# were the bulk of the API's dependency weight.
+#
+#     python -m pip install -r requirements-api.txt
+#
+# Use requirements-web.txt for local development, which adds streamlit (the
+# parity harness needs a Streamlit reference server) and the test tooling.
+#
+# Two checks keep this honest:
+#     python scripts/check_ml_free.py        # every module imports with the ML stack blocked
+#     python scripts/check_api_isolated.py   # builds a venv from this file and exercises the API
+
+# --- API server -------------------------------------------------------------
+# fastapi 0.118 is the newest release that still accepts pydantic v1, which
+# cfbd pins (cfbd requires pydantic<2). It also allows the starlette>=0.46 that
+# streamlit requires, so requirements-web.txt can install both side by side.
+fastapi==0.118.0
+uvicorn>=0.30.0
+
+# --- Data -------------------------------------------------------------------
+# The API reads Parquet artifacts and reshapes them for the pages.
+pandas>=2.1.0
+numpy>=1.26.0
+pyarrow>=15.0.0
+
+# api/charts.py builds Plotly figure JSON; the browser renders it.
+plotly>=5.18.0
+
+# api/main.py downscales data_files/logo.png before serving it.
+Pillow>=10.0.0
+
+# utils/cfbd_client.py backs the Win Probability page (page 7).
+cfbd>=4.5.0
+requests>=2.31.0

@@ -1,0 +1,180 @@
+{
+  "page_file": "pages/5_Model_Performance.py",
+  "exceptions": [],
+  "titles": [
+    "🎯 Model Performance"
+  ],
+  "subheaders": [
+    "Calibration Curve — Win Probability",
+    "ATS Record by Week",
+    "Feature Importance — Spread Model",
+    "Feature Importance — Total Model",
+    "Training Data Summary"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "OOS Brier Score",
+      "value": "0.1631",
+      "delta": ""
+    },
+    {
+      "label": "OOS Spread RMSE",
+      "value": "18.05 pts",
+      "delta": ""
+    },
+    {
+      "label": "OOS Total RMSE",
+      "value": "16.67 pts",
+      "delta": ""
+    },
+    {
+      "label": "OOS ATS Win %",
+      "value": "50.5%",
+      "delta": ""
+    },
+    {
+      "label": "ATS Record",
+      "value": "1792‑1758",
+      "delta": ""
+    },
+    {
+      "label": "Win model samples",
+      "value": "12,423",
+      "delta": ""
+    },
+    {
+      "label": "Spread model samples",
+      "value": "12,423",
+      "delta": ""
+    },
+    {
+      "label": "Total model samples",
+      "value": "12,423",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1631",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "Market comparisons use exactly the same priced games for model and baseline."
+  ],
+  "alerts": [
+    {
+      "kind": "info",
+      "text": "Feature importance not available for this model type."
+    },
+    {
+      "kind": "info",
+      "text": "Feature importance not available for this model type."
+    }
+  ],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [
+    "Release gates"
+  ],
+  "dataframes": [
+    {
+      "columns": [
+        "Target",
+        "Comparable model",
+        "Market baseline",
+        "Priced games",
+        "Model beats market"
+      ],
+      "rows": [
+        [
+          "Win probability (Brier)",
+          0.16748874943991657,
+          0.16748874943991657,
+          2836,
+          false
+        ],
+        [
+          "Home margin (RMSE)",
+          15.561577194641805,
+          15.261348797416021,
+          4966,
+          false
+        ],
+        [
+          "Game total (RMSE)",
+          15.736173244124132,
+          15.779306344043471,
+          4943,
+          true
+        ]
+      ]
+    },
+    {
+      "columns": [
+        "name",
+        "passed",
+        "actual",
+        "threshold",
+        "reason"
+      ],
+      "rows": [
+        [
+          "out_of_sample_games",
+          true,
+          12423.0,
+          "500",
+          "Require an adequately sized untouched walk-forward sample."
+        ],
+        [
+          "brier",
+          true,
+          0.16309429885355642,
+          "0.25",
+          "Probability quality must beat a coin-flip Brier score."
+        ],
+        [
+          "win_market_baseline",
+          false,
+          0.0,
+          "> 0 Brier skill",
+          "Win probabilities must improve on the vig-removed moneyline market."
+        ],
+        [
+          "calibration",
+          true,
+          0.008335332128850773,
+          "0.05",
+          "Calibration error controls overconfident bet sizing."
+        ],
+        [
+          "spread_market_baseline",
+          false,
+          15.561577194641805,
+          "< market RMSE 15.261348797416021",
+          "A spread model is not releasable when the market predicts margin better."
+        ],
+        [
+          "total_market_baseline",
+          true,
+          15.736173244124132,
+          "< market RMSE 15.779306344043471",
+          "A total model is not releasable when the market predicts totals better."
+        ],
+        [
+          "closing_line_value",
+          false,
+          null,
+          "0.5",
+          "A live strategy should beat later market prices more often than not."
+        ]
+      ]
+    }
+  ]
+}

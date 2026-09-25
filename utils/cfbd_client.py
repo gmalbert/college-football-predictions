@@ -1,6 +1,7 @@
 """utils/cfbd_client.py — Thin wrapper around the College Football Data API (v5)."""
 from __future__ import annotations
 import cfbd
+import math
 import requests
 from functools import lru_cache
 from utils.config import get_secret
@@ -491,6 +492,66 @@ def get_win_probability_chart(game_id: int) -> list:
     except Exception as e:
         logger.error(f"CFBD get_win_probability_chart error: {e}")
         return []
+
+
+def _first_present(record, *names):
+    """Read the first non-null field from a CFBD dict or SDK model."""
+    for name in names:
+        if isinstance(record, dict):
+            value = record.get(name)
+        else:
+            value = getattr(record, name, None)
+        if value is not None:
+            return value
+    return None
+
+
+def parse_win_probability_rows(data: list) -> list[dict]:
+    """Normalize CFBD play-win-probability records for the chart page.
+
+    The CFBD SDK exposes Pydantic fields such as ``home_win_probability``
+    while raw API payloads use ``homeWinProbability``. Older payloads also
+    used ``homeWinProb``; accept all variants and preserve valid zero values.
+    """
+    rows: list[dict] = []
+    for index, record in enumerate(data or []):
+        home_wp = _first_present(
+            record,
+            "home_win_probability",
+            "homeWinProbability",
+            "homeWinProb",
+            "home_win_prob",
+        )
+        try:
+            home_wp = float(home_wp)
+        except (TypeError, ValueError):
+            continue
+        if home_wp > 1.0 and home_wp <= 100.0:
+            home_wp /= 100.0
+        if not math.isfinite(home_wp) or not 0.0 <= home_wp <= 1.0:
+            continue
+
+        play_number = _first_present(record, "play_number", "playNumber", "play_id", "playId")
+        try:
+            play_number = int(play_number)
+        except (TypeError, ValueError):
+            play_number = index
+
+        def _score(*names):
+            value = _first_present(record, *names)
+            try:
+                return int(value) if value is not None else None
+            except (TypeError, ValueError):
+                return None
+
+        rows.append({
+            "play": play_number,
+            "home_wp": home_wp,
+            "home_score": _score("home_score", "homeScore"),
+            "away_score": _score("away_score", "awayScore"),
+            "play_text": str(_first_present(record, "play_text", "playText") or ""),
+        })
+    return rows
 
 
 # ── Advanced game-level stats ─────────────────────────────────────

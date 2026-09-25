@@ -1,0 +1,1488 @@
+{
+  "page_file": "pages/10_Total_Market_Signals.py",
+  "exceptions": [],
+  "titles": [
+    "Total Market Signals"
+  ],
+  "subheaders": [
+    "Walk-forward decisions",
+    "Current prospective shadow file"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "OOS Brier",
+      "value": "0.2497",
+      "delta": "vs 0.2500"
+    },
+    {
+      "label": "Validated Over Record",
+      "value": "214–164",
+      "delta": "56.6%"
+    },
+    {
+      "label": "2025 Confirmation",
+      "value": "42–19",
+      "delta": "68.9%"
+    },
+    {
+      "label": "Shadow-Eligible Side",
+      "value": "Over",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1631",
+      "delta": ""
+    }
+  ],
+  "captions": [
+    "A separate closing-time over/under classifier using opening-to-current movement, cross-book dispersion, market depth, and point-in-time team form.",
+    "Selection requires probability ≥ 57.5%. Historical ROI assumes every price was -110; actual deployment requires captured executable prices."
+  ],
+  "alerts": [
+    {
+      "kind": "warning",
+      "text": "Shadow deployment only. Retrospective gates passed, but no signal becomes an automated bet until 2026 prospective closing-line value passes."
+    },
+    {
+      "kind": "info",
+      "text": "Prospective validation only; prices and CLV must pass before promotion"
+    }
+  ],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": [
+    {
+      "columns": [
+        "week",
+        "Game",
+        "Side",
+        "market_total",
+        "market_total_open",
+        "market_total_move",
+        "Probability",
+        "Result"
+      ],
+      "rows": [
+        [
+          1,
+          "Texas State @ Texas",
+          "Over",
+          60.0,
+          59.75,
+          0.25,
+          0.9116553549131076,
+          "WIN"
+        ],
+        [
+          3,
+          "Utah State @ Utah",
+          "Over",
+          56.5,
+          56.5,
+          0.0,
+          0.9100812318217134,
+          "LOSS"
+        ],
+        [
+          1,
+          "Florida Atlantic @ Florida",
+          "Over",
+          59.0,
+          59.0,
+          0.0,
+          0.8545668568189476,
+          "WIN"
+        ],
+        [
+          2,
+          "Bowling Green @ Nebraska",
+          "Over",
+          50.0,
+          50.0,
+          0.0,
+          0.812423640681209,
+          "WIN"
+        ],
+        [
+          2,
+          "Rice @ Notre Dame",
+          "Over",
+          55.5,
+          53.5,
+          2.0,
+          0.8105962981718142,
+          "LOSS"
+        ],
+        [
+          2,
+          "Towson @ South Carolina",
+          "Over",
+          57.5,
+          55.5,
+          2.0,
+          0.8017530232818508,
+          "LOSS"
+        ],
+        [
+          3,
+          "Buffalo @ Penn State",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.8001853646718784,
+          "WIN"
+        ],
+        [
+          2,
+          "Robert Morris @ Akron",
+          "Over",
+          46.5,
+          41.5,
+          5.0,
+          0.7891695122622105,
+          "WIN"
+        ],
+        [
+          1,
+          "Washington State @ Washington",
+          "Over",
+          50.5,
+          51.0,
+          -0.5,
+          0.786212461022494,
+          "LOSS"
+        ],
+        [
+          2,
+          "Iowa State @ Iowa",
+          "Over",
+          42.5,
+          40.5,
+          2.0,
+          0.7806563182499423,
+          "LOSS"
+        ],
+        [
+          2,
+          "Jacksonville State @ Ohio",
+          "Over",
+          50.0,
+          49.5,
+          0.5,
+          0.7730988738931057,
+          "WIN"
+        ],
+        [
+          2,
+          "Wofford @ Kent State",
+          "Over",
+          46.5,
+          46.5,
+          0.0,
+          0.7714123758798271,
+          "WIN"
+        ],
+        [
+          2,
+          "Texas Tech @ Oregon State",
+          "Over",
+          53.0,
+          51.5,
+          1.5,
+          0.7685774303703343,
+          "WIN"
+        ],
+        [
+          2,
+          "Mississippi State @ Minnesota",
+          "Over",
+          54.5,
+          54.5,
+          0.0,
+          0.7646845269492177,
+          "LOSS"
+        ],
+        [
+          1,
+          "Bryant @ Army",
+          "Over",
+          51.0,
+          50.5,
+          0.5,
+          0.7607004584094611,
+          "WIN"
+        ],
+        [
+          2,
+          "Wagner @ James Madison",
+          "Over",
+          55.5,
+          55.5,
+          0.0,
+          0.7593827516153604,
+          "WIN"
+        ],
+        [
+          2,
+          "Penn State @ Temple",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.7555861525378775,
+          "LOSS"
+        ],
+        [
+          3,
+          "Mercer @ Georgia Tech",
+          "Over",
+          59.5,
+          59.5,
+          0.0,
+          0.7546824317190699,
+          "LOSS"
+        ],
+        [
+          2,
+          "Louisiana @ USC",
+          "Over",
+          59.5,
+          61.5,
+          -2.0,
+          0.7545250587910037,
+          "WIN"
+        ],
+        [
+          2,
+          "Memphis @ Boise State",
+          "Over",
+          55.5,
+          53.5,
+          2.0,
+          0.7543836212078676,
+          "WIN"
+        ],
+        [
+          3,
+          "Northern Illinois @ Arizona",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.7507510225813434,
+          "WIN"
+        ],
+        [
+          2,
+          "Alabama State @ Troy",
+          "Over",
+          52.5,
+          51.5,
+          1.0,
+          0.7500569847158267,
+          "LOSS"
+        ],
+        [
+          3,
+          "UTEP @ Michigan",
+          "Over",
+          48.5,
+          48.5,
+          0.0,
+          0.7485335515358245,
+          "WIN"
+        ],
+        [
+          2,
+          "Georgia Southern @ Clemson",
+          "Over",
+          54.5,
+          56.5,
+          -2.0,
+          0.7473393482070801,
+          "LOSS"
+        ],
+        [
+          2,
+          "Villanova @ Louisville",
+          "Over",
+          56.5,
+          56.5,
+          0.0,
+          0.7452648303887528,
+          "WIN"
+        ],
+        [
+          2,
+          "Oklahoma @ Michigan",
+          "Over",
+          44.5,
+          44.5,
+          0.0,
+          0.743084443544913,
+          "LOSS"
+        ],
+        [
+          2,
+          "Western Kentucky @ Georgia",
+          "Over",
+          55.5,
+          54.0,
+          1.5,
+          0.7411493593641332,
+          "WIN"
+        ],
+        [
+          2,
+          "Tennessee @ Georgia Tech",
+          "Over",
+          55.5,
+          56.0,
+          -0.5,
+          0.7408598207036146,
+          "WIN"
+        ],
+        [
+          2,
+          "Missouri @ Kansas",
+          "Over",
+          51.5,
+          50.5,
+          1.0,
+          0.738104075416243,
+          "WIN"
+        ],
+        [
+          3,
+          "Wagner @ California",
+          "Over",
+          65.5,
+          65.5,
+          0.0,
+          0.7375617733467246,
+          "LOSS"
+        ],
+        [
+          3,
+          "Southern Illinois @ Illinois",
+          "Over",
+          54.5,
+          54.5,
+          0.0,
+          0.7306857149964991,
+          "WIN"
+        ],
+        [
+          2,
+          "Howard @ Indiana",
+          "Over",
+          65.5,
+          65.5,
+          0.0,
+          0.7304025111958674,
+          "LOSS"
+        ],
+        [
+          3,
+          "Eastern Michigan @ Wisconsin",
+          "Over",
+          44.5,
+          44.5,
+          0.0,
+          0.730251019775217,
+          "WIN"
+        ],
+        [
+          2,
+          "Holy Cross @ Miami (OH)",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.7295857005297478,
+          "WIN"
+        ],
+        [
+          2,
+          "Weber State @ Colorado",
+          "Over",
+          56.5,
+          54.5,
+          2.0,
+          0.7293650407628668,
+          "WIN"
+        ],
+        [
+          2,
+          "Wake Forest @ Purdue",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.7275529182579904,
+          "WIN"
+        ],
+        [
+          1,
+          "Fresno State @ USC",
+          "Over",
+          51.5,
+          51.5,
+          0.0,
+          0.727294790513551,
+          "LOSS"
+        ],
+        [
+          3,
+          "Eastern Washington @ Washington",
+          "Over",
+          57.5,
+          57.5,
+          0.0,
+          0.7242849773709502,
+          "WIN"
+        ],
+        [
+          2,
+          "North Dakota State @ Air Force",
+          "Over",
+          47.5,
+          47.5,
+          0.0,
+          0.7224489144806541,
+          "WIN"
+        ],
+        [
+          3,
+          "Michigan State @ Notre Dame",
+          "Over",
+          52.5,
+          53.0,
+          -0.5,
+          0.7215907661592211,
+          "LOSS"
+        ],
+        [
+          3,
+          "Western Kentucky @ Indiana",
+          "Over",
+          60.5,
+          60.5,
+          0.0,
+          0.7212173659062926,
+          "LOSS"
+        ],
+        [
+          2,
+          "Sacramento State @ Fresno State",
+          "Over",
+          44.5,
+          44.5,
+          0.0,
+          0.721096921625497,
+          "WIN"
+        ],
+        [
+          1,
+          "Idaho @ Utah",
+          "Over",
+          58.5,
+          57.5,
+          1.0,
+          0.7195244334111834,
+          "WIN"
+        ],
+        [
+          1,
+          "Mercyhurst @ New Mexico State",
+          "Over",
+          51.5,
+          51.5,
+          0.0,
+          0.7190966689756727,
+          "WIN"
+        ],
+        [
+          1,
+          "Morgan State @ Arizona State",
+          "Over",
+          53.5,
+          52.5,
+          1.0,
+          0.7187785563711239,
+          "WIN"
+        ],
+        [
+          2,
+          "Mercyhurst @ New Mexico",
+          "Over",
+          54.5,
+          53.5,
+          1.0,
+          0.7177026101371542,
+          "WIN"
+        ],
+        [
+          3,
+          "Akron @ Minnesota",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.7165041208429035,
+          "LOSS"
+        ],
+        [
+          2,
+          "Gardner-Webb @ Liberty",
+          "Over",
+          54.5,
+          54.5,
+          0.0,
+          0.7153812070719069,
+          "LOSS"
+        ],
+        [
+          1,
+          "West Georgia @ Kennesaw State",
+          "Over",
+          50.5,
+          53.5,
+          -3.0,
+          0.714277368317444,
+          "LOSS"
+        ],
+        [
+          3,
+          "Northern Iowa @ Iowa",
+          "Over",
+          47.5,
+          47.5,
+          0.0,
+          0.7083046613338992,
+          "WIN"
+        ],
+        [
+          3,
+          "Maine @ Boston College",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.7065398235048554,
+          "LOSS"
+        ],
+        [
+          2,
+          "UC Davis @ SMU",
+          "Over",
+          59.5,
+          58.5,
+          1.0,
+          0.7061176644645155,
+          "WIN"
+        ],
+        [
+          3,
+          "Tulane @ Kansas State",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.7020638243000114,
+          "WIN"
+        ],
+        [
+          1,
+          "Abilene Christian @ Texas Tech",
+          "Over",
+          59.5,
+          58.5,
+          1.0,
+          0.7019900474858811,
+          "LOSS"
+        ],
+        [
+          1,
+          "Tennessee State @ Georgia",
+          "Over",
+          55.5,
+          56.5,
+          -1.0,
+          0.6989948068597898,
+          "WIN"
+        ],
+        [
+          2,
+          "Montana State @ Nevada",
+          "Over",
+          51.5,
+          50.5,
+          1.0,
+          0.6969802460432502,
+          "LOSS"
+        ],
+        [
+          1,
+          "San José State @ Eastern Michigan",
+          "Over",
+          55.0,
+          54.5,
+          0.5,
+          0.6957487101176175,
+          "LOSS"
+        ],
+        [
+          2,
+          "Richmond @ NC State",
+          "Over",
+          48.5,
+          49.5,
+          -1.0,
+          0.6950749160506536,
+          "WIN"
+        ],
+        [
+          2,
+          "Eastern Michigan @ Michigan State",
+          "Over",
+          49.5,
+          50.5,
+          -1.0,
+          0.692124672649478,
+          "LOSS"
+        ],
+        [
+          3,
+          "Stonehill @ Massachusetts",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.6867815738265859,
+          "WIN"
+        ],
+        [
+          2,
+          "Norfolk State @ Virginia",
+          "Over",
+          55.5,
+          53.5,
+          2.0,
+          0.6817785581581185,
+          "WIN"
+        ],
+        [
+          1,
+          "New Hampshire @ Syracuse",
+          "Over",
+          55.5,
+          56.5,
+          -1.0,
+          0.6803672277287555,
+          "WIN"
+        ],
+        [
+          2,
+          "Washington State @ Kansas State",
+          "Over",
+          48.5,
+          50.0,
+          -1.5,
+          0.6798883727080518,
+          "LOSS"
+        ],
+        [
+          2,
+          "Utah State @ Washington",
+          "Over",
+          55.5,
+          56.0,
+          -0.5,
+          0.6775060585934527,
+          "LOSS"
+        ],
+        [
+          1,
+          "San José State @ USC",
+          "Over",
+          60.5,
+          60.5,
+          0.0,
+          0.6763742272139511,
+          "WIN"
+        ],
+        [
+          1,
+          "The Citadel @ Charlotte",
+          "Over",
+          48.5,
+          45.5,
+          3.0,
+          0.6757480330755824,
+          "WIN"
+        ],
+        [
+          1,
+          "Northern Illinois @ Iowa",
+          "Over",
+          45.0,
+          45.0,
+          0.0,
+          0.6733914933257334,
+          "LOSS"
+        ],
+        [
+          3,
+          "East Texas A&M @ Tulsa",
+          "Over",
+          56.5,
+          56.5,
+          0.0,
+          0.6709870179433628,
+          "LOSS"
+        ],
+        [
+          3,
+          "Bowling Green @ Iowa State",
+          "Over",
+          43.5,
+          43.5,
+          0.0,
+          0.66958010831455,
+          "WIN"
+        ],
+        [
+          1,
+          "Merrimack @ Delaware",
+          "Over",
+          55.5,
+          56.5,
+          -1.0,
+          0.6685950129391045,
+          "LOSS"
+        ],
+        [
+          1,
+          "Nicholls @ Kansas State",
+          "Over",
+          55.5,
+          54.5,
+          1.0,
+          0.6666337808328158,
+          "WIN"
+        ],
+        [
+          1,
+          "Kent State @ South Carolina",
+          "Over",
+          53.5,
+          53.25,
+          0.25,
+          0.6620663369583503,
+          "WIN"
+        ],
+        [
+          1,
+          "North Alabama @ Arkansas",
+          "Over",
+          62.5,
+          62.5,
+          0.0,
+          0.6615340757659055,
+          "LOSS"
+        ],
+        [
+          1,
+          "Utah Tech @ BYU",
+          "Over",
+          61.5,
+          61.5,
+          0.0,
+          0.6604761035851151,
+          "WIN"
+        ],
+        [
+          1,
+          "New Mexico State @ Florida State",
+          "Over",
+          52.75,
+          52.75,
+          0.0,
+          0.6591903611461881,
+          "LOSS"
+        ],
+        [
+          3,
+          "Duquesne @ Washington State",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.6579491584007293,
+          "WIN"
+        ],
+        [
+          1,
+          "Northwestern State @ Louisiana Tech",
+          "Over",
+          56.5,
+          55.5,
+          1.0,
+          0.6569334520924572,
+          "WIN"
+        ],
+        [
+          3,
+          "North Dakota @ Nebraska",
+          "Over",
+          51.5,
+          51.5,
+          0.0,
+          0.6563777766797919,
+          "LOSS"
+        ],
+        [
+          1,
+          "VMI @ Virginia Tech",
+          "Over",
+          61.5,
+          62.5,
+          -1.0,
+          0.6562198591266957,
+          "WIN"
+        ],
+        [
+          1,
+          "Missouri State @ Texas A&M",
+          "Over",
+          53.0,
+          53.0,
+          0.0,
+          0.655442895593213,
+          "LOSS"
+        ],
+        [
+          1,
+          "Mississippi Valley State @ Sacramento State",
+          "Over",
+          56.5,
+          56.5,
+          0.0,
+          0.6530337761804823,
+          "LOSS"
+        ],
+        [
+          2,
+          "Georgia State @ Kennesaw State",
+          "Over",
+          55.5,
+          54.5,
+          1.0,
+          0.6525046000139103,
+          "LOSS"
+        ],
+        [
+          2,
+          "Arkansas @ Utah",
+          "Over",
+          55.5,
+          55.5,
+          0.0,
+          0.651370814877022,
+          "LOSS"
+        ],
+        [
+          1,
+          "Norfolk State @ Old Dominion",
+          "Over",
+          52.5,
+          52.5,
+          0.0,
+          0.6511827014394207,
+          "LOSS"
+        ],
+        [
+          1,
+          "Jacksonville State @ North Dakota State",
+          "Over",
+          47.0,
+          47.0,
+          0.0,
+          0.6495585046824309,
+          "LOSS"
+        ],
+        [
+          1,
+          "Akron @ Wake Forest",
+          "Over",
+          50.0,
+          49.0,
+          1.0,
+          0.6489299574261714,
+          "WIN"
+        ],
+        [
+          1,
+          "Tulane @ Duke",
+          "Over",
+          51.5,
+          51.75,
+          -0.25,
+          0.6468005760042941,
+          "LOSS"
+        ],
+        [
+          1,
+          "UNLV @ Hawai'i",
+          "Over",
+          57.0,
+          57.5,
+          -0.5,
+          0.6442010756344297,
+          "LOSS"
+        ],
+        [
+          2,
+          "Texas Southern @ UTEP",
+          "Over",
+          53.5,
+          53.0,
+          0.5,
+          0.640433070680762,
+          "WIN"
+        ],
+        [
+          1,
+          "Colorado @ Georgia Tech",
+          "Over",
+          51.25,
+          50.75,
+          0.5,
+          0.6394437361154168,
+          "LOSS"
+        ],
+        [
+          2,
+          "Cal Poly @ San José State",
+          "Over",
+          58.5,
+          57.0,
+          1.5,
+          0.639418606541453,
+          "LOSS"
+        ],
+        [
+          1,
+          "Morgan State @ North Carolina A&T",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.6383863117979167,
+          "LOSS"
+        ],
+        [
+          3,
+          "South Dakota @ Boise State",
+          "Over",
+          55.5,
+          55.5,
+          0.0,
+          0.6382638659238716,
+          "WIN"
+        ],
+        [
+          1,
+          "Portland State @ San Diego State",
+          "Over",
+          62.5,
+          62.5,
+          0.0,
+          0.6373591060706054,
+          "WIN"
+        ],
+        [
+          3,
+          "Georgia @ Arkansas",
+          "Over",
+          54.5,
+          53.5,
+          1.0,
+          0.6364229517671535,
+          "WIN"
+        ],
+        [
+          2,
+          "Colgate @ Central Michigan",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.6357472050332975,
+          "LOSS"
+        ],
+        [
+          3,
+          "North Dakota State @ Sacramento State",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.6350925172589428,
+          "LOSS"
+        ],
+        [
+          1,
+          "Miami @ Stanford",
+          "Over",
+          48.5,
+          48.5,
+          0.0,
+          0.6310876525055622,
+          "WIN"
+        ],
+        [
+          1,
+          "Southeast Missouri State @ Iowa State",
+          "Over",
+          52.5,
+          52.5,
+          0.0,
+          0.6288733570969123,
+          "LOSS"
+        ],
+        [
+          2,
+          "Valparaiso @ Murray State",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.6267812704675534,
+          "LOSS"
+        ],
+        [
+          3,
+          "Louisiana Tech @ Baylor",
+          "Over",
+          48.5,
+          48.5,
+          0.0,
+          0.6258293484941714,
+          "WIN"
+        ],
+        [
+          1,
+          "North Carolina A&T @ Georgia State",
+          "Over",
+          58.5,
+          63.5,
+          -5.0,
+          0.6254402849163962,
+          "WIN"
+        ],
+        [
+          1,
+          "Butler @ Montana State",
+          "Over",
+          59.5,
+          59.5,
+          0.0,
+          0.6246428636873189,
+          "WIN"
+        ],
+        [
+          1,
+          "Sam Houston @ Troy",
+          "Over",
+          52.0,
+          52.5,
+          -0.5,
+          0.6242611377100774,
+          "LOSS"
+        ],
+        [
+          1,
+          "Coastal Carolina @ West Virginia",
+          "Over",
+          57.25,
+          57.25,
+          0.0,
+          0.6240045999375581,
+          "LOSS"
+        ],
+        [
+          2,
+          "Stonehill @ New Hampshire",
+          "Over",
+          43.5,
+          42.5,
+          1.0,
+          0.6228372675748907,
+          "WIN"
+        ],
+        [
+          1,
+          "Charleston Southern @ Georgia Southern",
+          "Over",
+          51.5,
+          51.5,
+          0.0,
+          0.6218381998426602,
+          "LOSS"
+        ],
+        [
+          2,
+          "UTSA @ Texas State",
+          "Over",
+          65.5,
+          65.5,
+          0.0,
+          0.6200498363006648,
+          "LOSS"
+        ],
+        [
+          1,
+          "Lamar @ Louisiana",
+          "Over",
+          48.5,
+          49.5,
+          -1.0,
+          0.6189488631653747,
+          "LOSS"
+        ],
+        [
+          1,
+          "UAB @ Illinois",
+          "Over",
+          55.75,
+          56.75,
+          -1.0,
+          0.6158416173014387,
+          "WIN"
+        ],
+        [
+          1,
+          "Indiana State @ Purdue",
+          "Over",
+          56.5,
+          57.5,
+          -1.0,
+          0.6137016555457758,
+          "WIN"
+        ],
+        [
+          2,
+          "Sacred Heart @ Massachusetts",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.6120891989472402,
+          "LOSS"
+        ],
+        [
+          1,
+          "Stonehill @ New Haven",
+          "Over",
+          42.5,
+          42.5,
+          0.0,
+          0.6120399144841915,
+          "LOSS"
+        ],
+        [
+          2,
+          "Florida A&M @ Miami",
+          "Over",
+          63.0,
+          61.0,
+          2.0,
+          0.6114179634195234,
+          "WIN"
+        ],
+        [
+          2,
+          "Central Connecticut @ Toledo",
+          "Over",
+          52.5,
+          56.5,
+          -4.0,
+          0.6108957598021736,
+          "WIN"
+        ],
+        [
+          2,
+          "Marist @ Lafayette",
+          "Over",
+          46.5,
+          46.5,
+          0.0,
+          0.6106922444461016,
+          "LOSS"
+        ],
+        [
+          1,
+          "Ohio @ Nebraska",
+          "Over",
+          47.0,
+          47.0,
+          0.0,
+          0.6102568976333114,
+          "WIN"
+        ],
+        [
+          3,
+          "Florida State @ Alabama",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.609949740187977,
+          "WIN"
+        ],
+        [
+          1,
+          "Alcorn State @ Southern Miss",
+          "Over",
+          50.5,
+          51.5,
+          -1.0,
+          0.6078685173616106,
+          "WIN"
+        ],
+        [
+          3,
+          "Ball State @ Liberty",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.6051064022697206,
+          "WIN"
+        ],
+        [
+          2,
+          "Oregon @ Oklahoma State",
+          "Over",
+          54.5,
+          57.5,
+          -3.0,
+          0.6047372000244201,
+          "WIN"
+        ],
+        [
+          3,
+          "Morgan State @ Towson",
+          "Over",
+          43.5,
+          43.5,
+          0.0,
+          0.6028294835858293,
+          "WIN"
+        ],
+        [
+          3,
+          "Miami (OH) @ Cincinnati",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.5991482126277138,
+          "WIN"
+        ],
+        [
+          2,
+          "Ohio State @ Texas",
+          "Over",
+          49.5,
+          48.5,
+          1.0,
+          0.5968198377488663,
+          "LOSS"
+        ],
+        [
+          1,
+          "Western Michigan @ Michigan",
+          "Over",
+          48.5,
+          48.0,
+          0.5,
+          0.5950366064965161,
+          "LOSS"
+        ],
+        [
+          2,
+          "New Haven @ South Dakota State",
+          "Over",
+          54.5,
+          56.5,
+          -2.0,
+          0.5889137097352015,
+          "WIN"
+        ],
+        [
+          2,
+          "New Mexico State @ Hawai'i",
+          "Over",
+          49.5,
+          50.5,
+          -1.0,
+          0.58787897058452,
+          "LOSS"
+        ],
+        [
+          1,
+          "SMU @ Florida State",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.5873946652975605,
+          "LOSS"
+        ],
+        [
+          2,
+          "Southern Miss @ Auburn",
+          "Over",
+          56.5,
+          56.5,
+          0.0,
+          0.5871231182616989,
+          "LOSS"
+        ],
+        [
+          3,
+          "Valparaiso @ Indiana State",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.5869394737710483,
+          "WIN"
+        ],
+        [
+          3,
+          "Stanford @ Duke",
+          "Over",
+          51.5,
+          51.5,
+          0.0,
+          0.586815250398094,
+          "LOSS"
+        ],
+        [
+          1,
+          "Northern Arizona @ Arizona",
+          "Over",
+          58.5,
+          57.5,
+          1.0,
+          0.5852929369173755,
+          "LOSS"
+        ],
+        [
+          2,
+          "Duke @ Illinois",
+          "Over",
+          51.5,
+          54.0,
+          -2.5,
+          0.5852296375806447,
+          "WIN"
+        ],
+        [
+          3,
+          "Troy @ Missouri",
+          "Over",
+          50.5,
+          50.5,
+          0.0,
+          0.5851771734672224,
+          "LOSS"
+        ],
+        [
+          2,
+          "Arizona @ BYU",
+          "Over",
+          48.5,
+          49.5,
+          -1.0,
+          0.5843502686521767,
+          "LOSS"
+        ],
+        [
+          3,
+          "Montana @ Oregon State",
+          "Over",
+          53.5,
+          53.5,
+          0.0,
+          0.5832311166322193,
+          "WIN"
+        ],
+        [
+          2,
+          "UNLV @ North Texas",
+          "Over",
+          58.5,
+          59.0,
+          -0.5,
+          0.5829030481279068,
+          "LOSS"
+        ],
+        [
+          2,
+          "Tulsa @ Sam Houston",
+          "Over",
+          51.5,
+          52.5,
+          -1.0,
+          0.5810770350477545,
+          "LOSS"
+        ],
+        [
+          2,
+          "Arizona State @ Texas A&M",
+          "Over",
+          50.5,
+          51.5,
+          -1.0,
+          0.5779744081227967,
+          "WIN"
+        ],
+        [
+          3,
+          "Nicholls @ Sam Houston",
+          "Over",
+          49.5,
+          49.5,
+          0.0,
+          0.5764523636790057,
+          "WIN"
+        ],
+        [
+          1,
+          "Eastern Kentucky @ Jacksonville State",
+          "Over",
+          53.5,
+          54.5,
+          -1.0,
+          0.5750056526744183,
+          "WIN"
+        ]
+      ]
+    }
+  ]
+}

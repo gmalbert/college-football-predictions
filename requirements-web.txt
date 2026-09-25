@@ -1,0 +1,30 @@
+# Local development: everything needed to run both front ends and the full test
+# suite, including the parity harness.
+#
+#     python -m pip install -r requirements-web.txt
+#     python -m playwright install chromium
+#
+# The three requirement files exist because the two deployments need different
+# things:
+#
+#     requirements.txt      the Streamlit app (Streamlit Cloud)
+#     requirements-api.txt  the FastAPI backend only — no streamlit at all
+#     requirements-web.txt  this file: both, plus the test tooling
+#
+# The parity harness compares the React build against a live Streamlit server,
+# so it needs streamlit installed. The API itself does not: utils/config.py
+# imports streamlit lazily, and scripts/check_api_isolated.py proves the whole
+# API runs in a venv that has no streamlit at all.
+
+-r requirements.txt
+-r requirements-api.txt
+
+# --- Tests ------------------------------------------------------------------
+pytest>=8.0.0
+playwright>=1.45.0
+httpx>=0.27.0
+# Parses render.yaml so a malformed blueprint fails in tests, not on deploy.
+PyYAML>=6.0
+
+# After installing, fetch the browser used by the Playwright suites:
+#     python -m playwright install chromium

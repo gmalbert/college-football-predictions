@@ -1,0 +1,656 @@
+{
+  "page_file": "pages/4_Historical_Analysis.py",
+  "exceptions": [],
+  "titles": [
+    "📈 Historical Analysis"
+  ],
+  "subheaders": [
+    "Season Trends",
+    "Model ATS Win % by Conference",
+    "Head-to-Head Lookup",
+    "Conference Power",
+    "Average Scoring by Conference"
+  ],
+  "headers": [],
+  "metrics": [
+    {
+      "label": "Ohio State wins",
+      "value": "1",
+      "delta": ""
+    },
+    {
+      "label": "Michigan wins",
+      "value": "5",
+      "delta": ""
+    },
+    {
+      "label": "Games",
+      "value": "6",
+      "delta": ""
+    },
+    {
+      "label": "Season ATS",
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
+    },
+    {
+      "label": "Model Brier",
+      "value": "0.1631",
+      "delta": ""
+    }
+  ],
+  "captions": [],
+  "alerts": [],
+  "markdown": [
+    "<div style=\"text-align: center; padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 40px;\"> <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666; font-family: sans-serif;\"> Powered by <a href=\"https://www.betting-oracle.com\" target=\"_blank\" style=\"color: #3b82f6; text-decoration: none; font-weight: bold;\">Betting Oracle</a> </p> <p style=\"margin: 0 0 15px 0; font-size: 12px; color: #888; font-family: sans-serif;\"> Sports Prediction Analytics </p> <a href=\"https://www.betting-oracle.com\" target=\"_blank\"> <img src=\"https://raw.githubusercontent.com/gmalbert/betting-oracle/main/data_files/logo.png\" alt=\"Betting Oracle Logo\" style=\"height: 60px; width: auto; border: none;\"> </a> </div>"
+  ],
+  "expanders": [],
+  "dataframes": [
+    {
+      "columns": [
+        "Conference",
+        "ATS Win %",
+        "Bets"
+      ],
+      "rows": [
+        [
+          "OVC",
+          66.7,
+          9
+        ],
+        [
+          "SWAC",
+          55.6,
+          169
+        ],
+        [
+          "NEC",
+          55.1,
+          98
+        ],
+        [
+          "SEC",
+          54.6,
+          392
+        ],
+        [
+          "Sun Belt",
+          54.2,
+          275
+        ],
+        [
+          "Ivy",
+          54.2,
+          120
+        ],
+        [
+          "Patriot",
+          53.2,
+          124
+        ],
+        [
+          "UAC",
+          52.6,
+          137
+        ],
+        [
+          "ACC",
+          52.2,
+          364
+        ],
+        [
+          "Southern",
+          52.0,
+          148
+        ],
+        [
+          "Big Ten",
+          51.7,
+          408
+        ],
+        [
+          "Conference USA",
+          51.2,
+          207
+        ],
+        [
+          "CAA",
+          51.1,
+          231
+        ],
+        [
+          "FBS Independents",
+          50.8,
+          65
+        ],
+        [
+          "Big South-OVC",
+          50.4,
+          127
+        ],
+        [
+          "Mountain West",
+          49.6,
+          250
+        ],
+        [
+          "Mid-American",
+          49.4,
+          235
+        ],
+        [
+          "MVFC",
+          48.2,
+          199
+        ],
+        [
+          "Big 12",
+          47.8,
+          347
+        ],
+        [
+          "Pioneer",
+          45.3,
+          137
+        ],
+        [
+          "Pac-12",
+          45.1,
+          122
+        ],
+        [
+          "American Athletic",
+          44.9,
+          285
+        ],
+        [
+          "MEAC",
+          44.6,
+          74
+        ],
+        [
+          "Big Sky",
+          43.1,
+          209
+        ],
+        [
+          "Southland",
+          41.8,
+          122
+        ],
+        [
+          "Coastal Athletic",
+          38.5,
+          13
+        ],
+        [
+          "FCS Independents",
+          30.0,
+          20
+        ]
+      ]
+    },
+    {
+      "columns": [
+        "Season",
+        "Week",
+        "Site",
+        "Result",
+        "Spread"
+      ],
+      "rows": [
+        [
+          2026,
+          13,
+          "Home",
+          "—",
+          "—"
+        ],
+        [
+          2025,
+          14,
+          "Away",
+          "Ohio State 27–9 Michigan",
+          "+9.5"
+        ],
+        [
+          2024,
+          14,
+          "Home",
+          "Ohio State 10–13 Michigan",
+          "-20.0"
+        ],
+        [
+          2023,
+          13,
+          "Away",
+          "Ohio State 24–30 Michigan",
+          "-3.0"
+        ],
+        [
+          2022,
+          13,
+          "Home",
+          "Ohio State 23–45 Michigan",
+          "-9.0"
+        ],
+        [
+          2021,
+          13,
+          "Away",
+          "Ohio State 27–42 Michigan",
+          "+6.5"
+        ]
+      ]
+    },
+    {
+      "columns": [
+        "Conference",
+        "Avg Home Score",
+        "Avg Away Score"
+      ],
+      "rows": [
+        [
+          "Great Northwest",
+          38.8,
+          19.7
+        ],
+        [
+          "Atlantic Sun",
+          35.6,
+          28.8
+        ],
+        [
+          "SEC",
+          34.2,
+          20.5
+        ],
+        [
+          "Big 12",
+          33.3,
+          22.4
+        ],
+        [
+          "Wisconsin",
+          32.9,
+          24.1
+        ],
+        [
+          "Big Sky",
+          32.7,
+          25.4
+        ],
+        [
+          "Michigan",
+          32.7,
+          25.5
+        ],
+        [
+          "Commonwealth Coast",
+          32.4,
+          25.8
+        ],
+        [
+          "MVFC",
+          32.2,
+          22.3
+        ],
+        [
+          "Pac-12",
+          32.1,
+          24.9
+        ],
+        [
+          "American Athletic",
+          32.1,
+          25.3
+        ],
+        [
+          "Western Athletic",
+          32.1,
+          21.3
+        ],
+        [
+          "Minnesota",
+          31.9,
+          25.0
+        ],
+        [
+          "UAC",
+          31.8,
+          24.1
+        ],
+        [
+          "ACC",
+          31.5,
+          23.1
+        ],
+        [
+          "AWC",
+          31.3,
+          25.2
+        ],
+        [
+          "Ohio",
+          31.2,
+          26.3
+        ],
+        [
+          "CCIW",
+          31.2,
+          26.0
+        ],
+        [
+          "FBS Independents",
+          31.1,
+          22.5
+        ],
+        [
+          "Sun Belt",
+          31.1,
+          24.0
+        ],
+        [
+          "Big South",
+          31.0,
+          26.2
+        ],
+        [
+          "American Southwest",
+          30.9,
+          25.0
+        ],
+        [
+          "Gulf South",
+          30.7,
+          23.8
+        ],
+        [
+          "GLIAC",
+          30.5,
+          24.4
+        ],
+        [
+          "Conference USA",
+          30.3,
+          25.0
+        ],
+        [
+          "Great Lakes",
+          30.3,
+          27.9
+        ],
+        [
+          "Lone Star",
+          30.0,
+          25.7
+        ],
+        [
+          "Southland",
+          30.0,
+          23.7
+        ],
+        [
+          "Big Ten",
+          29.9,
+          19.7
+        ],
+        [
+          "Empire 8",
+          29.9,
+          22.0
+        ],
+        [
+          "MEAC",
+          29.6,
+          22.7
+        ],
+        [
+          "OVC",
+          29.6,
+          24.3
+        ],
+        [
+          "Mid America",
+          29.2,
+          25.4
+        ],
+        [
+          "Northwest",
+          29.2,
+          27.0
+        ],
+        [
+          "Great American",
+          29.2,
+          26.4
+        ],
+        [
+          "FCS Independents",
+          29.1,
+          18.5
+        ],
+        [
+          "NACC",
+          29.1,
+          27.4
+        ],
+        [
+          "SWAC",
+          29.1,
+          22.1
+        ],
+        [
+          "Rocky Mountain",
+          29.0,
+          27.7
+        ],
+        [
+          "Pioneer",
+          28.9,
+          22.7
+        ],
+        [
+          "Southern",
+          28.9,
+          23.8
+        ],
+        [
+          "Centennial",
+          28.7,
+          24.3
+        ],
+        [
+          "Mountain West",
+          28.7,
+          23.6
+        ],
+        [
+          "American Rivers",
+          28.7,
+          26.3
+        ],
+        [
+          "CAA",
+          28.5,
+          23.9
+        ],
+        [
+          "Mountain East",
+          28.5,
+          26.3
+        ],
+        [
+          "Mid-American",
+          28.3,
+          23.6
+        ],
+        [
+          "Northern Sun",
+          28.3,
+          25.1
+        ],
+        [
+          "North Coast",
+          28.2,
+          28.9
+        ],
+        [
+          "Old Dominion",
+          28.0,
+          24.6
+        ],
+        [
+          "Southern Athletic",
+          27.9,
+          24.7
+        ],
+        [
+          "Heartland",
+          27.9,
+          32.0
+        ],
+        [
+          "South Atlantic",
+          27.6,
+          22.8
+        ],
+        [
+          "Big South-OVC",
+          27.4,
+          23.3
+        ],
+        [
+          "Coastal Athletic",
+          27.4,
+          21.4
+        ],
+        [
+          "ECFC",
+          27.2,
+          28.6
+        ],
+        [
+          "Midwest",
+          27.2,
+          25.1
+        ],
+        [
+          "Ivy",
+          27.0,
+          22.3
+        ],
+        [
+          "Presidents'",
+          27.0,
+          25.5
+        ],
+        [
+          "NEWMAC",
+          26.8,
+          23.5
+        ],
+        [
+          "Landmark Conference",
+          26.5,
+          28.6
+        ],
+        [
+          "NEC",
+          26.5,
+          21.8
+        ],
+        [
+          "USA South",
+          26.3,
+          27.6
+        ],
+        [
+          "Patriot",
+          26.0,
+          25.0
+        ],
+        [
+          "Pennsylvania State Athletic",
+          26.0,
+          24.5
+        ],
+        [
+          "New Jersey",
+          25.8,
+          23.2
+        ],
+        [
+          "SIAC",
+          25.8,
+          25.3
+        ],
+        [
+          "MSCAC",
+          25.4,
+          24.1
+        ],
+        [
+          "Independent DII",
+          25.3,
+          34.3
+        ],
+        [
+          "Carolinas",
+          25.3,
+          27.2
+        ],
+        [
+          "Northeast 10",
+          25.0,
+          22.6
+        ],
+        [
+          "CIAA",
+          24.9,
+          22.3
+        ],
+        [
+          "Great Midwest Athletic",
+          24.7,
+          23.6
+        ],
+        [
+          "Liberty League",
+          24.6,
+          18.8
+        ],
+        [
+          "So. Cal.",
+          24.2,
+          22.1
+        ],
+        [
+          "Mid Atlantic",
+          23.8,
+          21.7
+        ],
+        [
+          "Southern Collegiate Athletic",
+          23.7,
+          29.0
+        ],
+        [
+          "Upper Midwest",
+          23.7,
+          27.2
+        ],
+        [
+          "Independent DIII",
+          23.2,
+          33.9
+        ],
+        [
+          "NESCAC",
+          23.0,
+          21.4
+        ]
+      ]
+    }
+  ]
+}
