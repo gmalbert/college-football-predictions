@@ -1,0 +1,86 @@
+# Render Blueprint — Tailgate Edge (FastAPI + React).
+#
+# Commit this file and point a Render Blueprint at the repo; Render creates the
+# service from it. Everything below is deliberate:
+#
+#   runtime: python
+#     Render's native Python runtime also ships node, npm, yarn and a full
+#     build toolchain on Debian 12 (see render.com/docs/native-runtimes), so the
+#     frontend is built in the same service. No Dockerfile required.
+#
+#   buildCommand
+#     Installs only requirements-api.txt. The API serves artifacts the weekly
+#     workflow publishes and never trains, infers or loads a model, so
+#     streamlit, scikit-learn, XGBoost and scipy are not installed — ~300 MB of
+#     dependencies instead of ~530 MB. Then it builds the SPA into
+#     frontend/dist, which FastAPI serves at the same origin (so there is no
+#     CORS to configure).
+#
+#   startCommand
+#     python -m api reads TAILGATE_* and PORT from the environment.
+#
+#   healthCheckPath
+#     /api/health is deliberately unauthenticated and cheap.
+#
+# After the first deploy, add the custom domain in the dashboard
+# (Settings → Custom Domains). Hobby includes 2 with automatic TLS. Also set
+# CFBD_API_KEY there — it is marked `sync: false` so it is never stored here.
+
+services:
+  - type: web
+    name: tailgate-edge
+    runtime: python
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    buildCommand: >-
+      pip install -r requirements-api.txt &&
+      npm ci --prefix frontend &&
+      npm run build --prefix frontend
+    startCommand: python -m api
+    envVars:
+      # Render injects PORT; TAILGATE_HOST must be 0.0.0.0 for it to be reachable.
+      - key: TAILGATE_HOST
+        value: 0.0.0.0
+      - key: TAILGATE_LOG_LEVEL
+        value: info
+      # Prime the artifact caches at boot so the first visitor does not pay the
+      # ~5 s cold path. Drop to "false" if the memory is ever tight.
+      - key: TAILGATE_WARM_CACHE
+        value: "true"
+      # Render reads this to pick the interpreter. 3.12 matches CI.
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      # Page 7 (Win Probability) calls the College Football Data API.
+      # Set the value in the Render dashboard, not in this file.
+      - key: CFBD_API_KEY
+        sync: false
+      # Main Menu > Docs on the deployed service exposes /docs by default.
+      # Uncomment to require a key on every /api/* route except /api/health.
+      # - key: TAILGATE_API_KEY
+      #   sync: false
+
+# ---------------------------------------------------------------------------
+# Notes
+#
+# Plan. `free` fits comfortably: the API holds ~300 MB of dependencies and
+# measures 249 MB resident (331 MB under uvicorn). Free instances spin down
+# after ~15 minutes idle, so the first visitor after a quiet spell waits for a
+# container boot plus the warm-up. Change `plan: starter` ($7/mo, same 512 MB
+# but always on) if that matters. The next tier up ($25/mo) is where the memory
+# ceiling actually rises.
+#
+# Branch. `main` is the eventual home. To trial the deploy before merging,
+# temporarily set `branch: coding/fastapi-react`.
+#
+# Redeploys. The weekly workflow commits refreshed artifacts to the branch it
+# runs on, and autoDeploy is on, so each pipeline run triggers a rebuild. That
+# is intended — the deployed data stays current — but it does mean a deploy per
+# pipeline run, not just per code change.
+#
+# Bandwidth. Hobby includes 5 GB/month. A cold page is ~200 KB plus the 4.7 MB
+# Plotly chunk, which is lazily loaded and then cached by the browser, so this
+# is only a concern under heavy first-visit traffic. Static assets are served
+# with Brotli/gzip automatically.
+# ---------------------------------------------------------------------------

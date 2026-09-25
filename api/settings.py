@@ -8,7 +8,9 @@ deployment can be configured without editing code.  All variables use the
 Variable                Default                     Meaning
 ======================  ==========================  ==========================
 ``TAILGATE_HOST``       ``127.0.0.1``               Bind address.
-``TAILGATE_PORT``       ``8000``                    Bind port.
+``TAILGATE_PORT``       ``8000`` / ``$PORT``        Bind port. Falls back to
+                                                    ``PORT``, which Render and
+                                                    most PaaS platforms inject.
 ``TAILGATE_WORKERS``    ``1``                       Uvicorn worker processes.
 ``TAILGATE_LOG_LEVEL``  ``warning``                 Uvicorn log level.
 ``TAILGATE_CORS_ORIGINS`` (empty)                   Comma-separated browser
@@ -152,9 +154,12 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     """Build ``Settings`` from a mapping (defaults to ``os.environ``)."""
     source = environ if env is None else env
     origins = _as_origins(source.get("TAILGATE_CORS_ORIGINS"))
+    # Render (and Heroku and most PaaS platforms) inject PORT and expect the
+    # process to bind it. TAILGATE_PORT wins when both are set.
+    port_source = source.get("TAILGATE_PORT") or source.get("PORT")
     return Settings(
         host=source.get("TAILGATE_HOST", "127.0.0.1").strip() or "127.0.0.1",
-        port=_as_int(source.get("TAILGATE_PORT"), 8000, minimum=1, maximum=65535),
+        port=_as_int(port_source, 8000, minimum=1, maximum=65535),
         workers=_as_int(source.get("TAILGATE_WORKERS"), 1, maximum=64),
         log_level=(source.get("TAILGATE_LOG_LEVEL", "warning").strip() or "warning"),
         cors_origins=origins,

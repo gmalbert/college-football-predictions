@@ -173,16 +173,58 @@ are not — the two freshness ages, `release_metadata` (reads
 `merge_live_checks` recomputes those at view time so the page never reports an
 age or a release id that was true only when the workflow last ran.
 
-### Where this can run
+### Where this runs: Render
 
-The backend is now a long-lived Python process holding ~300 MB of dependencies
-(pandas 68 MB, pyarrow 86 MB, plotly 52 MB, numpy 35 MB) plus ~8 MB of artifacts.
+`render.yaml` is the blueprint. Point a Render Blueprint at the repo and it
+creates the service; no Dockerfile is involved, because Render's native Python
+runtime also ships `node`, `npm` and a full build toolchain on Debian 12
+(render.com/docs/native-runtimes), so the frontend builds in the same service.
 
-| Platform | Backend? | Notes |
-|---|---|---|
-| **Render** | **Yes** | Fits the 512 MB free/$7 tiers with room to spare. Build: `pip install -r requirements-api.txt && npm ci --prefix frontend && npm run build --prefix frontend`. Start: `python -m api` with `TAILGATE_HOST=0.0.0.0`. |
-| Vercel | Marginal | The Python function limit is 500 MB uncompressed and this is now well under it — but functions are stateless, so the warm cache would not survive and every request would take the cold path. |
-| Cloudflare Pages | No | Workers are V8 isolates capped at 128 MB with no CPython or native extensions. |
+```
+runtime      python
+build        pip install -r requirements-api.txt
+             npm ci --prefix frontend
+             npm run build --prefix frontend
+start        python -m api
+health       /api/health
+plan         free
+```
+
+**Checklist to go live**
+
+1. Set `CFBD_API_KEY` in the Render dashboard (a blueprint variable marked
+   `sync: false` is intentionally *not* in the repo). Without it page 7 fails;
+   everything else works.
+2. Point the blueprint at the branch you want deployed. `render.yaml` says
+   `branch: main`; the parity work currently lives on `coding/fastapi-react`,
+   so either merge first or change that line to trial it.
+3. After the first deploy, add the custom domain in the dashboard. Hobby
+   includes 2 with automatic TLS and HTTP→HTTPS redirects.
+4. Nothing else. Same-origin serving means no CORS to configure, and
+   `data_files/` ships in the repo so there is no disk to mount.
+
+**What the deploy does, rehearsed locally**
+
+`scripts/check_render_deploy.py` runs the same steps in the deployment
+environment rather than the development one — builds a venv from
+`requirements-api.txt`, asserts streamlit/sklearn/xgboost/scipy are absent,
+builds the frontend the way the blueprint does, then starts `python -m api`
+with an injected `PORT` and smoke tests the result. 13/13 checks pass.
+
+`tests/test_render_blueprint.py` parses the blueprint and asserts its contract,
+including that the health check path is one the app actually serves and that the
+build command installs the API-only requirements.
+
+**Two things to expect**
+
+*Free instances spin down.* After ~15 minutes idle the first visitor waits for a
+container boot plus the warm-up. `plan: starter` ($7/mo, same 512 MB but always
+on) removes that; the memory ceiling only rises at $25/mo.
+
+*The pipeline triggers redeploys.* The weekly workflow commits refreshed
+artifacts to the branch it runs on and `autoDeploy` is on, so each pipeline run
+rebuilds. That is intended — the deployed data stays current — but it is a
+deploy per pipeline run, not per code change.
 
 ---
 
