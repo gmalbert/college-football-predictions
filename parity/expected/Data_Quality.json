@@ -9,12 +9,12 @@
   "metrics": [
     {
       "label": "Passing",
-      "value": "10",
+      "value": "12",
       "delta": ""
     },
     {
       "label": "Warnings",
-      "value": "6",
+      "value": "4",
       "delta": ""
     },
     {
@@ -24,18 +24,18 @@
     },
     {
       "label": "Season ATS",
-      "value": "1659‑1693",
-      "delta": "49.5% win rate"
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
     },
     {
       "label": "Model Brier",
-      "value": "0.1632",
+      "value": "0.1631",
       "delta": ""
     }
   ],
   "captions": [
     "Release-contract checks for grain, point-in-time safety, freshness, and evaluation scope.",
-    "Release 1f5d8ecc15b2 · SHADOW · generated 2026-09-12T20:08:29.582591+00:00"
+    "Release 991c44c52635 · SHADOW · generated 2026-09-25T20:06:19.080673+00:00"
   ],
   "alerts": [
     {
@@ -60,24 +60,24 @@
           "✅ Pass",
           "games_contract",
           "Contract passed",
-          "21197"
+          "21196"
         ],
         [
           "✅ Pass",
           "feature_matrix_contract",
           "Contract passed",
-          "21197"
+          "21196"
         ],
         [
           "✅ Pass",
           "team_game_stats_contract",
           "Contract passed",
-          "15136"
+          "15656"
         ],
         [
           "✅ Pass",
           "feature_game_coverage",
-          "Feature artifact covers 21,197 of 21,197 unique games",
+          "Feature artifact covers 21,196 of 21,196 unique games",
           "1.0"
         ],
         [
@@ -96,7 +96,7 @@
           "✅ Pass",
           "release_metadata",
           "Release metadata is present",
-          "1f5d8ecc15b24ab2b756656be1010f37"
+          "991c44c526354dfe8e2e5d073a88e148"
         ],
         [
           "⚠️ Warning",
@@ -107,8 +107,8 @@
         [
           "✅ Pass",
           "market_snapshot_history",
-          "Timestamped market history contains 66,227 quotes; movement and CLV require forward collection",
-          "66227"
+          "Timestamped market history contains 200,589 quotes; movement and CLV require forward collection",
+          "200589"
         ],
         [
           "⚠️ Warning",
@@ -131,8 +131,8 @@
         [
           "✅ Pass",
           "oos_prediction_artifact",
-          "OOS artifact has 21,197 rows and 0 duplicate games",
-          "21197"
+          "OOS artifact has 21,196 rows and 0 duplicate games",
+          "21196"
         ],
         [
           "✅ Pass",
@@ -141,16 +141,16 @@
           "4"
         ],
         [
-          "⚠️ Warning",
+          "✅ Pass",
           "best_bets_freshness",
-          "Best-bets export age is 260.8 hours",
-          "260.7539070172222"
+          "Best-bets export age is 0.5 hours",
+          "0.4506794675"
         ],
         [
-          "⚠️ Warning",
+          "✅ Pass",
           "shadow_total_freshness",
-          "Shadow-total export age is 265.0 hours",
-          "265.01373938833336"
+          "Shadow-total export age is 0.5 hours",
+          "0.4604011913888889"
         ]
       ]
     }

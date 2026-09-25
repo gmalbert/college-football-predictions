@@ -197,9 +197,23 @@ def test_data_quality_summary_counts() -> None:
     assert payload["table"]["columns"] == ["Status", "Check", "Details", "Value"]
 
 
-def test_total_market_signals_is_hold() -> None:
+def test_total_market_signals_reports_its_release_status() -> None:
+    """The page warns in shadow deployment and errors when the strategy is held.
+
+    Which one it is depends on the model artifacts, not on this code, so the
+    assertion is about the contract — exactly one channel is used, with the
+    matching message — rather than about whichever state the data happens to be
+    in today.
+    """
     payload = client.get("/api/total-market-signals").json()
-    assert payload["errors"] == ["The total-side strategy is on hold."]
+    warnings = payload.get("warnings") or []
+    errors = payload.get("errors") or []
+
+    assert bool(warnings) != bool(errors), "exactly one of warnings/errors should be raised"
+    if errors:
+        assert errors == ["The total-side strategy is on hold."]
+    else:
+        assert "Shadow deployment only" in warnings[0], warnings
     assert payload["metrics"][0]["label"] == "OOS Brier"
 
 

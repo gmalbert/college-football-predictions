@@ -30,12 +30,12 @@
     },
     {
       "label": "Season ATS",
-      "value": "1659‑1693",
-      "delta": "49.5% win rate"
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
     },
     {
       "label": "Model Brier",
-      "value": "0.1632",
+      "value": "0.1631",
       "delta": ""
     }
   ],
@@ -54,129 +54,139 @@
       ],
       "rows": [
         [
-          "SEC",
-          55.2,
-          355
-        ],
-        [
-          "Patriot",
-          53.7,
-          108
+          "OVC",
+          66.7,
+          9
         ],
         [
           "SWAC",
-          53.1,
-          160
-        ],
-        [
-          "Conference USA",
-          52.9,
-          191
-        ],
-        [
-          "CAA",
-          52.8,
-          231
+          55.6,
+          169
         ],
         [
           "NEC",
-          52.7,
-          93
+          55.1,
+          98
         ],
         [
-          "Southern",
-          51.9,
-          131
+          "SEC",
+          54.6,
+          392
         ],
         [
           "Sun Belt",
-          50.8,
-          256
-        ],
-        [
-          "MEAC",
-          50.7,
-          69
+          54.2,
+          275
         ],
         [
           "Ivy",
-          50.4,
-          119
+          54.2,
+          120
         ],
         [
-          "ACC",
-          49.8,
-          331
-        ],
-        [
-          "Big Ten",
-          48.8,
-          365
-        ],
-        [
-          "Big 12",
-          48.4,
-          312
-        ],
-        [
-          "FBS Independents",
-          48.3,
-          60
-        ],
-        [
-          "Mountain West",
-          48.3,
-          234
-        ],
-        [
-          "UAC",
-          47.6,
+          "Patriot",
+          53.2,
           124
         ],
         [
-          "MVFC",
-          47.0,
-          183
+          "UAC",
+          52.6,
+          137
         ],
         [
-          "Pioneer",
-          47.0,
-          132
+          "ACC",
+          52.2,
+          364
+        ],
+        [
+          "Southern",
+          52.0,
+          148
+        ],
+        [
+          "Big Ten",
+          51.7,
+          408
+        ],
+        [
+          "Conference USA",
+          51.2,
+          207
+        ],
+        [
+          "CAA",
+          51.1,
+          231
+        ],
+        [
+          "FBS Independents",
+          50.8,
+          65
         ],
         [
           "Big South-OVC",
-          46.5,
+          50.4,
           127
         ],
         [
+          "Mountain West",
+          49.6,
+          250
+        ],
+        [
           "Mid-American",
-          46.3,
-          218
+          49.4,
+          235
+        ],
+        [
+          "MVFC",
+          48.2,
+          199
+        ],
+        [
+          "Big 12",
+          47.8,
+          347
+        ],
+        [
+          "Pioneer",
+          45.3,
+          137
         ],
         [
           "Pac-12",
-          46.3,
-          108
+          45.1,
+          122
         ],
         [
           "American Athletic",
-          45.3,
-          265
+          44.9,
+          285
+        ],
+        [
+          "MEAC",
+          44.6,
+          74
         ],
         [
           "Big Sky",
-          44.1,
-          186
+          43.1,
+          209
         ],
         [
           "Southland",
-          43.4,
-          113
+          41.8,
+          122
+        ],
+        [
+          "Coastal Athletic",
+          38.5,
+          13
         ],
         [
           "FCS Independents",
-          36.8,
-          19
+          30.0,
+          20
         ]
       ]
     },
@@ -252,38 +262,48 @@
         ],
         [
           "SEC",
-          34.1,
+          34.2,
           20.5
         ],
         [
-          "Michigan",
-          32.9,
-          25.5
-        ],
-        [
           "Big 12",
-          32.9,
-          22.7
-        ],
-        [
-          "Big Sky",
-          32.6,
-          25.4
+          33.3,
+          22.4
         ],
         [
           "Wisconsin",
-          32.6,
-          24.4
+          32.9,
+          24.1
+        ],
+        [
+          "Big Sky",
+          32.7,
+          25.4
+        ],
+        [
+          "Michigan",
+          32.7,
+          25.5
         ],
         [
           "Commonwealth Coast",
           32.4,
-          25.1
+          25.8
+        ],
+        [
+          "MVFC",
+          32.2,
+          22.3
+        ],
+        [
+          "Pac-12",
+          32.1,
+          24.9
         ],
         [
           "American Athletic",
           32.1,
-          25.4
+          25.3
         ],
         [
           "Western Athletic",
@@ -291,24 +311,19 @@
           21.3
         ],
         [
-          "Pac-12",
+          "Minnesota",
           31.9,
-          24.9
-        ],
-        [
-          "MVFC",
-          31.8,
-          22.5
+          25.0
         ],
         [
           "UAC",
           31.8,
-          24.2
+          24.1
         ],
         [
-          "Minnesota",
+          "ACC",
           31.5,
-          25.4
+          23.1
         ],
         [
           "AWC",
@@ -316,24 +331,24 @@
           25.2
         ],
         [
-          "ACC",
-          31.3,
-          23.4
+          "Ohio",
+          31.2,
+          26.3
         ],
         [
           "CCIW",
-          31.3,
+          31.2,
           26.0
         ],
         [
           "FBS Independents",
           31.1,
-          22.6
+          22.5
         ],
         [
-          "Ohio",
-          31.0,
-          26.5
+          "Sun Belt",
+          31.1,
+          24.0
         ],
         [
           "Big South",
@@ -341,118 +356,118 @@
           26.2
         ],
         [
-          "Sun Belt",
+          "American Southwest",
           30.9,
-          24.0
+          25.0
         ],
         [
           "Gulf South",
-          30.8,
+          30.7,
           23.8
         ],
         [
-          "American Southwest",
-          30.7,
-          25.1
-        ],
-        [
           "GLIAC",
-          30.4,
+          30.5,
           24.4
         ],
         [
           "Conference USA",
           30.3,
-          25.2
+          25.0
         ],
         [
           "Great Lakes",
-          30.2,
-          27.8
-        ],
-        [
-          "Southland",
-          29.8,
-          23.9
+          30.3,
+          27.9
         ],
         [
           "Lone Star",
-          29.7,
-          25.5
+          30.0,
+          25.7
         ],
         [
-          "Northwest",
-          29.6,
-          26.9
-        ],
-        [
-          "Empire 8",
-          29.5,
-          22.4
+          "Southland",
+          30.0,
+          23.7
         ],
         [
           "Big Ten",
-          29.4,
-          19.9
+          29.9,
+          19.7
         ],
         [
-          "NACC",
-          29.3,
-          27.4
+          "Empire 8",
+          29.9,
+          22.0
         ],
         [
           "MEAC",
-          29.2,
-          23.1
+          29.6,
+          22.7
         ],
         [
-          "Great American",
-          29.1,
-          26.3
+          "OVC",
+          29.6,
+          24.3
         ],
         [
           "Mid America",
+          29.2,
+          25.4
+        ],
+        [
+          "Northwest",
+          29.2,
+          27.0
+        ],
+        [
+          "Great American",
+          29.2,
+          26.4
+        ],
+        [
+          "FCS Independents",
           29.1,
-          25.7
+          18.5
+        ],
+        [
+          "NACC",
+          29.1,
+          27.4
+        ],
+        [
+          "SWAC",
+          29.1,
+          22.1
         ],
         [
           "Rocky Mountain",
           29.0,
-          27.8
+          27.7
+        ],
+        [
+          "Pioneer",
+          28.9,
+          22.7
         ],
         [
           "Southern",
           28.9,
-          24.0
+          23.8
         ],
         [
-          "American Rivers",
-          28.9,
-          26.3
-        ],
-        [
-          "SWAC",
-          28.9,
-          22.1
-        ],
-        [
-          "Pioneer",
+          "Centennial",
           28.7,
-          22.9
+          24.3
         ],
         [
           "Mountain West",
           28.7,
-          23.7
+          23.6
         ],
         [
-          "Centennial",
-          28.6,
-          24.0
-        ],
-        [
-          "Mountain East",
-          28.6,
+          "American Rivers",
+          28.7,
           26.3
         ],
         [
@@ -461,54 +476,44 @@
           23.9
         ],
         [
-          "OVC",
+          "Mountain East",
           28.5,
-          25.0
+          26.3
+        ],
+        [
+          "Mid-American",
+          28.3,
+          23.6
+        ],
+        [
+          "Northern Sun",
+          28.3,
+          25.1
         ],
         [
           "North Coast",
           28.2,
-          29.1
-        ],
-        [
-          "Northern Sun",
-          28.2,
-          25.4
-        ],
-        [
-          "Southern Athletic",
-          28.2,
-          25.0
-        ],
-        [
-          "Heartland",
-          28.1,
-          31.7
-        ],
-        [
-          "Mid-American",
-          28.0,
-          23.8
-        ],
-        [
-          "South Atlantic",
-          28.0,
-          22.8
+          28.9
         ],
         [
           "Old Dominion",
-          27.8,
-          24.8
+          28.0,
+          24.6
         ],
         [
-          "Midwest",
-          27.5,
-          25.0
+          "Southern Athletic",
+          27.9,
+          24.7
         ],
         [
-          "FCS Independents",
-          27.4,
-          18.9
+          "Heartland",
+          27.9,
+          32.0
+        ],
+        [
+          "South Atlantic",
+          27.6,
+          22.8
         ],
         [
           "Big South-OVC",
@@ -516,14 +521,19 @@
           23.3
         ],
         [
+          "Coastal Athletic",
+          27.4,
+          21.4
+        ],
+        [
           "ECFC",
           27.2,
           28.6
         ],
         [
-          "Presidents'",
-          27.0,
-          25.5
+          "Midwest",
+          27.2,
+          25.1
         ],
         [
           "Ivy",
@@ -531,49 +541,54 @@
           22.3
         ],
         [
-          "Landmark Conference",
-          26.9,
-          28.7
-        ],
-        [
-          "NEC",
-          26.6,
-          21.8
+          "Presidents'",
+          27.0,
+          25.5
         ],
         [
           "NEWMAC",
+          26.8,
+          23.5
+        ],
+        [
+          "Landmark Conference",
           26.5,
-          24.0
+          28.6
         ],
         [
-          "Coastal Athletic",
-          26.1,
-          14.9
-        ],
-        [
-          "Patriot",
-          26.1,
-          25.1
+          "NEC",
+          26.5,
+          21.8
         ],
         [
           "USA South",
-          26.1,
+          26.3,
           27.6
         ],
         [
-          "SIAC",
+          "Patriot",
           26.0,
           25.0
         ],
         [
           "Pennsylvania State Athletic",
           26.0,
-          24.3
+          24.5
         ],
         [
           "New Jersey",
+          25.8,
+          23.2
+        ],
+        [
+          "SIAC",
+          25.8,
+          25.3
+        ],
+        [
+          "MSCAC",
           25.4,
-          23.6
+          24.1
         ],
         [
           "Independent DII",
@@ -581,54 +596,49 @@
           34.3
         ],
         [
-          "MSCAC",
-          25.2,
-          24.1
-        ],
-        [
-          "CIAA",
-          24.8,
-          22.3
+          "Carolinas",
+          25.3,
+          27.2
         ],
         [
           "Northeast 10",
-          24.8,
-          22.4
+          25.0,
+          22.6
         ],
         [
-          "Liberty League",
-          24.8,
-          18.7
+          "CIAA",
+          24.9,
+          22.3
         ],
         [
           "Great Midwest Athletic",
           24.7,
-          23.8
+          23.6
+        ],
+        [
+          "Liberty League",
+          24.6,
+          18.8
+        ],
+        [
+          "So. Cal.",
+          24.2,
+          22.1
         ],
         [
           "Mid Atlantic",
           23.8,
-          21.8
-        ],
-        [
-          "Upper Midwest",
-          23.8,
-          26.9
-        ],
-        [
-          "So. Cal.",
-          23.8,
-          22.0
+          21.7
         ],
         [
           "Southern Collegiate Athletic",
-          23.4,
+          23.7,
           29.0
         ],
         [
-          "Carolinas",
-          23.4,
-          27.8
+          "Upper Midwest",
+          23.7,
+          27.2
         ],
         [
           "Independent DIII",
@@ -637,7 +647,7 @@
         ],
         [
           "NESCAC",
-          22.9,
+          23.0,
           21.4
         ]
       ]

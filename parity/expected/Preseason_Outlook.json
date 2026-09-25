@@ -15,12 +15,12 @@
   "metrics": [
     {
       "label": "Season ATS",
-      "value": "1659‑1693",
-      "delta": "49.5% win rate"
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
     },
     {
       "label": "Model Brier",
-      "value": "0.1632",
+      "value": "0.1631",
       "delta": ""
     }
   ],

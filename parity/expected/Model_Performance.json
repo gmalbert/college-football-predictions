@@ -15,52 +15,52 @@
   "metrics": [
     {
       "label": "OOS Brier Score",
-      "value": "0.1632",
+      "value": "0.1631",
       "delta": ""
     },
     {
       "label": "OOS Spread RMSE",
-      "value": "17.90 pts",
+      "value": "18.05 pts",
       "delta": ""
     },
     {
       "label": "OOS Total RMSE",
-      "value": "16.70 pts",
+      "value": "16.67 pts",
       "delta": ""
     },
     {
       "label": "OOS ATS Win %",
-      "value": "49.5%",
+      "value": "50.5%",
       "delta": ""
     },
     {
       "label": "ATS Record",
-      "value": "1659‑1693",
+      "value": "1792‑1758",
       "delta": ""
     },
     {
       "label": "Win model samples",
-      "value": "11,812",
+      "value": "12,423",
       "delta": ""
     },
     {
       "label": "Spread model samples",
-      "value": "11,812",
+      "value": "12,423",
       "delta": ""
     },
     {
       "label": "Total model samples",
-      "value": "11,812",
+      "value": "12,423",
       "delta": ""
     },
     {
       "label": "Season ATS",
-      "value": "1659‑1693",
-      "delta": "49.5% win rate"
+      "value": "1792‑1758",
+      "delta": "50.5% win rate"
     },
     {
       "label": "Model Brier",
-      "value": "0.1632",
+      "value": "0.1631",
       "delta": ""
     }
   ],
@@ -95,23 +95,23 @@
       "rows": [
         [
           "Win probability (Brier)",
-          0.1708238650352512,
-          0.1708238650352512,
-          2634,
+          0.16748874943991657,
+          0.16748874943991657,
+          2836,
           false
         ],
         [
           "Home margin (RMSE)",
-          15.576937206231763,
-          15.27099073426196,
-          4734,
+          15.561577194641805,
+          15.261348797416021,
+          4966,
           false
         ],
         [
           "Game total (RMSE)",
-          15.78561364519625,
-          15.82085762704232,
-          4715,
+          15.736173244124132,
+          15.779306344043471,
+          4943,
           true
         ]
       ]
@@ -128,14 +128,14 @@
         [
           "out_of_sample_games",
           true,
-          11812.0,
+          12423.0,
           "500",
           "Require an adequately sized untouched walk-forward sample."
         ],
         [
           "brier",
           true,
-          0.16321633755591136,
+          0.16309429885355642,
           "0.25",
           "Probability quality must beat a coin-flip Brier score."
         ],
@@ -149,22 +149,22 @@
         [
           "calibration",
           true,
-          0.009719797949411193,
+          0.008335332128850773,
           "0.05",
           "Calibration error controls overconfident bet sizing."
         ],
         [
           "spread_market_baseline",
           false,
-          15.576937206231763,
-          "< market RMSE 15.27099073426196",
+          15.561577194641805,
+          "< market RMSE 15.261348797416021",
           "A spread model is not releasable when the market predicts margin better."
         ],
         [
           "total_market_baseline",
           true,
-          15.78561364519625,
-          "< market RMSE 15.82085762704232",
+          15.736173244124132,
+          "< market RMSE 15.779306344043471",
           "A total model is not releasable when the market predicts totals better."
         ],
         [
