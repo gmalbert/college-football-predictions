@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-25T12:09:48.192465+00:00",
+    "generated_at": "2026-09-25T15:10:26.520091+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -176,6 +176,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401864510,
+      "game_date": "2026-09-26",
+      "game_time": "2026-09-26T19:00:00+00:00",
+      "game": "Hawai'i @ Wyoming",
+      "home_team": "Wyoming",
+      "away_team": "Hawai'i",
+      "bet_type": "Total",
+      "pick": "Over 44.5",
+      "probability": 0.601673,
+      "edge": 4.2944,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 44.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401872618,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T17:00:00+00:00",
@@ -189,22 +205,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 46.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401864510,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T19:00:00+00:00",
-      "game": "Hawai'i @ Wyoming",
-      "home_team": "Wyoming",
-      "away_team": "Hawai'i",
-      "bet_type": "Total",
-      "pick": "Over 44.5",
-      "probability": 0.601401,
-      "edge": 4.2827,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 44.5,
       "league": "NCAAF"
     },
     {
@@ -880,22 +880,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858234,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T02:30:00+00:00",
-      "game": "Clemson @ California",
-      "home_team": "California",
-      "away_team": "Clemson",
-      "bet_type": "Total",
-      "pick": "Over 50.5",
-      "probability": 0.578912,
-      "edge": 3.3183,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 50.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856805,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T16:00:00+00:00",
@@ -941,6 +925,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 45.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858234,
+      "game_date": "2026-09-26",
+      "game_time": "2026-09-26T02:30:00+00:00",
+      "game": "Clemson @ California",
+      "home_team": "California",
+      "away_team": "Clemson",
+      "bet_type": "Total",
+      "pick": "Over 50.5",
+      "probability": 0.577782,
+      "edge": 3.2702,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 50.5,
       "league": "NCAAF"
     },
     {
@@ -1424,6 +1424,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401860897,
+      "game_date": "2026-09-26",
+      "game_time": "2026-09-26T19:30:00+00:00",
+      "game": "Boise State @ Western Michigan",
+      "home_team": "Western Michigan",
+      "away_team": "Boise State",
+      "bet_type": "Total",
+      "pick": "Over 49.5",
+      "probability": 0.566261,
+      "edge": 2.7809,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 49.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856813,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T16:00:00+00:00",
@@ -1501,22 +1517,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 50.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401860897,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T19:30:00+00:00",
-      "game": "Boise State @ Western Michigan",
-      "home_team": "Western Michigan",
-      "away_team": "Boise State",
-      "bet_type": "Total",
-      "pick": "Over 49.5",
-      "probability": 0.564555,
-      "edge": 2.7087,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 49.5,
       "league": "NCAAF"
     },
     {
@@ -1600,6 +1600,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401856702,
+      "game_date": "2026-09-26",
+      "game_time": "2026-09-26T23:30:00+00:00",
+      "game": "Texas A&M @ LSU",
+      "home_team": "LSU",
+      "away_team": "Texas A&M",
+      "bet_type": "Total",
+      "pick": "Over 51.5",
+      "probability": 0.560669,
+      "edge": 2.5443,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 51.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401858461,
       "game_date": "2026-09-26",
       "game_time": "2026-09-26T00:00:00+00:00",
@@ -1613,22 +1629,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 49.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401856702,
-      "game_date": "2026-09-26",
-      "game_time": "2026-09-26T23:30:00+00:00",
-      "game": "Texas A&M @ LSU",
-      "home_team": "LSU",
-      "away_team": "Texas A&M",
-      "bet_type": "Total",
-      "pick": "Over 51.5",
-      "probability": 0.560295,
-      "edge": 2.5285,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 51.5,
       "league": "NCAAF"
     },
     {

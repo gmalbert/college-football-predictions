@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-09-25T12:09:11.081249+00:00",
+    "generated_at": "2026-09-25T15:10:01.010710+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
     "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "e2f9cdcb7ab5461e94524627763f9f22",
+    "release_id": "89a256dbe03348e5901b4eec87e2e20e",
     "model_version": "2.2.0",
     "strategy_version": "total-over-v2.2-locked"
   },
