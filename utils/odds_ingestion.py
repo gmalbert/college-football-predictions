@@ -226,10 +226,13 @@ def build_market_consensus_from_snapshots(
 
     frame = snapshots.copy()
     frame["game_id"] = pd.to_numeric(frame["game_id"], errors="coerce")
-    frame = frame[frame["game_id"].isin(set(game_ids))].copy()
+    # Boolean masking already returns a new frame, and pandas copies on write, so
+    # the explicit .copy() calls that used to follow only forced extra full
+    # materialisations of a 200k-row frame.
+    frame = frame[frame["game_id"].isin(set(game_ids))]
     excluded = {str(source) for source in exclude_sources}
     if "source" in frame.columns and excluded:
-        frame = frame[~frame["source"].astype(str).isin(excluded)].copy()
+        frame = frame[~frame["source"].astype(str).isin(excluded)]
     if frame.empty:
         return pd.DataFrame()
 
@@ -246,46 +249,75 @@ def build_market_consensus_from_snapshots(
     current = ordered.drop_duplicates(quote_keys, keep="last")
     opening = ordered.drop_duplicates(quote_keys, keep="first")
 
-    def median_value(group: pd.DataFrame, market: str, side: str, column: str) -> float:
-        values = group.loc[
-            group["market"].eq(market) & group["side"].eq(side), column
-        ].dropna()
-        return float(values.median()) if not values.empty else np.nan
+    # Aggregate once per (game, market, side) instead of masking a frame for
+    # every game and every book.  ``market`` and ``side`` are Arrow-backed
+    # strings, so each ``.eq()`` boxes a Python object per row; the previous
+    # ~9,250 masks cost ~15s of a ~19s call, and the count grows with the
+    # retained snapshot history (200k quotes by late September).
+    line_key = ["game_id", "market", "side"]
+    current_stats = (
+        current.groupby(line_key, sort=False)["line"]
+        .agg(["median", "std", "count"])
+        .to_dict("index")
+    )
+    opening_stats = (
+        opening.groupby(line_key, sort=False)["line"]
+        .agg(["median", "std", "count"])
+        .to_dict("index")
+    )
+
+    # A book only contributes to the moneyline consensus when it quoted one, so
+    # index the moneyline rows rather than every book in the game.
+    book_moneyline = (
+        current.loc[current["market"].eq("moneyline")]
+        .groupby(["game_id", "sportsbook", "side"], sort=False)["odds"]
+        .median()
+        .to_dict()
+    )
+
+    def line_stat(stats: dict, game_id: int, market: str, side: str) -> dict | None:
+        return stats.get((game_id, market, side))
+
+    def line_median(stats: dict, game_id: int, market: str, side: str) -> float:
+        entry = line_stat(stats, game_id, market, side)
+        return float(entry["median"]) if entry is not None else np.nan
+
+    def _count_of(entry: dict | None) -> int:
+        return int(entry["count"]) if entry is not None else 0
+
+    def _std_of(entry: dict | None) -> float:
+        count = _count_of(entry)
+        return float(entry["std"]) if count > 1 else 0.0
 
     rows: list[dict] = []
     for game_id, group in current.groupby("game_id", sort=False):
-        first = opening[opening["game_id"].eq(game_id)]
-        home_spread = median_value(group, "spread", "home", "line")
-        open_spread = median_value(first, "spread", "home", "line")
-        total = median_value(group, "total", "over", "line")
+        home_spread = line_median(current_stats, game_id, "spread", "home")
+        open_spread = line_median(opening_stats, game_id, "spread", "home")
+        total = line_median(current_stats, game_id, "total", "over")
         if pd.isna(total):
-            total = median_value(group, "total", "under", "line")
-        open_total = median_value(first, "total", "over", "line")
+            total = line_median(current_stats, game_id, "total", "under")
+        open_total = line_median(opening_stats, game_id, "total", "over")
         if pd.isna(open_total):
-            open_total = median_value(first, "total", "under", "line")
+            open_total = line_median(opening_stats, game_id, "total", "under")
 
-        current_spreads = group.loc[
-            group["market"].eq("spread") & group["side"].eq("home"), "line"
-        ].dropna()
-        current_totals = group.loc[
-            group["market"].eq("total") & group["side"].eq("over"), "line"
-        ].dropna()
-        if current_totals.empty:
-            current_totals = group.loc[
-                group["market"].eq("total") & group["side"].eq("under"), "line"
-            ].dropna()
+        spreads = line_stat(current_stats, game_id, "spread", "home")
+        totals = line_stat(current_stats, game_id, "total", "over")
+        if _count_of(totals) == 0:
+            totals = line_stat(current_stats, game_id, "total", "under")
 
         home_moneylines: list[float] = []
         away_moneylines: list[float] = []
         market_home_probs: list[float] = []
-        for _, book in group.groupby("sportsbook", sort=False):
-            home_ml = median_value(book, "moneyline", "home", "odds")
-            away_ml = median_value(book, "moneyline", "away", "odds")
-            if pd.notna(home_ml):
-                home_moneylines.append(home_ml)
-            if pd.notna(away_ml):
-                away_moneylines.append(away_ml)
-            if pd.notna(home_ml) and pd.notna(away_ml) and home_ml != 0 and away_ml != 0:
+        for book in group["sportsbook"].unique():
+            home_ml = book_moneyline.get((game_id, book, "home"))
+            away_ml = book_moneyline.get((game_id, book, "away"))
+            home_priced = home_ml is not None and pd.notna(home_ml)
+            away_priced = away_ml is not None and pd.notna(away_ml)
+            if home_priced:
+                home_moneylines.append(float(home_ml))
+            if away_priced:
+                away_moneylines.append(float(away_ml))
+            if home_priced and away_priced and home_ml != 0 and away_ml != 0:
                 market_home_probs.append(float(remove_vig([home_ml, away_ml])[0]))
 
         rows.append(
@@ -294,12 +326,12 @@ def build_market_consensus_from_snapshots(
                 "season": int(season),
                 "market_spread": home_spread,
                 "market_spread_open": open_spread,
-                "market_spread_dispersion": float(current_spreads.std()) if len(current_spreads) > 1 else 0.0,
-                "market_spread_book_count": int(current_spreads.count()),
+                "market_spread_dispersion": _std_of(spreads),
+                "market_spread_book_count": _count_of(spreads),
                 "market_total": total,
                 "market_total_open": open_total,
-                "market_total_dispersion": float(current_totals.std()) if len(current_totals) > 1 else 0.0,
-                "market_total_book_count": int(current_totals.count()),
+                "market_total_dispersion": _std_of(totals),
+                "market_total_book_count": _count_of(totals),
                 "home_moneyline": float(np.median(home_moneylines)) if home_moneylines else np.nan,
                 "away_moneyline": float(np.median(away_moneylines)) if away_moneylines else np.nan,
                 "market_home_prob": float(np.median(market_home_probs)) if market_home_probs else np.nan,

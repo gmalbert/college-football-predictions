@@ -45,10 +45,14 @@ services:
         value: 0.0.0.0
       - key: TAILGATE_LOG_LEVEL
         value: info
-      # Prime the artifact caches at boot so the first visitor does not pay the
-      # ~5 s cold path. Drop to "false" if the memory is ever tight.
+      # Off, deliberately. Free instances spin down, so most visitors arrive to a
+      # cold process anyway — and on a 0.1-CPU instance the warm-up thread
+      # competes with that visitor's first request instead of helping it
+      # (measured: 1.13s for the first request with warm-up running against 0.68s
+      # without). It also holds every page's frames resident from boot. Set this
+      # to "true" if the service is moved to an always-on paid instance.
       - key: TAILGATE_WARM_CACHE
-        value: "true"
+        value: "false"
       # Render reads this to pick the interpreter. 3.12 matches CI.
       - key: PYTHON_VERSION
         value: "3.12.7"
