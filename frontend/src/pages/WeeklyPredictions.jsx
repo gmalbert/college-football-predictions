@@ -18,7 +18,12 @@ import {
 import { weeklyParams } from "../api";
 import { useApi } from "../useApi";
 
-const SORT_OPTIONS = ["Edge (High→Low)", "Win Prob", "Game"];
+const SORT_OPTIONS = [
+  "Edge (High→Low)",
+  "Win Prob",
+  "Matchup (A–Z)",
+  "Kickoff (earliest first)",
+];
 
 export default function WeeklyPredictions() {
   const [season, setSeason] = useState(null);

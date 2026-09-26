@@ -438,10 +438,25 @@ def build_weekly(
         df_week["edge"] = df_week[edge_columns].max(axis=1, skipna=True)
         if min_edge > 0:
             df_week = df_week[df_week["edge"] >= min_edge]
-        if sort_by == "Edge (High→Low)":
-            df_week = df_week.sort_values("edge", ascending=False)
-        elif sort_by == "Win Prob":
-            df_week = df_week.sort_values("win_prob", ascending=False)
+
+    if sort_by == "Edge (High→Low)" and "edge" in df_week.columns:
+        df_week = df_week.sort_values("edge", ascending=False, kind="mergesort")
+    elif sort_by == "Win Prob" and "win_prob" in df_week.columns:
+        df_week = df_week.sort_values("win_prob", ascending=False, kind="mergesort")
+    elif sort_by == "Matchup (A–Z)":
+        df_week = df_week.assign(
+            _matchup_sort=(
+                df_week["away_team"].fillna("").astype(str)
+                + " @ "
+                + df_week["home_team"].fillna("").astype(str)
+            ).str.casefold()
+        ).sort_values("_matchup_sort", kind="mergesort").drop(columns="_matchup_sort")
+    elif sort_by == "Kickoff (earliest first)" and "start_date" in df_week.columns:
+        df_week = df_week.assign(
+            _kickoff_sort=pd.to_datetime(df_week["start_date"], utc=True, errors="coerce")
+        ).sort_values(
+            "_kickoff_sort", na_position="last", kind="mergesort"
+        ).drop(columns="_kickoff_sort")
 
     game_count_line = f"**{len(df_week)} games** — Season {season} · Week {int(week)}"
     captions: list[str] = []
