@@ -41,3 +41,7 @@ parity/benchmark_report.json
 parity/statistics.json
 parity/diffs/
 parity/*.log
+
+# Local development launchers
+start-local.ps1
+start-local.cmd

@@ -474,6 +474,53 @@ table.df tbody tr:nth-child(even) td {
   padding: 0.5rem;
 }
 
+.table-downloads {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.table-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.table-section-heading h3 {
+  margin: 0;
+}
+
+.table-downloads button {
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.table-downloads button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.table-downloads button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .table-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .progress-cell {
   display: flex;
   align-items: center;
