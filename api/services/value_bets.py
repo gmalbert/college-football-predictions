@@ -8,6 +8,7 @@ from api.charts import figure_json
 from api.columns import FEATURE_MATRIX_COLUMNS
 from api.data import parquet
 from api.jsonutil import records
+from api.services.common import resolve_timezone
 from utils.betting import (
     CONFIDENCE_LABEL,
     Confidence,
@@ -139,9 +140,12 @@ def _bankroll_chart(
 
 def build_value_bets(
     season: int | None = None,
+    week: int | None = None,
     bet_type: str = "Spread",
     min_edge: float = 2.0,
     min_conf: str = "MODERATE",
+    sort_by: str = "Edge (High→Low)",
+    timezone_name: str | None = None,
     start_bankroll: float = 1000,
     stake_method: str = "Flat (1%)",
     bet_odds: float = -110,
@@ -178,10 +182,25 @@ def build_value_bets(
         season = int(seasons[0])
 
     df_season = df_all[df_all["season"] == season].copy()
-    df_season = predict_for_display(df_season)
+    weeks = sorted(int(value) for value in df_season["week"].dropna().unique())
+    now = pd.Timestamp.now(tz="UTC")
+    starts = pd.to_datetime(df_season["start_date"], utc=True, errors="coerce")
+    past_weeks = sorted(
+        int(value)
+        for value in df_season.loc[starts <= now, "week"].dropna().unique()
+    )
+    default_week = past_weeks[-1] if past_weeks else weeks[0] if weeks else 1
+    week = default_week if week is None else int(week)
+    if week not in weeks:
+        week = default_week
+
+    df_week = df_season[df_season["week"] == week].copy()
+    df_week = predict_for_display(df_week)
+    browser_tz, browser_tz_name = resolve_timezone(timezone_name)
+    kickoff_column = f"Kickoff ({browser_tz_name})"
 
     captions: list[str] = []
-    if "walk_forward_oos" in set(df_season["prediction_scope"].dropna()):
+    if "walk_forward_oos" in set(df_week["prediction_scope"].dropna()):
         captions.append(
             "Settled games use season walk-forward predictions; "
             "unplayed games use the current full-history model."
@@ -190,7 +209,7 @@ def build_value_bets(
     min_conf_enum = CONF_ORDER.get(min_conf)
 
     recs = []
-    for _, row in df_season.iterrows():
+    for _, row in df_week.iterrows():
         home = row.get("home_team", "")
         away = row.get("away_team", "")
         gid = row.get("game_id")
@@ -201,6 +220,21 @@ def build_value_bets(
         wp = row.get("win_prob", 0.5)
         actual_margin = row.get("home_margin")
         actual_total = row.get("total_points")
+        start_date = pd.to_datetime(row.get("start_date"), utc=True, errors="coerce")
+        kickoff = (
+            start_date.tz_convert(browser_tz)
+            if pd.notna(start_date)
+            else pd.NaT
+        )
+        kickoff_text = (
+            f"{kickoff.strftime('%b')} {kickoff.day} · {kickoff.strftime('%I:%M %p')}"
+            if pd.notna(kickoff)
+            else "—"
+        )
+        sort_fields = {
+            "_win_prob": float(wp) if pd.notna(wp) else float("nan"),
+            "_start_date": start_date,
+        }
 
         if bet_type in ("Spread", "All") and pd.notna(ms) and pd.notna(bs):
             rec = generate_spread_pick(home, away, ms, bs, game_id=gid)
@@ -211,6 +245,7 @@ def build_value_bets(
                     {
                         "Week": int(row.get("week", 0)),
                         "Game": f"{away} @ {home}",
+                        kickoff_column: kickoff_text,
                         "Bet Type": "Spread",
                         "Model": f"{ms:+.1f}",
                         "Book": f"{bs:+.1f}",
@@ -222,6 +257,7 @@ def build_value_bets(
                             if pd.notna(actual_margin) else "—"
                         ),
                         "_conf_val": rec.confidence,
+                        **sort_fields,
                     }
                 )
 
@@ -234,6 +270,7 @@ def build_value_bets(
                     {
                         "Week": int(row.get("week", 0)),
                         "Game": f"{away} @ {home}",
+                        kickoff_column: kickoff_text,
                         "Bet Type": "Total",
                         "Model": f"{mt:.1f}",
                         "Book": f"{bt:.1f}",
@@ -245,6 +282,7 @@ def build_value_bets(
                             if pd.notna(actual_total) else "—"
                         ),
                         "_conf_val": rec.confidence,
+                        **sort_fields,
                     }
                 )
 
@@ -260,6 +298,7 @@ def build_value_bets(
                         {
                             "Week": int(row.get("week", 0)),
                             "Game": f"{away} @ {home}",
+                            kickoff_column: kickoff_text,
                             "Bet Type": "Moneyline",
                             "Model": f"{wp:.1%}",
                             "Book": f"{int(hml):+d} / {int(aml):+d}",
@@ -271,17 +310,22 @@ def build_value_bets(
                                 if pd.notna(actual_margin) else "—"
                             ),
                             "_conf_val": rec.confidence,
+                            **sort_fields,
                         }
                     )
 
     controls = {
         "seasons": [int(value) for value in seasons],
         "season": season,
+        "weeks": weeks,
+        "week": week,
+        "default_week": default_week,
         "bet_types": ["Spread", "Total", "Moneyline", "All"],
         "bet_type": bet_type,
         "min_edge": min_edge,
         "min_conf_options": ["All", "LEAN", "MODERATE", "STRONG"],
         "min_conf": min_conf,
+        "sort_by": sort_by,
         "stake_methods": ["Flat (1%)", "Half Kelly", "Full Kelly"],
         "stake_method": stake_method,
         "start_bankroll": start_bankroll,
@@ -299,13 +343,28 @@ def build_value_bets(
             "stopped": True,
         }
 
-    df_recs = pd.DataFrame(recs).sort_values(["Edge"], ascending=False)
+    df_recs = pd.DataFrame(recs)
+    if sort_by == "Edge (High→Low)":
+        df_recs = df_recs.sort_values("Edge", ascending=False, kind="mergesort")
+    elif sort_by == "Win Prob":
+        df_recs = df_recs.sort_values("_win_prob", ascending=False, kind="mergesort")
+    elif sort_by == "Matchup (A–Z)":
+        df_recs = df_recs.assign(
+            _matchup_sort=df_recs["Game"].str.casefold()
+        ).sort_values("_matchup_sort", kind="mergesort").drop(columns="_matchup_sort")
+    elif sort_by == "Kickoff (earliest first)":
+        df_recs = df_recs.sort_values(
+            "_start_date", na_position="last", kind="mergesort"
+        )
 
     wins = int((df_recs["Result"] == "✅ WIN").sum())
     losses = int((df_recs["Result"] == "❌ LOSS").sum())
     total = wins + losses
 
-    display_cols = ["Week", "Game", "Bet Type", "Model", "Book", "Edge", "Edge Tier", "Pick", "Result"]
+    display_cols = [
+        "Week", "Game", kickoff_column, "Bet Type", "Model", "Book", "Edge",
+        "Edge Tier", "Pick", "Result",
+    ]
     table = df_recs[display_cols].reset_index(drop=True)
 
     chart = _bankroll_chart(

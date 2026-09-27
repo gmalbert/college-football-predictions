@@ -361,16 +361,20 @@ def api_weekly(
 @app.get("/api/value-bets")
 def api_value_bets(
     season: int | None = None,
+    week: int | None = None,
     bet_type: str = "Spread",
     min_edge: float = 2.0,
     min_conf: str = "MODERATE",
+    sort_by: str = "Edge (High→Low)",
+    tz: str | None = Query(default=None, description="IANA browser timezone"),
     start_bankroll: float = 1000,
     stake_method: str = "Flat (1%)",
     bet_odds: float = -110,
     scenario_probability: float = 0.50,
 ) -> dict:
     return value_bets.build_value_bets(
-        season=season, bet_type=bet_type, min_edge=min_edge, min_conf=min_conf,
+        season=season, week=week, bet_type=bet_type, min_edge=min_edge, min_conf=min_conf,
+        sort_by=sort_by, timezone_name=tz,
         start_bankroll=start_bankroll, stake_method=stake_method,
         bet_odds=bet_odds, scenario_probability=scenario_probability,
     )

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
 import PageState from "../components/PageState";
+import TableDownloads from "../components/TableDownloads";
 import {
   Alert,
   Caption,
@@ -125,6 +126,12 @@ export default function WeeklyPredictions() {
                   ) : null}
 
                   <Caption>{data.table_caption}</Caption>
+                  <TableDownloads
+                    table={data.table}
+                    title="Weekly Predictions"
+                    subtitle={`${data.selection.season} · Week ${data.selection.week} · ${data.selection.conference} · ${data.selection.sort_by}`}
+                    filename={`weekly-predictions-${data.selection.season}-week-${data.selection.week}`}
+                  />
                   <DataFrame table={data.table} height={data.table_height} />
                 </>
               )}
