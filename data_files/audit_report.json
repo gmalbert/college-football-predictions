@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-25T20:33:23.559477+00:00",
+  "generated_at": "2026-09-29T11:52:00.377595+00:00",
   "summary": {
     "pass": 12,
     "warn": 4,
@@ -22,7 +22,7 @@
       "name": "team_game_stats_contract",
       "status": "pass",
       "message": "Contract passed",
-      "value": 15656
+      "value": 15902
     },
     {
       "name": "feature_game_coverage",
@@ -46,7 +46,7 @@
       "name": "release_metadata",
       "status": "pass",
       "message": "Release metadata is present",
-      "value": "991c44c526354dfe8e2e5d073a88e148"
+      "value": "f614c6fc9da54255b4793e5e932729d5"
     },
     {
       "name": "empty_raw_cache",
@@ -57,8 +57,8 @@
     {
       "name": "market_snapshot_history",
       "status": "pass",
-      "message": "Timestamped market history contains 200,589 quotes; movement and CLV require forward collection",
-      "value": 200589
+      "message": "Timestamped market history contains 235,197 quotes; movement and CLV require forward collection",
+      "value": 235197
     },
     {
       "name": "context_feature_observations",
@@ -93,14 +93,14 @@
     {
       "name": "best_bets_freshness",
       "status": "pass",
-      "message": "Best-bets export age is 0.5 hours",
-      "value": 0.4514287577777778
+      "message": "Best-bets export age is 0.0 hours",
+      "value": 0.0007542005555555556
     },
     {
       "name": "shadow_total_freshness",
       "status": "pass",
-      "message": "Shadow-total export age is 0.5 hours",
-      "value": 0.46115001805555556
+      "message": "Shadow-total export age is 0.0 hours",
+      "value": 0.0003440172222222222
     }
   ],
   "release_status": "shadow",
