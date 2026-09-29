@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-09-29T11:51:57.661700+00:00",
+    "generated_at": "2026-09-29T15:10:38.145331+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -216,27 +216,11 @@
       "away_team": "Penn State",
       "bet_type": "Total",
       "pick": "Over 48.5",
-      "probability": 0.566631,
-      "edge": 2.7935,
+      "probability": 0.56592,
+      "edge": 2.7634,
       "tier": "Strong",
       "odds": -110.0,
       "line": 48.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401871049,
-      "game_date": "2026-10-02",
-      "game_time": "2026-10-02T00:00:00+00:00",
-      "game": "Western Kentucky @ New Mexico State",
-      "home_team": "New Mexico State",
-      "away_team": "Western Kentucky",
-      "bet_type": "Spread",
-      "pick": "Take Western Kentucky +1.5",
-      "probability": 0.558253,
-      "edge": 2.646,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -1.5,
       "league": "NCAAF"
     },
     {
@@ -288,6 +272,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401866434,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T19:30:00+00:00",
+      "game": "Ohio @ Kent State",
+      "home_team": "Kent State",
+      "away_team": "Ohio",
+      "bet_type": "Spread",
+      "pick": "Take Ohio -2.2",
+      "probability": 0.55441,
+      "edge": 2.4703,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 2.25,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401869932,
       "game_date": "2026-10-04",
       "game_time": "2026-10-04T00:00:00+00:00",
@@ -336,6 +336,38 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401871049,
+      "game_date": "2026-10-02",
+      "game_time": "2026-10-02T00:00:00+00:00",
+      "game": "Western Kentucky @ New Mexico State",
+      "home_team": "New Mexico State",
+      "away_team": "Western Kentucky",
+      "bet_type": "Spread",
+      "pick": "Take Western Kentucky +0.5",
+      "probability": 0.55051,
+      "edge": 2.2922,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -0.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401864513,
+      "game_date": "2026-10-04",
+      "game_time": "2026-10-04T03:59:00+00:00",
+      "game": "San José State @ Hawai'i",
+      "home_team": "Hawai'i",
+      "away_team": "San José State",
+      "bet_type": "Spread",
+      "pick": "Take San José State +1.8",
+      "probability": 0.549259,
+      "edge": 2.2352,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -1.75,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856705,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T16:45:00+00:00",
@@ -343,12 +375,12 @@
       "home_team": "Georgia",
       "away_team": "Vanderbilt",
       "bet_type": "Spread",
-      "pick": "Take Vanderbilt +19.5",
-      "probability": 0.545852,
-      "edge": 2.0799,
+      "pick": "Take Vanderbilt +19.0",
+      "probability": 0.54875,
+      "edge": 2.2119,
       "tier": "Strong",
       "odds": -110.0,
-      "line": -19.5,
+      "line": -19.0,
       "league": "NCAAF"
     },
     {
