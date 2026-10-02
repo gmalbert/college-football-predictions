@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-02T17:06:40.987749+00:00",
+    "generated_at": "2026-10-02T19:45:23.421550+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -160,38 +160,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868328,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T20:00:00+00:00",
-      "game": "Alabama State @ Bethune-Cookman",
-      "home_team": "Bethune-Cookman",
-      "away_team": "Alabama State",
-      "bet_type": "Spread",
-      "pick": "Take Alabama State -7.5",
-      "probability": 0.594397,
-      "edge": 4.3131,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 7.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401862790,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T22:00:00+00:00",
-      "game": "Texas Southern @ Florida Atlantic",
-      "home_team": "Florida Atlantic",
-      "away_team": "Texas Southern",
-      "bet_type": "Spread",
-      "pick": "Take Florida Atlantic -44.5",
-      "probability": 0.594145,
-      "edge": 4.3013,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -44.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866652,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T19:30:00+00:00",
@@ -205,6 +173,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -2.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401868053,
+      "game_date": "2026-10-04",
+      "game_time": "2026-10-04T00:00:00+00:00",
+      "game": "West Florida @ Abilene Christian",
+      "home_team": "Abilene Christian",
+      "away_team": "West Florida",
+      "bet_type": "Spread",
+      "pick": "Take West Florida +2.8",
+      "probability": 0.590808,
+      "edge": 4.1461,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -2.75,
       "league": "NCAAF"
     },
     {
@@ -240,19 +224,35 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868053,
-      "game_date": "2026-10-04",
-      "game_time": "2026-10-04T00:00:00+00:00",
-      "game": "West Florida @ Abilene Christian",
-      "home_team": "Abilene Christian",
-      "away_team": "West Florida",
+      "game_id": 401869962,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T19:45:00+00:00",
+      "game": "Marshall @ James Madison",
+      "home_team": "James Madison",
+      "away_team": "Marshall",
       "bet_type": "Spread",
-      "pick": "Take West Florida +2.5",
-      "probability": 0.58542,
-      "edge": 3.8961,
+      "pick": "Take James Madison -12.5",
+      "probability": 0.585036,
+      "edge": 3.8784,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -2.5,
+      "line": -12.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401862790,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T22:00:00+00:00",
+      "game": "Texas Southern @ Florida Atlantic",
+      "home_team": "Florida Atlantic",
+      "away_team": "Texas Southern",
+      "bet_type": "Spread",
+      "pick": "Take Florida Atlantic -35.5",
+      "probability": 0.580911,
+      "edge": 3.6875,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -35.5,
       "league": "NCAAF"
     },
     {
@@ -288,22 +288,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401869962,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T19:45:00+00:00",
-      "game": "Marshall @ James Madison",
-      "home_team": "James Madison",
-      "away_team": "Marshall",
-      "bet_type": "Spread",
-      "pick": "Take James Madison -13.0",
-      "probability": 0.579474,
-      "edge": 3.6211,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -13.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401867688,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T23:00:00+00:00",
@@ -317,6 +301,38 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -49.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401867967,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T17:00:00+00:00",
+      "game": "Morgan State @ Villanova",
+      "home_team": "Villanova",
+      "away_team": "Morgan State",
+      "bet_type": "Spread",
+      "pick": "Take Morgan State +11.5",
+      "probability": 0.573098,
+      "edge": 3.3272,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -11.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401864515,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T19:30:00+00:00",
+      "game": "Wyoming @ North Dakota State",
+      "home_team": "North Dakota State",
+      "away_team": "Wyoming",
+      "bet_type": "Spread",
+      "pick": "Take North Dakota State -12.0",
+      "probability": 0.572955,
+      "edge": 3.3205,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -12.0,
       "league": "NCAAF"
     },
     {
@@ -336,6 +352,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868328,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T20:00:00+00:00",
+      "game": "Alabama State @ Bethune-Cookman",
+      "home_team": "Bethune-Cookman",
+      "away_team": "Alabama State",
+      "bet_type": "Spread",
+      "pick": "Take Alabama State -7.5",
+      "probability": 0.568768,
+      "edge": 3.128,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 7.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401868270,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T17:00:00+00:00",
@@ -349,6 +381,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 2.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856706,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T23:45:00+00:00",
+      "game": "McNeese @ LSU",
+      "home_team": "LSU",
+      "away_team": "McNeese",
+      "bet_type": "Spread",
+      "pick": "Take LSU -42.5",
+      "probability": 0.567204,
+      "edge": 3.0562,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -42.5,
       "league": "NCAAF"
     },
     {
@@ -384,6 +432,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401869151,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T23:00:00+00:00",
+      "game": "Nicholls @ Houston Christian",
+      "home_team": "Houston Christian",
+      "away_team": "Nicholls",
+      "bet_type": "Moneyline",
+      "pick": "Nicholls ML (-2)",
+      "probability": 0.476068,
+      "edge": 0.442,
+      "tier": "Elite",
+      "odds": -2.0,
+      "line": null,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401858474,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T16:00:00+00:00",
@@ -392,8 +456,8 @@
       "away_team": "Michigan",
       "bet_type": "Total",
       "pick": "Over 43.5",
-      "probability": 0.581134,
-      "edge": 3.4093,
+      "probability": 0.581426,
+      "edge": 3.4218,
       "tier": "Strong",
       "odds": -110.0,
       "line": 43.5,
@@ -413,22 +477,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -2.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401864515,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T19:30:00+00:00",
-      "game": "Wyoming @ North Dakota State",
-      "home_team": "North Dakota State",
-      "away_team": "Wyoming",
-      "bet_type": "Spread",
-      "pick": "Take North Dakota State -12.5",
-      "probability": 0.563746,
-      "edge": 2.8975,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -12.5,
       "league": "NCAAF"
     },
     {
@@ -496,22 +544,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868936,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T23:00:00+00:00",
-      "game": "Arkansas-Pine Bluff @ Southern",
-      "home_team": "Southern",
-      "away_team": "Arkansas-Pine Bluff",
-      "bet_type": "Spread",
-      "pick": "Take Arkansas-Pine Bluff +4.5",
-      "probability": 0.559698,
-      "edge": 2.7121,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -4.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401868381,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T17:30:00+00:00",
@@ -576,22 +608,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401869932,
-      "game_date": "2026-10-04",
-      "game_time": "2026-10-04T00:00:00+00:00",
-      "game": "Arkansas State @ Louisiana",
-      "home_team": "Louisiana",
-      "away_team": "Arkansas State",
-      "bet_type": "Spread",
-      "pick": "Take Louisiana -3.5",
-      "probability": 0.554326,
-      "edge": 2.4664,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -3.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866431,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T18:00:00+00:00",
@@ -605,22 +621,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 15.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401867967,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T17:00:00+00:00",
-      "game": "Morgan State @ Villanova",
-      "home_team": "Villanova",
-      "away_team": "Morgan State",
-      "bet_type": "Spread",
-      "pick": "Take Morgan State +10.5",
-      "probability": 0.553129,
-      "edge": 2.4117,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -10.5,
       "league": "NCAAF"
     },
     {
@@ -672,6 +672,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868936,
+      "game_date": "2026-10-03",
+      "game_time": "2026-10-03T23:00:00+00:00",
+      "game": "Arkansas-Pine Bluff @ Southern",
+      "home_team": "Southern",
+      "away_team": "Arkansas-Pine Bluff",
+      "bet_type": "Spread",
+      "pick": "Take Arkansas-Pine Bluff +4.0",
+      "probability": 0.551014,
+      "edge": 2.3152,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -4.0,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856817,
       "game_date": "2026-10-04",
       "game_time": "2026-10-04T02:30:00+00:00",
@@ -704,22 +720,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401867828,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T16:30:00+00:00",
-      "game": "Cornell @ Georgetown",
-      "home_team": "Georgetown",
-      "away_team": "Cornell",
-      "bet_type": "Spread",
-      "pick": "Take Cornell -7.5",
-      "probability": 0.548964,
-      "edge": 2.2217,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 7.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401858479,
       "game_date": "2026-10-03",
       "game_time": "2026-10-03T16:30:00+00:00",
@@ -749,22 +749,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -13.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401868264,
-      "game_date": "2026-10-03",
-      "game_time": "2026-10-03T17:00:00+00:00",
-      "game": "Marist @ Stetson",
-      "home_team": "Stetson",
-      "away_team": "Marist",
-      "bet_type": "Spread",
-      "pick": "Take Marist -15.5",
-      "probability": 0.546836,
-      "edge": 2.1247,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 15.5,
       "league": "NCAAF"
     },
     {
