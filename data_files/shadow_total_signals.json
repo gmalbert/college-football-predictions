@@ -1,34 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-10-03T22:35:05.990437+00:00",
+    "generated_at": "2026-10-04T04:09:09.153582+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "25247278b8e340e082e0260c8f436319",
-    "model_version": "2.2.0",
-    "strategy_version": "total-over-v2.2-locked"
+    "note": "No priced games are within the closing-time window"
   },
-  "signals": [
-    {
-      "game_id": 401871089,
-      "game": "UL Monroe @ South Alabama",
-      "kickoff": "2026-10-03T23:00:00+00:00",
-      "side": "over",
-      "market_total": 56.5,
-      "prediction_time": "2026-10-03T22:35:05.445485+00:00",
-      "sportsbook": "BetMGM",
-      "taken_line": 56.5,
-      "taken_odds": -110.0,
-      "source_snapshot_at": "2026-10-03T18:57:46.356887+00:00",
-      "ingestion_run_id": "c0dd9d1f5e2c4f90af5ccfa8313a5523",
-      "over_probability": 0.595039,
-      "selected_probability": 0.595039,
-      "probability_edge": 0.095039,
-      "opening_total": 56.5,
-      "line_move": 0.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
