@@ -1,10 +1,10 @@
 {
   "model_name": "total_over_probability",
   "version": "2.2.0",
-  "created_at": "2026-09-29T11:51:53.094238+00:00",
-  "git_sha": "f68c86cdfeb6189216dfad822a62a620a55f1484",
+  "created_at": "2026-10-06T06:26:09.323005+00:00",
+  "git_sha": "ed5c2a0561768a99660a09b7228e0cd206afed34",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-09-27T03:00:00+00:00",
+  "training_end": "2026-10-04T03:59:00+00:00",
   "feature_names": [
     "home_points_for_l5",
     "away_points_for_l5",
@@ -37,22 +37,22 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "7f25613996f3a8bf613d9f6f43c7b95f0799f7ab8dfe8eb2f6480f3ce997085f",
+  "data_fingerprint": "5f84076f206c01a9fb5ab3d93e8577ec58ffc693fb9055b23544e584c437a211",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "median_with_indicator"
   },
   "metrics": {
-    "n": 5023,
-    "brier": 0.24986607970869576,
-    "log_loss": 0.6930793683082522,
-    "ece": 0.018205777302530562,
-    "accuracy": 0.5192116265180171,
-    "baseline_n": 5023,
+    "n": 5096,
+    "brier": 0.2499546831493058,
+    "log_loss": 0.6932522767368696,
+    "ece": 0.019328007347243513,
+    "accuracy": 0.5184458398744113,
+    "baseline_n": 5096,
     "baseline_brier": 0.25,
-    "model_brier_on_baseline_subset": 0.24986607970869576,
-    "brier_skill": 0.0005356811652169613,
+    "model_brier_on_baseline_subset": 0.2499546831493058,
+    "brier_skill": 0.00018126740277679687,
     "folds": [
       {
         "fold": 0,
@@ -118,26 +118,26 @@
           2025
         ],
         "test_season": 2026,
-        "n": 498,
-        "brier": 0.2563365911127831,
-        "log_loss": 0.7079209210422153,
-        "ece": 0.08050326582335536,
-        "accuracy": 0.5060240963855421,
-        "baseline_n": 498,
+        "n": 571,
+        "brier": 0.2563001214119959,
+        "log_loss": 0.7075666443393334,
+        "ece": 0.08255434751483873,
+        "accuracy": 0.500875656742557,
+        "baseline_n": 571,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.2563365911127831,
-        "brier_skill": -0.025346364451132475
+        "model_brier_on_baseline_subset": 0.2563001214119959,
+        "brier_skill": -0.025200485647983495
       }
     ],
-    "n_samples": 5023,
+    "n_samples": 5096,
     "strategy": {
-      "n": 515,
-      "wins": 287,
-      "losses": 228,
-      "win_rate": 0.5572815533980583,
-      "wilson_95_low": 0.5141155992220764,
-      "wilson_95_high": 0.5995992919011286,
-      "flat_stake_roi_at_minus_110": 0.06390114739629296,
+      "n": 533,
+      "wins": 297,
+      "losses": 236,
+      "win_rate": 0.5572232645403377,
+      "wilson_95_low": 0.5147941173141476,
+      "wilson_95_high": 0.59883347049176,
+      "flat_stake_roi_at_minus_110": 0.06378986866791744,
       "probability_edge_threshold": 0.075,
       "minimum_selected_probability": 0.575,
       "assumed_odds": -110.0,
@@ -189,33 +189,33 @@
           "flat_stake_roi_at_minus_110": 0.21657754010695182
         },
         "2026": {
-          "n": 192,
-          "wins": 102,
-          "losses": 90,
-          "win_rate": 0.53125,
-          "wilson_95_low": 0.4607442027555418,
-          "wilson_95_high": 0.6005298506152861,
-          "flat_stake_roi_at_minus_110": 0.014204545454545414
+          "n": 210,
+          "wins": 112,
+          "losses": 98,
+          "win_rate": 0.5333333333333333,
+          "wilson_95_low": 0.4658659201940727,
+          "wilson_95_high": 0.5996031430886417,
+          "flat_stake_roi_at_minus_110": 0.018181818181818157
         }
       },
       "by_side": {
         "over": {
-          "n": 389,
-          "wins": 220,
-          "losses": 169,
-          "win_rate": 0.5655526992287918,
-          "wilson_95_low": 0.5158907397095057,
-          "wilson_95_high": 0.6139326250471101,
-          "flat_stake_roi_at_minus_110": 0.07969151670951156
+          "n": 405,
+          "wins": 229,
+          "losses": 176,
+          "win_rate": 0.5654320987654321,
+          "wilson_95_low": 0.5167637791096958,
+          "wilson_95_high": 0.6128708233909381,
+          "flat_stake_roi_at_minus_110": 0.07946127946127947
         },
         "under": {
-          "n": 126,
-          "wins": 67,
-          "losses": 59,
-          "win_rate": 0.5317460317460317,
-          "wilson_95_low": 0.444972621282495,
-          "wilson_95_high": 0.6166409809726034,
-          "flat_stake_roi_at_minus_110": 0.015151515151515131
+          "n": 128,
+          "wins": 68,
+          "losses": 60,
+          "win_rate": 0.53125,
+          "wilson_95_low": 0.44515370795994524,
+          "wilson_95_high": 0.6155252322729605,
+          "flat_stake_roi_at_minus_110": 0.014204545454545414
         }
       },
       "by_season_and_side": {
@@ -321,22 +321,22 @@
         },
         "2026": {
           "over": {
-            "n": 152,
-            "wins": 81,
-            "losses": 71,
-            "win_rate": 0.5328947368421053,
-            "wilson_95_low": 0.45374850912928033,
-            "wilson_95_high": 0.6104192680185561,
-            "flat_stake_roi_at_minus_110": 0.017344497607655527
+            "n": 168,
+            "wins": 90,
+            "losses": 78,
+            "win_rate": 0.5357142857142857,
+            "wilson_95_low": 0.4603451940164348,
+            "wilson_95_high": 0.609486615387146,
+            "flat_stake_roi_at_minus_110": 0.022727272727272697
           },
           "under": {
-            "n": 40,
-            "wins": 21,
-            "losses": 19,
-            "win_rate": 0.525,
-            "wilson_95_low": 0.3749736210669247,
-            "wilson_95_high": 0.670645298873211,
-            "flat_stake_roi_at_minus_110": 0.0022727272727272483
+            "n": 42,
+            "wins": 22,
+            "losses": 20,
+            "win_rate": 0.5238095238095238,
+            "wilson_95_low": 0.3772246413134497,
+            "wilson_95_high": 0.6664039876929452,
+            "flat_stake_roi_at_minus_110": 0.0
           }
         }
       },

@@ -2,14 +2,14 @@
   "model_version": "2.2.0",
   "evaluation_scope": "walk_forward_season_oos",
   "win_model": {
-    "n": 12706,
-    "brier": 0.16292813089846964,
-    "log_loss": 0.488655246735502,
-    "ece": 0.00762348572816988,
-    "accuracy": 0.7537383913111916,
-    "baseline_n": 2946,
-    "baseline_brier": 0.1668060583307935,
-    "model_brier_on_baseline_subset": 0.1668060583307935,
+    "n": 13009,
+    "brier": 0.16310855697932267,
+    "log_loss": 0.48916456364710076,
+    "ece": 0.007878399180798879,
+    "accuracy": 0.7536321008532555,
+    "baseline_n": 3049,
+    "baseline_brier": 0.16808667199105287,
+    "model_brier_on_baseline_subset": 0.16808667199105287,
     "brier_skill": 0.0,
     "folds": [
       {
@@ -76,32 +76,32 @@
           2025
         ],
         "test_season": 2026,
-        "n": 1348,
-        "brier": 0.16842587885022958,
-        "log_loss": 0.4989424396368245,
-        "ece": 0.029210409212371755,
-        "accuracy": 0.7373887240356083,
-        "baseline_n": 454,
-        "baseline_brier": 0.12945738231230808,
-        "model_brier_on_baseline_subset": 0.12945738231230808,
+        "n": 1651,
+        "brier": 0.16883856525630714,
+        "log_loss": 0.5010676269499005,
+        "ece": 0.01809202844929447,
+        "accuracy": 0.7395517867958813,
+        "baseline_n": 557,
+        "baseline_brier": 0.1433739077701804,
+        "model_brier_on_baseline_subset": 0.1433739077701804,
         "brier_skill": 0.0
       }
     ],
-    "n_samples": 12706,
+    "n_samples": 13009,
     "strategy": "no_vig_market_when_available_structural_fallback",
-    "market_anchored_n": 2946
+    "market_anchored_n": 3049
   },
   "spread_model": {
-    "n": 12706,
-    "rmse": 18.05558720665302,
-    "mae": 14.083661077783153,
-    "bias": -0.08670799878205122,
-    "residual_std": 18.056089555339174,
-    "baseline_n": 5084,
-    "baseline_rmse": 15.247003323479145,
-    "baseline_mae": 11.9816089693155,
-    "model_rmse_on_baseline_subset": 15.547247635831976,
-    "model_mae_on_baseline_subset": 12.27467398038733,
+    "n": 13009,
+    "rmse": 18.065170114351325,
+    "mae": 14.087866826605445,
+    "bias": -0.11325778344006648,
+    "residual_std": 18.065509441599122,
+    "baseline_n": 5194,
+    "baseline_rmse": 15.314716044764507,
+    "baseline_mae": 12.02368117058144,
+    "model_rmse_on_baseline_subset": 15.598611034522538,
+    "model_mae_on_baseline_subset": 12.30157753214099,
     "folds": [
       {
         "fold": 0,
@@ -170,21 +170,21 @@
           2025
         ],
         "test_season": 2026,
-        "n": 1348,
-        "rmse": 20.859828332137514,
-        "mae": 15.999423474235078,
-        "bias": -0.6749798329353598,
-        "residual_std": 20.856642592398124,
-        "baseline_n": 517,
-        "baseline_rmse": 15.669037555351801,
-        "baseline_mae": 12.173597678916828,
-        "model_rmse_on_baseline_subset": 15.698174345143638,
-        "model_mae_on_baseline_subset": 12.193478287909201
+        "n": 1651,
+        "rmse": 20.440941324267133,
+        "mae": 15.680971978356366,
+        "bias": -0.7762153161986354,
+        "residual_std": 20.432386997419226,
+        "baseline_n": 627,
+        "baseline_rmse": 16.136062344155764,
+        "baseline_mae": 12.488437001594896,
+        "model_rmse_on_baseline_subset": 16.089051081726602,
+        "model_mae_on_baseline_subset": 12.43058925119646
       }
     ],
-    "n_samples": 12706,
+    "n_samples": 13009,
     "strategy": "structural_xgb_with_market_residual_shadow",
-    "market_anchored_n": 5084,
+    "market_anchored_n": 5194,
     "residual_folds": [
       {
         "fold": 0,
@@ -214,37 +214,37 @@
         "fold": 3,
         "test_season": 2026,
         "train_n": 6913,
-        "test_n": 517,
+        "test_n": 627,
         "shrinkage": 0.0,
         "shrinkage_oos_n": 6026
       }
     ],
-    "final_residual_shrinkage": 0.045670739680271785,
-    "final_residual_shrinkage_oos_n": 6543,
+    "final_residual_shrinkage": 0.054112979567123146,
+    "final_residual_shrinkage_oos_n": 6653,
     "market_residual_metrics": {
-      "n": 12706,
-      "rmse": 17.952847841515013,
-      "mae": 13.966398169213251,
-      "bias": -0.12999107941257135,
-      "residual_std": 17.953083716976113,
-      "baseline_n": 5084,
-      "baseline_rmse": 15.247003323479145,
-      "baseline_mae": 11.9816089693155,
-      "model_rmse_on_baseline_subset": 15.247003323479145,
-      "model_mae_on_baseline_subset": 11.9816089693155
+      "n": 13009,
+      "rmse": 17.967926762647476,
+      "mae": 13.976913355782145,
+      "bias": -0.1576796062614974,
+      "residual_std": 17.96792549079799,
+      "baseline_n": 5194,
+      "baseline_rmse": 15.314716044764507,
+      "baseline_mae": 12.02368117058144,
+      "model_rmse_on_baseline_subset": 15.314716044764507,
+      "model_mae_on_baseline_subset": 12.02368117058144
     }
   },
   "total_model": {
-    "n": 12706,
-    "rmse": 16.64859460144924,
-    "mae": 13.198524306538346,
-    "bias": -0.2501143486023713,
-    "residual_std": 16.647370854328997,
-    "baseline_n": 5058,
-    "baseline_rmse": 15.742610551339153,
-    "baseline_mae": 12.571026097271648,
-    "model_rmse_on_baseline_subset": 15.702409851572915,
-    "model_mae_on_baseline_subset": 12.546661743605462,
+    "n": 13009,
+    "rmse": 16.657349022255755,
+    "mae": 13.206283802684343,
+    "bias": -0.26029478603059486,
+    "residual_std": 16.655955342615425,
+    "baseline_n": 5131,
+    "baseline_rmse": 15.754918753174168,
+    "baseline_mae": 12.572354316897291,
+    "model_rmse_on_baseline_subset": 15.71606927529062,
+    "model_mae_on_baseline_subset": 12.548100099685595,
     "folds": [
       {
         "fold": 0,
@@ -254,15 +254,15 @@
         ],
         "test_season": 2023,
         "n": 3730,
-        "rmse": 16.739837343274953,
-        "mae": 13.292493026146275,
-        "bias": -0.30638952198804825,
+        "rmse": 16.73983734327495,
+        "mae": 13.292493026146278,
+        "bias": -0.3063895219880273,
         "residual_std": 16.73927720349435,
         "baseline_n": 1411,
         "baseline_rmse": 15.779587869715042,
         "baseline_mae": 12.617647058823529,
         "model_rmse_on_baseline_subset": 15.74662301164962,
-        "model_mae_on_baseline_subset": 12.614234620492924
+        "model_mae_on_baseline_subset": 12.614234620492926
       },
       {
         "fold": 1,
@@ -274,14 +274,14 @@
         "test_season": 2024,
         "n": 3799,
         "rmse": 16.761496583100282,
-        "mae": 13.25115441049563,
-        "bias": -0.13838718247395598,
+        "mae": 13.251154410495634,
+        "bias": -0.13838718247395432,
         "residual_std": 16.763131694484173,
         "baseline_n": 1553,
         "baseline_rmse": 16.360532248492408,
         "baseline_mae": 12.92369607211848,
         "model_rmse_on_baseline_subset": 16.321466430124953,
-        "model_mae_on_baseline_subset": 12.898954993521512
+        "model_mae_on_baseline_subset": 12.898954993521514
       },
       {
         "fold": 2,
@@ -295,12 +295,12 @@
         "n": 3829,
         "rmse": 16.52466754393891,
         "mae": 13.108474521569507,
-        "bias": -0.4150851230766778,
-        "residual_std": 16.521611007067268,
+        "bias": -0.4150851230766847,
+        "residual_std": 16.521611007067264,
         "baseline_n": 1594,
         "baseline_rmse": 15.34149001472869,
         "baseline_mae": 12.337045169385194,
-        "model_rmse_on_baseline_subset": 15.303384663467934,
+        "model_rmse_on_baseline_subset": 15.303384663467936,
         "model_mae_on_baseline_subset": 12.31188785712569
       },
       {
@@ -313,19 +313,19 @@
           2025
         ],
         "test_season": 2026,
-        "n": 1348,
-        "rmse": 16.425372337764742,
-        "mae": 13.045969067350219,
-        "bias": 0.059327779045140146,
-        "residual_std": 16.431361041881747,
-        "baseline_n": 500,
-        "baseline_rmse": 14.922315503969214,
-        "baseline_mae": 12.09,
-        "model_rmse_on_baseline_subset": 14.849540254749279,
-        "model_mae_on_baseline_subset": 12.010207400887312
+        "n": 1651,
+        "rmse": 16.536179844670418,
+        "mae": 13.135107482151682,
+        "bias": -0.0776790502589269,
+        "residual_std": 16.541007543485964,
+        "baseline_n": 573,
+        "baseline_rmse": 15.14436059860776,
+        "baseline_mae": 12.163176265270506,
+        "model_rmse_on_baseline_subset": 15.088784857054886,
+        "model_mae_on_baseline_subset": 12.091431435905772
       }
     ],
-    "n_samples": 12706,
+    "n_samples": 13009,
     "strategy": "nested_oos_shrunk_market_residual_ridge",
     "residual_folds": [
       {
@@ -333,7 +333,7 @@
         "test_season": 2023,
         "train_n": 2346,
         "test_n": 1411,
-        "shrinkage": 0.19575051806991303,
+        "shrinkage": 0.19575051806991103,
         "shrinkage_oos_n": 1459
       },
       {
@@ -341,7 +341,7 @@
         "test_season": 2024,
         "train_n": 3757,
         "test_n": 1553,
-        "shrinkage": 0.27485816721758854,
+        "shrinkage": 0.27485816721758627,
         "shrinkage_oos_n": 2870
       },
       {
@@ -349,31 +349,31 @@
         "test_season": 2025,
         "train_n": 5310,
         "test_n": 1594,
-        "shrinkage": 0.33266209900954713,
+        "shrinkage": 0.3326620990095443,
         "shrinkage_oos_n": 4423
       },
       {
         "fold": 3,
         "test_season": 2026,
         "train_n": 6904,
-        "test_n": 500,
-        "shrinkage": 0.3647890266059074,
+        "test_n": 573,
+        "shrinkage": 0.36478902660590506,
         "shrinkage_oos_n": 6017
       }
     ],
-    "final_residual_shrinkage": 0.35325151663754745,
-    "final_residual_shrinkage_oos_n": 6517
+    "final_residual_shrinkage": 0.34723935062407557,
+    "final_residual_shrinkage_oos_n": 6590
   },
   "total_cover_model": {
-    "n": 5023,
-    "brier": 0.24986607970869576,
-    "log_loss": 0.6930793683082522,
-    "ece": 0.018205777302530562,
-    "accuracy": 0.5192116265180171,
-    "baseline_n": 5023,
+    "n": 5096,
+    "brier": 0.2499546831493058,
+    "log_loss": 0.6932522767368696,
+    "ece": 0.019328007347243513,
+    "accuracy": 0.5184458398744113,
+    "baseline_n": 5096,
     "baseline_brier": 0.25,
-    "model_brier_on_baseline_subset": 0.24986607970869576,
-    "brier_skill": 0.0005356811652169613,
+    "model_brier_on_baseline_subset": 0.2499546831493058,
+    "brier_skill": 0.00018126740277679687,
     "folds": [
       {
         "fold": 0,
@@ -439,26 +439,26 @@
           2025
         ],
         "test_season": 2026,
-        "n": 498,
-        "brier": 0.2563365911127831,
-        "log_loss": 0.7079209210422153,
-        "ece": 0.08050326582335536,
-        "accuracy": 0.5060240963855421,
-        "baseline_n": 498,
+        "n": 571,
+        "brier": 0.2563001214119959,
+        "log_loss": 0.7075666443393334,
+        "ece": 0.08255434751483873,
+        "accuracy": 0.500875656742557,
+        "baseline_n": 571,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.2563365911127831,
-        "brier_skill": -0.025346364451132475
+        "model_brier_on_baseline_subset": 0.2563001214119959,
+        "brier_skill": -0.025200485647983495
       }
     ],
-    "n_samples": 5023,
+    "n_samples": 5096,
     "strategy": {
-      "n": 515,
-      "wins": 287,
-      "losses": 228,
-      "win_rate": 0.5572815533980583,
-      "wilson_95_low": 0.5141155992220764,
-      "wilson_95_high": 0.5995992919011286,
-      "flat_stake_roi_at_minus_110": 0.06390114739629296,
+      "n": 533,
+      "wins": 297,
+      "losses": 236,
+      "win_rate": 0.5572232645403377,
+      "wilson_95_low": 0.5147941173141476,
+      "wilson_95_high": 0.59883347049176,
+      "flat_stake_roi_at_minus_110": 0.06378986866791744,
       "probability_edge_threshold": 0.075,
       "minimum_selected_probability": 0.575,
       "assumed_odds": -110.0,
@@ -510,33 +510,33 @@
           "flat_stake_roi_at_minus_110": 0.21657754010695182
         },
         "2026": {
-          "n": 192,
-          "wins": 102,
-          "losses": 90,
-          "win_rate": 0.53125,
-          "wilson_95_low": 0.4607442027555418,
-          "wilson_95_high": 0.6005298506152861,
-          "flat_stake_roi_at_minus_110": 0.014204545454545414
+          "n": 210,
+          "wins": 112,
+          "losses": 98,
+          "win_rate": 0.5333333333333333,
+          "wilson_95_low": 0.4658659201940727,
+          "wilson_95_high": 0.5996031430886417,
+          "flat_stake_roi_at_minus_110": 0.018181818181818157
         }
       },
       "by_side": {
         "over": {
-          "n": 389,
-          "wins": 220,
-          "losses": 169,
-          "win_rate": 0.5655526992287918,
-          "wilson_95_low": 0.5158907397095057,
-          "wilson_95_high": 0.6139326250471101,
-          "flat_stake_roi_at_minus_110": 0.07969151670951156
+          "n": 405,
+          "wins": 229,
+          "losses": 176,
+          "win_rate": 0.5654320987654321,
+          "wilson_95_low": 0.5167637791096958,
+          "wilson_95_high": 0.6128708233909381,
+          "flat_stake_roi_at_minus_110": 0.07946127946127947
         },
         "under": {
-          "n": 126,
-          "wins": 67,
-          "losses": 59,
-          "win_rate": 0.5317460317460317,
-          "wilson_95_low": 0.444972621282495,
-          "wilson_95_high": 0.6166409809726034,
-          "flat_stake_roi_at_minus_110": 0.015151515151515131
+          "n": 128,
+          "wins": 68,
+          "losses": 60,
+          "win_rate": 0.53125,
+          "wilson_95_low": 0.44515370795994524,
+          "wilson_95_high": 0.6155252322729605,
+          "flat_stake_roi_at_minus_110": 0.014204545454545414
         }
       },
       "by_season_and_side": {
@@ -642,22 +642,22 @@
         },
         "2026": {
           "over": {
-            "n": 152,
-            "wins": 81,
-            "losses": 71,
-            "win_rate": 0.5328947368421053,
-            "wilson_95_low": 0.45374850912928033,
-            "wilson_95_high": 0.6104192680185561,
-            "flat_stake_roi_at_minus_110": 0.017344497607655527
+            "n": 168,
+            "wins": 90,
+            "losses": 78,
+            "win_rate": 0.5357142857142857,
+            "wilson_95_low": 0.4603451940164348,
+            "wilson_95_high": 0.609486615387146,
+            "flat_stake_roi_at_minus_110": 0.022727272727272697
           },
           "under": {
-            "n": 40,
-            "wins": 21,
-            "losses": 19,
-            "win_rate": 0.525,
-            "wilson_95_low": 0.3749736210669247,
-            "wilson_95_high": 0.670645298873211,
-            "flat_stake_roi_at_minus_110": 0.0022727272727272483
+            "n": 42,
+            "wins": 22,
+            "losses": 20,
+            "win_rate": 0.5238095238095238,
+            "wilson_95_low": 0.3772246413134497,
+            "wilson_95_high": 0.6664039876929452,
+            "flat_stake_roi_at_minus_110": 0.0
           }
         }
       },
@@ -676,12 +676,12 @@
     }
   },
   "ats": {
-    "wins": 1838,
-    "losses": 1801,
+    "wins": 1887,
+    "losses": 1835,
     "pushes": 79,
-    "pct": 0.5051,
-    "n": 3639,
-    "abstentions": 1390,
+    "pct": 0.507,
+    "n": 3722,
+    "abstentions": 1417,
     "minimum_edge_points": 1.0,
     "scope": "walk_forward_season_oos_actionable_lined_games"
   },
@@ -689,14 +689,14 @@
     {
       "name": "out_of_sample_games",
       "passed": true,
-      "actual": 12706,
+      "actual": 13009,
       "threshold": 500,
       "reason": "Require an adequately sized untouched walk-forward sample."
     },
     {
       "name": "brier",
       "passed": true,
-      "actual": 0.16292813089846964,
+      "actual": 0.16310855697932267,
       "threshold": 0.25,
       "reason": "Probability quality must beat a coin-flip Brier score."
     },
@@ -710,22 +710,22 @@
     {
       "name": "calibration",
       "passed": true,
-      "actual": 0.00762348572816988,
+      "actual": 0.007878399180798879,
       "threshold": 0.05,
       "reason": "Calibration error controls overconfident bet sizing."
     },
     {
       "name": "spread_market_baseline",
       "passed": false,
-      "actual": 15.547247635831976,
-      "threshold": "< market RMSE 15.247003323479145",
+      "actual": 15.598611034522538,
+      "threshold": "< market RMSE 15.314716044764507",
       "reason": "A spread model is not releasable when the market predicts margin better."
     },
     {
       "name": "total_market_baseline",
       "passed": true,
-      "actual": 15.702409851572915,
-      "threshold": "< market RMSE 15.742610551339153",
+      "actual": 15.71606927529062,
+      "threshold": "< market RMSE 15.754918753174168",
       "reason": "A total model is not releasable when the market predicts totals better."
     },
     {
