@@ -1,13 +1,54 @@
 {
   "meta": {
-    "generated_at": "2026-10-06T19:58:40.782536+00:00",
+    "generated_at": "2026-10-07T20:25:39.707449+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
     "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "947f014b3add48b19c804ae52ce24cf4",
+    "release_id": "78ddf31cc71b4703b61b38825f06b69f",
     "model_version": "2.2.0",
     "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401871051,
+      "game": "Jacksonville State @ Kennesaw State",
+      "kickoff": "2026-10-07T23:00:00+00:00",
+      "side": "over",
+      "market_total": 48.5,
+      "prediction_time": "2026-10-07T20:25:39.474168+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 48.5,
+      "taken_odds": -110.0,
+      "source_snapshot_at": "2026-10-07T20:25:06.475081+00:00",
+      "ingestion_run_id": "25ba1b32e2094c06b6cdcf8786047172",
+      "over_probability": 0.634536,
+      "selected_probability": 0.634536,
+      "probability_edge": 0.134536,
+      "opening_total": 50.5,
+      "line_move": -2.0,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401871066,
+      "game": "New Mexico State @ Florida International",
+      "kickoff": "2026-10-07T23:30:00+00:00",
+      "side": "over",
+      "market_total": 45.5,
+      "prediction_time": "2026-10-07T20:25:39.474168+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 45.5,
+      "taken_odds": -110.0,
+      "source_snapshot_at": "2026-10-07T20:25:06.475081+00:00",
+      "ingestion_run_id": "25ba1b32e2094c06b6cdcf8786047172",
+      "over_probability": 0.642276,
+      "selected_probability": 0.642276,
+      "probability_edge": 0.142276,
+      "opening_total": 47.0,
+      "line_move": -1.5,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
