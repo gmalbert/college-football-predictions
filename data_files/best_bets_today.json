@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-09T23:02:57.604763+00:00",
+    "generated_at": "2026-10-09T23:45:45.253826+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -29,22 +29,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -9.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401867877,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T21:00:00+00:00",
-      "game": "North Dakota @ Northern Iowa",
-      "home_team": "Northern Iowa",
-      "away_team": "North Dakota",
-      "bet_type": "Spread",
-      "pick": "Take Northern Iowa +13.0",
-      "probability": 0.619729,
-      "edge": 5.5058,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 13.0,
       "league": "NCAAF"
     },
     {
@@ -416,6 +400,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868011,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T19:30:00+00:00",
+      "game": "Richmond @ Fordham",
+      "home_team": "Fordham",
+      "away_team": "Richmond",
+      "bet_type": "Total",
+      "pick": "Over 44.5",
+      "probability": 0.59243,
+      "edge": 3.8941,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 44.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401868144,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T22:00:00+00:00",
@@ -445,22 +445,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 46.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401868011,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T19:30:00+00:00",
-      "game": "Richmond @ Fordham",
-      "home_team": "Fordham",
-      "away_team": "Richmond",
-      "bet_type": "Total",
-      "pick": "Over 44.5",
-      "probability": 0.589951,
-      "edge": 3.7879,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 44.5,
       "league": "NCAAF"
     },
     {
@@ -640,6 +624,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868966,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T19:00:00+00:00",
+      "game": "Mississippi Valley State @ Texas Southern",
+      "home_team": "Texas Southern",
+      "away_team": "Mississippi Valley State",
+      "bet_type": "Total",
+      "pick": "Over 57.5",
+      "probability": 0.582289,
+      "edge": 3.4603,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 57.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401868282,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T18:00:00+00:00",
@@ -688,22 +688,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868966,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T19:00:00+00:00",
-      "game": "Mississippi Valley State @ Texas Southern",
-      "home_team": "Texas Southern",
-      "away_team": "Mississippi Valley State",
-      "bet_type": "Total",
-      "pick": "Over 57.5",
-      "probability": 0.579515,
-      "edge": 3.342,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 57.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401858255,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T19:30:00+00:00",
@@ -728,8 +712,8 @@
       "away_team": "Texas",
       "bet_type": "Total",
       "pick": "Over 39.5",
-      "probability": 0.57805,
-      "edge": 3.2797,
+      "probability": 0.578342,
+      "edge": 3.2921,
       "tier": "Strong",
       "odds": -110.0,
       "line": 39.5,
@@ -880,6 +864,38 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868180,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T19:30:00+00:00",
+      "game": "Eastern Illinois @ Gardner-Webb",
+      "home_team": "Gardner-Webb",
+      "away_team": "Eastern Illinois",
+      "bet_type": "Total",
+      "pick": "Over 52.5",
+      "probability": 0.573149,
+      "edge": 3.0713,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 52.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401868156,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T20:00:00+00:00",
+      "game": "Utah Tech @ Portland State",
+      "home_team": "Portland State",
+      "away_team": "Utah Tech",
+      "bet_type": "Total",
+      "pick": "Over 61.5",
+      "probability": 0.572299,
+      "edge": 3.0352,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 61.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401868065,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T23:00:00+00:00",
@@ -909,22 +925,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -1.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401868180,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T19:30:00+00:00",
-      "game": "Eastern Illinois @ Gardner-Webb",
-      "home_team": "Gardner-Webb",
-      "away_team": "Eastern Illinois",
-      "bet_type": "Total",
-      "pick": "Over 52.5",
-      "probability": 0.570381,
-      "edge": 2.9539,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 52.5,
       "league": "NCAAF"
     },
     {
@@ -1024,22 +1024,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868156,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T20:00:00+00:00",
-      "game": "Utah Tech @ Portland State",
-      "home_team": "Portland State",
-      "away_team": "Utah Tech",
-      "bet_type": "Total",
-      "pick": "Over 61.5",
-      "probability": 0.569116,
-      "edge": 2.9002,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 61.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401867836,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T16:00:00+00:00",
@@ -1056,6 +1040,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401866440,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T18:00:00+00:00",
+      "game": "Miami (OH) @ Massachusetts",
+      "home_team": "Massachusetts",
+      "away_team": "Miami (OH)",
+      "bet_type": "Total",
+      "pick": "Over 47.5",
+      "probability": 0.567489,
+      "edge": 2.8313,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 47.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401866437,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T19:30:00+00:00",
@@ -1069,22 +1069,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -7.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401866440,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T18:00:00+00:00",
-      "game": "Miami (OH) @ Massachusetts",
-      "home_team": "Massachusetts",
-      "away_team": "Miami (OH)",
-      "bet_type": "Total",
-      "pick": "Over 47.5",
-      "probability": 0.567264,
-      "edge": 2.8217,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 47.5,
       "league": "NCAAF"
     },
     {
@@ -1165,6 +1149,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 58.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401868087,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T23:00:00+00:00",
+      "game": "Northern Colorado @ Eastern Washington",
+      "home_team": "Eastern Washington",
+      "away_team": "Northern Colorado",
+      "bet_type": "Total",
+      "pick": "Over 59.5",
+      "probability": 0.56542,
+      "edge": 2.7437,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 59.5,
       "league": "NCAAF"
     },
     {
@@ -1312,22 +1312,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868087,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T23:00:00+00:00",
-      "game": "Northern Colorado @ Eastern Washington",
-      "home_team": "Eastern Washington",
-      "away_team": "Northern Colorado",
-      "bet_type": "Total",
-      "pick": "Over 59.5",
-      "probability": 0.562565,
-      "edge": 2.6229,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 59.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401868229,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T16:00:00+00:00",
@@ -1408,6 +1392,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401866659,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T20:00:00+00:00",
+      "game": "Stony Brook @ Towson",
+      "home_team": "Towson",
+      "away_team": "Stony Brook",
+      "bet_type": "Spread",
+      "pick": "Take Stony Brook -6.5",
+      "probability": 0.555083,
+      "edge": 2.5023,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 6.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856826,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T02:15:00+00:00",
@@ -1485,22 +1485,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 1.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401866659,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T20:00:00+00:00",
-      "game": "Stony Brook @ Towson",
-      "home_team": "Towson",
-      "away_team": "Stony Brook",
-      "bet_type": "Spread",
-      "pick": "Take Stony Brook -6.8",
-      "probability": 0.54961,
-      "edge": 2.2523,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 6.75,
       "league": "NCAAF"
     },
     {
