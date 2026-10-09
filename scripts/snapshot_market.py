@@ -29,6 +29,7 @@ from utils.odds_ingestion import (  # noqa: E402
     append_line_snapshots,
     build_market_consensus_from_snapshots,
     normalize_cfbd_line_snapshots,
+    redact_provider_payload,
 )
 from utils.seasons import current_cfb_season  # noqa: E402
 from utils.storage import (  # noqa: E402
@@ -143,6 +144,7 @@ def main() -> int:
             return 1
     # Record when the response became available locally, not only when the
     # request was initiated.  This is the cutoff-safe timestamp for research.
+    payload = redact_provider_payload(payload)
     captured_at = datetime.now(timezone.utc)
     raw_path, ingestion_run_id, captured_at = save_immutable_raw_json(
         payload or [], source=source, season=args.season, captured_at=captured_at
