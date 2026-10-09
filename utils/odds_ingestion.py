@@ -1,6 +1,7 @@
 """Normalize and append timestamped CFBD sportsbook snapshots."""
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Iterable
 
@@ -10,6 +11,36 @@ import pandas as pd
 from utils.contracts import ensure_utc, validate_line_snapshots
 from utils.market import remove_vig
 from utils.storage import atomic_write_parquet
+
+
+# VolcEngine Access Key IDs have a stable ``AKLT`` prefix. Odds feeds can
+# contain arbitrary provider metadata, so redact such values before any
+# provider-supplied text is persisted in a committed artifact.
+_VOLCENGINE_ACCESS_KEY_RE = re.compile(r"(?<![A-Za-z0-9])AKLT[A-Za-z0-9]{16,}(?![A-Za-z0-9])")
+
+
+def redact_provider_payload(value):
+    """Redact credential-shaped text from provider data before it is persisted."""
+    if isinstance(value, str):
+        return _VOLCENGINE_ACCESS_KEY_RE.sub("[REDACTED]", value)
+    if isinstance(value, dict):
+        return {
+            redact_provider_payload(key): redact_provider_payload(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [redact_provider_payload(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(redact_provider_payload(item) for item in value)
+    return value
+
+
+def _redact_provider_secrets(frame: pd.DataFrame) -> pd.DataFrame:
+    """Remove known credential-shaped values from provider-supplied strings."""
+    result = frame.copy()
+    for column in result.select_dtypes(include=["object", "string"]).columns:
+        result[column] = result[column].map(redact_provider_payload)
+    return result
 
 
 def _provider_name(value) -> str:
@@ -355,6 +386,7 @@ def append_line_snapshots(snapshots: pd.DataFrame, path: str | Path) -> Path:
         return destination
     existing = pd.read_parquet(destination) if destination.exists() else pd.DataFrame()
     combined = pd.concat([existing, snapshots], ignore_index=True)
+    combined = _redact_provider_secrets(combined)
     combined["captured_at"] = ensure_utc(combined["captured_at"])
     if "source" not in combined.columns:
         combined["source"] = "cfbd"
