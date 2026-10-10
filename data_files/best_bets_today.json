@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-10T19:08:11.685657+00:00",
+    "generated_at": "2026-10-10T23:07:57.746832+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -23,12 +23,12 @@
       "home_team": "Arizona State",
       "away_team": "Hawai'i",
       "bet_type": "Spread",
-      "pick": "Take Arizona State -9.5",
-      "probability": 0.644001,
-      "edge": 6.6693,
+      "pick": "Take Arizona State -8.5",
+      "probability": 0.663843,
+      "edge": 7.6413,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -9.5,
+      "line": -8.5,
       "league": "NCAAF"
     },
     {
@@ -288,6 +288,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401869949,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T23:30:00+00:00",
+      "game": "James Madison @ Georgia Southern",
+      "home_team": "Georgia Southern",
+      "away_team": "James Madison",
+      "bet_type": "Spread",
+      "pick": "Take James Madison -2.5",
+      "probability": 0.572397,
+      "edge": 3.2966,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": 2.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856717,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T19:30:00+00:00",
@@ -333,22 +349,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -6.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401869949,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T23:30:00+00:00",
-      "game": "James Madison @ Georgia Southern",
-      "home_team": "Georgia Southern",
-      "away_team": "James Madison",
-      "bet_type": "Spread",
-      "pick": "Take James Madison -3.5",
-      "probability": 0.569755,
-      "edge": 3.175,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 3.5,
       "league": "NCAAF"
     },
     {
@@ -560,22 +560,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856808,
-      "game_date": "2026-10-11",
-      "game_time": "2026-10-11T01:30:00+00:00",
-      "game": "Hawai'i @ Arizona State",
-      "home_team": "Arizona State",
-      "away_team": "Hawai'i",
-      "bet_type": "Total",
-      "pick": "Over 49.5",
-      "probability": 0.586234,
-      "edge": 3.6288,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 49.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401862797,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T20:00:00+00:00",
@@ -589,6 +573,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 47.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856808,
+      "game_date": "2026-10-11",
+      "game_time": "2026-10-11T01:30:00+00:00",
+      "game": "Hawai'i @ Arizona State",
+      "home_team": "Arizona State",
+      "away_team": "Hawai'i",
+      "bet_type": "Total",
+      "pick": "Over 49.5",
+      "probability": 0.586022,
+      "edge": 3.6197,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 49.5,
       "league": "NCAAF"
     },
     {
@@ -728,8 +728,8 @@
       "away_team": "Central Arkansas",
       "bet_type": "Total",
       "pick": "Over 50.5",
-      "probability": 0.57797,
-      "edge": 3.2763,
+      "probability": 0.578176,
+      "edge": 3.285,
       "tier": "Strong",
       "odds": -110.0,
       "line": 50.5,
@@ -1280,22 +1280,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401860901,
-      "game_date": "2026-10-11",
-      "game_time": "2026-10-11T02:30:00+00:00",
-      "game": "Boise State @ Fresno State",
-      "home_team": "Fresno State",
-      "away_team": "Boise State",
-      "bet_type": "Total",
-      "pick": "Over 48.5",
-      "probability": 0.564073,
-      "edge": 2.6867,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 48.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401869144,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T20:00:00+00:00",
@@ -1309,6 +1293,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 49.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401860901,
+      "game_date": "2026-10-11",
+      "game_time": "2026-10-11T02:30:00+00:00",
+      "game": "Boise State @ Fresno State",
+      "home_team": "Fresno State",
+      "away_team": "Boise State",
+      "bet_type": "Total",
+      "pick": "Over 48.5",
+      "probability": 0.563777,
+      "edge": 2.6741,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 48.5,
       "league": "NCAAF"
     },
     {
