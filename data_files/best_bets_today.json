@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-09T23:45:45.253826+00:00",
+    "generated_at": "2026-10-10T04:11:40.859459+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -256,22 +256,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858258,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T23:30:00+00:00",
-      "game": "Syracuse @ Virginia",
-      "home_team": "Virginia",
-      "away_team": "Syracuse",
-      "bet_type": "Spread",
-      "pick": "Take Virginia -4.5",
-      "probability": 0.57401,
-      "edge": 3.3709,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -4.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401868282,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T18:00:00+00:00",
@@ -349,6 +333,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 3.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858258,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T23:30:00+00:00",
+      "game": "Syracuse @ Virginia",
+      "home_team": "Virginia",
+      "away_team": "Syracuse",
+      "bet_type": "Spread",
+      "pick": "Take Virginia -6.5",
+      "probability": 0.567459,
+      "edge": 3.0695,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -6.5,
       "league": "NCAAF"
     },
     {
@@ -656,22 +656,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401868265,
-      "game_date": "2026-10-09",
-      "game_time": "2026-10-09T23:00:00+00:00",
-      "game": "Columbia @ Marist",
-      "home_team": "Marist",
-      "away_team": "Columbia",
-      "bet_type": "Total",
-      "pick": "Over 43.5",
-      "probability": 0.580347,
-      "edge": 3.3775,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 43.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866435,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T19:30:00+00:00",
@@ -720,6 +704,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401868054,
+      "game_date": "2026-10-11",
+      "game_time": "2026-10-11T00:00:00+00:00",
+      "game": "Central Arkansas @ Abilene Christian",
+      "home_team": "Abilene Christian",
+      "away_team": "Central Arkansas",
+      "bet_type": "Total",
+      "pick": "Over 50.5",
+      "probability": 0.57797,
+      "edge": 3.2763,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 50.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401866661,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T18:00:00+00:00",
@@ -760,8 +760,8 @@
       "away_team": "Ball State",
       "bet_type": "Total",
       "pick": "Over 52.5",
-      "probability": 0.576247,
-      "edge": 3.203,
+      "probability": 0.576046,
+      "edge": 3.1944,
       "tier": "Strong",
       "odds": -110.0,
       "line": 52.5,
@@ -781,22 +781,6 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 41.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401868054,
-      "game_date": "2026-10-11",
-      "game_time": "2026-10-11T00:00:00+00:00",
-      "game": "Central Arkansas @ Abilene Christian",
-      "home_team": "Abilene Christian",
-      "away_team": "Central Arkansas",
-      "bet_type": "Total",
-      "pick": "Over 50.5",
-      "probability": 0.575208,
-      "edge": 3.1588,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 50.5,
       "league": "NCAAF"
     },
     {
@@ -1040,22 +1024,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401866440,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T18:00:00+00:00",
-      "game": "Miami (OH) @ Massachusetts",
-      "home_team": "Massachusetts",
-      "away_team": "Miami (OH)",
-      "bet_type": "Total",
-      "pick": "Over 47.5",
-      "probability": 0.567489,
-      "edge": 2.8313,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 47.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401866437,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T19:30:00+00:00",
@@ -1069,6 +1037,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -7.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401866440,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T18:00:00+00:00",
+      "game": "Miami (OH) @ Massachusetts",
+      "home_team": "Massachusetts",
+      "away_team": "Miami (OH)",
+      "bet_type": "Total",
+      "pick": "Over 47.5",
+      "probability": 0.567264,
+      "edge": 2.8217,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 47.5,
       "league": "NCAAF"
     },
     {
@@ -1328,6 +1312,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858482,
+      "game_date": "2026-10-10",
+      "game_time": "2026-10-10T16:30:00+00:00",
+      "game": "Ball State @ Northwestern",
+      "home_team": "Northwestern",
+      "away_team": "Ball State",
+      "bet_type": "Spread",
+      "pick": "Take Northwestern -14.5",
+      "probability": 0.557032,
+      "edge": 2.5914,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -14.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856716,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T16:00:00+00:00",
@@ -1344,22 +1344,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858482,
-      "game_date": "2026-10-10",
-      "game_time": "2026-10-10T16:30:00+00:00",
-      "game": "Ball State @ Northwestern",
-      "home_team": "Northwestern",
-      "away_team": "Ball State",
-      "bet_type": "Spread",
-      "pick": "Take Northwestern -15.5",
-      "probability": 0.556446,
-      "edge": 2.5647,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -15.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401858258,
       "game_date": "2026-10-10",
       "game_time": "2026-10-10T23:30:00+00:00",
@@ -1368,11 +1352,27 @@
       "away_team": "Syracuse",
       "bet_type": "Total",
       "pick": "Over 50.5",
-      "probability": 0.560386,
-      "edge": 2.5308,
+      "probability": 0.560991,
+      "edge": 2.5564,
       "tier": "Strong",
       "odds": -110.0,
       "line": 50.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401860923,
+      "game_date": "2026-10-16",
+      "game_time": "2026-10-16T00:00:00+00:00",
+      "game": "Colorado State @ Texas State",
+      "home_team": "Texas State",
+      "away_team": "Colorado State",
+      "bet_type": "Spread",
+      "pick": "Take Colorado State +12.5",
+      "probability": 0.555817,
+      "edge": 2.5359,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -12.5,
       "league": "NCAAF"
     },
     {
