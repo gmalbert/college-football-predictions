@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-15T16:01:52.226413+00:00",
+    "generated_at": "2026-10-15T18:53:13.296213+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -32,6 +32,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401862806,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T23:00:00+00:00",
+      "game": "Kent State @ South Florida",
+      "home_team": "South Florida",
+      "away_team": "Kent State",
+      "bet_type": "Spread",
+      "pick": "Take South Florida -7.5",
+      "probability": 0.650842,
+      "edge": 6.9992,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -7.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401856828,
       "game_date": "2026-10-17",
       "game_time": "2026-10-17T19:30:00+00:00",
@@ -45,22 +61,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -5.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401862806,
-      "game_date": "2026-10-17",
-      "game_time": "2026-10-17T23:00:00+00:00",
-      "game": "Kent State @ South Florida",
-      "home_team": "South Florida",
-      "away_team": "Kent State",
-      "bet_type": "Spread",
-      "pick": "Take South Florida -8.0",
-      "probability": 0.640542,
-      "edge": 6.4992,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -8.0,
       "league": "NCAAF"
     },
     {
@@ -112,6 +112,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858262,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T23:30:00+00:00",
+      "game": "Elon @ Stanford",
+      "home_team": "Stanford",
+      "away_team": "Elon",
+      "bet_type": "Spread",
+      "pick": "Take Elon +35.5",
+      "probability": 0.607405,
+      "edge": 4.9219,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -35.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401860923,
       "game_date": "2026-10-16",
       "game_time": "2026-10-16T00:00:00+00:00",
@@ -119,25 +135,9 @@
       "home_team": "Texas State",
       "away_team": "Colorado State",
       "bet_type": "Spread",
-      "pick": "Take Texas State -6.5",
-      "probability": 0.606075,
-      "edge": 4.8595,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -6.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401860903,
-      "game_date": "2026-10-17",
-      "game_time": "2026-10-17T22:00:00+00:00",
-      "game": "Washington State @ Oregon State",
-      "home_team": "Oregon State",
-      "away_team": "Washington State",
-      "bet_type": "Spread",
-      "pick": "Take Oregon State -6.0",
-      "probability": 0.6031,
-      "edge": 4.72,
+      "pick": "Take Texas State -6.0",
+      "probability": 0.603047,
+      "edge": 4.7175,
       "tier": "Elite",
       "odds": -110.0,
       "line": -6.0,
@@ -173,6 +173,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 5.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401860903,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T22:00:00+00:00",
+      "game": "Washington State @ Oregon State",
+      "home_team": "Oregon State",
+      "away_team": "Washington State",
+      "bet_type": "Spread",
+      "pick": "Take Oregon State -7.0",
+      "probability": 0.590101,
+      "edge": 4.1137,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -7.0,
       "league": "NCAAF"
     },
     {
@@ -256,6 +272,38 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858261,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T16:00:00+00:00",
+      "game": "Charleston Southern @ Clemson",
+      "home_team": "Clemson",
+      "away_team": "Charleston Southern",
+      "bet_type": "Spread",
+      "pick": "Take Charleston Southern +43.5",
+      "probability": 0.57077,
+      "edge": 3.2203,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -43.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858266,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T19:30:00+00:00",
+      "game": "North Carolina @ Duke",
+      "home_team": "Duke",
+      "away_team": "North Carolina",
+      "bet_type": "Spread",
+      "pick": "Take Duke -1.0",
+      "probability": 0.567952,
+      "edge": 3.0908,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -1.0,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401864522,
       "game_date": "2026-10-17",
       "game_time": "2026-10-17T19:30:00+00:00",
@@ -304,19 +352,35 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858266,
+      "game_id": 401866444,
       "game_date": "2026-10-17",
       "game_time": "2026-10-17T19:30:00+00:00",
-      "game": "North Carolina @ Duke",
-      "home_team": "Duke",
-      "away_team": "North Carolina",
+      "game": "Toledo @ Eastern Michigan",
+      "home_team": "Eastern Michigan",
+      "away_team": "Toledo",
       "bet_type": "Spread",
-      "pick": "Take Duke -1.5",
-      "probability": 0.557042,
-      "edge": 2.5908,
+      "pick": "Take Toledo -2.0",
+      "probability": 0.554208,
+      "edge": 2.4613,
       "tier": "Strong",
       "odds": -110.0,
-      "line": -1.5,
+      "line": 2.0,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401862804,
+      "game_date": "2026-10-18",
+      "game_time": "2026-10-18T00:00:00+00:00",
+      "game": "Navy @ UTSA",
+      "home_team": "UTSA",
+      "away_team": "Navy",
+      "bet_type": "Spread",
+      "pick": "Take UTSA -3.5",
+      "probability": 0.550055,
+      "edge": 2.2717,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -3.5,
       "league": "NCAAF"
     },
     {
@@ -352,22 +416,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401866444,
-      "game_date": "2026-10-17",
-      "game_time": "2026-10-17T19:30:00+00:00",
-      "game": "Toledo @ Eastern Michigan",
-      "home_team": "Eastern Michigan",
-      "away_team": "Toledo",
-      "bet_type": "Spread",
-      "pick": "Take Toledo -2.5",
-      "probability": 0.547325,
-      "edge": 2.1472,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": 2.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856809,
       "game_date": "2026-10-17",
       "game_time": "2026-10-17T23:30:00+00:00",
@@ -397,6 +445,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": 2.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856724,
+      "game_date": "2026-10-17",
+      "game_time": "2026-10-17T16:00:00+00:00",
+      "game": "Florida @ Texas",
+      "home_team": "Texas",
+      "away_team": "Florida",
+      "bet_type": "Spread",
+      "pick": "Take Texas -4.0",
+      "probability": 0.544646,
+      "edge": 2.0251,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -4.0,
       "league": "NCAAF"
     }
   ]
