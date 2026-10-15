@@ -1,54 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-10-15T19:48:19.582629+00:00",
+    "generated_at": "2026-10-15T22:48:39.464190+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
     "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "f7a4a04fe4954e089691654bb3dafa41",
+    "release_id": "b997ab2687424c2e8345d15ad0ec78f1",
     "model_version": "2.2.0",
     "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": [
-    {
-      "game_id": 401862800,
-      "game": "East Carolina @ UAB",
-      "kickoff": "2026-10-15T23:30:00+00:00",
-      "side": "over",
-      "market_total": 48.5,
-      "prediction_time": "2026-10-15T19:48:19.385065+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 48.5,
-      "taken_odds": -105.0,
-      "source_snapshot_at": "2026-10-15T19:47:42.348927+00:00",
-      "ingestion_run_id": "34b60969d1e242ddb1eee27231540862",
-      "over_probability": 0.648969,
-      "selected_probability": 0.648969,
-      "probability_edge": 0.148969,
-      "opening_total": 48.5,
-      "line_move": 0.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    },
-    {
-      "game_id": 401869950,
-      "game": "Georgia Southern @ Old Dominion",
-      "kickoff": "2026-10-15T23:30:00+00:00",
-      "side": "over",
-      "market_total": 46.5,
-      "prediction_time": "2026-10-15T19:48:19.385065+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 46.5,
-      "taken_odds": -106.0,
-      "source_snapshot_at": "2026-10-15T19:47:42.348927+00:00",
-      "ingestion_run_id": "34b60969d1e242ddb1eee27231540862",
-      "over_probability": 0.67148,
-      "selected_probability": 0.67148,
-      "probability_edge": 0.17148,
-      "opening_total": 46.5,
-      "line_move": 0.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
