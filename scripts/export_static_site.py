@@ -102,6 +102,10 @@ def main() -> int:
             static_logo = OUTPUT_DIR.parent / "tailgate-logo.png"
             static_logo.write_bytes(LOGO_PATH.read_bytes())
             payload.setdefault("sidebar", {})["logo"] = "/data/tailgate-logo.png"
+        elif name == "home" and LOGO_PATH.exists():
+            # The home payload has its own logo field, separate from sidebar
+            # metadata, and must also use the copied static asset on Pages.
+            payload["logo"] = "/data/tailgate-logo.png"
         payload = jsonable(payload)
         encoded = json.dumps(
             payload,
