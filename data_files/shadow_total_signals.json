@@ -1,10 +1,54 @@
 {
   "meta": {
-    "generated_at": "2026-10-16T03:00:04.969236+00:00",
+    "generated_at": "2026-10-16T15:49:26.890390+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "b58d2c0b4ec241dcb7f5d945fa08dd21",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401867821,
+      "game": "Columbia @ Pennsylvania",
+      "kickoff": "2026-10-16T23:00:00+00:00",
+      "side": "over",
+      "market_total": 46.5,
+      "prediction_time": "2026-10-16T15:49:26.728957+00:00",
+      "sportsbook": "Novig",
+      "taken_line": 46.5,
+      "taken_odds": -106.0,
+      "source_snapshot_at": "2026-10-16T03:00:38.174619+00:00",
+      "ingestion_run_id": "01f852ed4e9e4ed0bd7efa49c3cf134c",
+      "over_probability": 0.646623,
+      "selected_probability": 0.646623,
+      "probability_edge": 0.146623,
+      "opening_total": 46.5,
+      "line_move": 0.0,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401869844,
+      "game": "App State @ Coastal Carolina",
+      "kickoff": "2026-10-17T00:00:00+00:00",
+      "side": "over",
+      "market_total": 49.5,
+      "prediction_time": "2026-10-16T15:49:26.728957+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 49.5,
+      "taken_odds": -106.0,
+      "source_snapshot_at": "2026-10-15T19:47:42.348927+00:00",
+      "ingestion_run_id": "34b60969d1e242ddb1eee27231540862",
+      "over_probability": 0.623748,
+      "selected_probability": 0.623748,
+      "probability_edge": 0.123748,
+      "opening_total": 49.5,
+      "line_move": 0.0,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
