@@ -1,4 +1,4 @@
-﻿"""Value Bets — mirrors ``pages/2_Value_Bets.py``."""
+"""Value Bets — mirrors ``pages/2_Value_Bets.py``."""
 from __future__ import annotations
 
 import pandas as pd
@@ -150,6 +150,7 @@ def build_value_bets(
     stake_method: str = "Flat (1%)",
     bet_odds: float = -110,
     scenario_probability: float = 0.50,
+    static_catalog: bool = False,
 ) -> dict:
     """Return the Value Bets payload."""
     df_all = load_data()
@@ -250,6 +251,7 @@ def build_value_bets(
                         "Model": f"{ms:+.1f}",
                         "Book": f"{bs:+.1f}",
                         "Edge": round(rec.edge, 1),
+                        "Edge Unit": "pts",
                         "Edge Tier": CONFIDENCE_LABEL[rec.confidence],
                         "Pick": rec.pick,
                         "Result": (
@@ -275,6 +277,7 @@ def build_value_bets(
                         "Model": f"{mt:.1f}",
                         "Book": f"{bt:.1f}",
                         "Edge": round(rec.edge, 1),
+                        "Edge Unit": "pts",
                         "Edge Tier": CONFIDENCE_LABEL[rec.confidence],
                         "Pick": rec.pick,
                         "Result": (
@@ -291,7 +294,7 @@ def build_value_bets(
             aml = row.get("away_moneyline")
             if pd.notna(hml) and pd.notna(aml):
                 rec = generate_moneyline_pick(home, away, wp, float(hml), float(aml), game_id=gid)
-                if rec is not None and (
+                if rec is not None and rec.edge * 100 >= min_edge and (
                     min_conf_enum is None or _conf_gte(rec.confidence, min_conf_enum)
                 ):
                     recs.append(
@@ -303,6 +306,7 @@ def build_value_bets(
                             "Model": f"{wp:.1%}",
                             "Book": f"{int(hml):+d} / {int(aml):+d}",
                             "Edge": round(rec.edge * 100, 1),
+                            "Edge Unit": "pp",
                             "Edge Tier": CONFIDENCE_LABEL[rec.confidence],
                             "Pick": rec.pick,
                             "Result": (
@@ -339,7 +343,8 @@ def build_value_bets(
             "warnings": warnings,
             "captions": captions,
             "controls": controls,
-            "info": f"No bets found with edge ≥ {min_edge} pts and confidence ≥ {min_conf}.",
+            "info": f"No bets found with edge ≥ {min_edge} pts (moneyline: pp) and confidence ≥ {min_conf}.",
+            **({"static_rows": []} if static_catalog else {}),
             "stopped": True,
         }
 
@@ -357,12 +362,27 @@ def build_value_bets(
             "_start_date", na_position="last", kind="mergesort"
         )
 
+    static_rows = []
+    if static_catalog:
+        for _, row in df_recs.iterrows():
+            start_date = pd.to_datetime(row.get("_start_date"), utc=True, errors="coerce")
+            win_prob = row.get("_win_prob")
+            static_rows.append(
+                {
+                    "key": f"{row['Bet Type']}|{row['Game']}|{row['Week']}",
+                    "edge": float(row["Edge"]),
+                    "confidence": str(row["Edge Tier"]),
+                    "win_prob": float(win_prob) if pd.notna(win_prob) else None,
+                    "start_date": start_date.isoformat() if pd.notna(start_date) else None,
+                }
+            )
+
     wins = int((df_recs["Result"] == "✅ WIN").sum())
     losses = int((df_recs["Result"] == "❌ LOSS").sum())
     total = wins + losses
 
     display_cols = [
-        "Week", "Game", kickoff_column, "Bet Type", "Model", "Book", "Edge",
+        "Week", "Game", kickoff_column, "Bet Type", "Model", "Book", "Edge", "Edge Unit",
         "Edge Tier", "Pick", "Result",
     ]
     table = df_recs[display_cols].reset_index(drop=True)
@@ -389,6 +409,7 @@ def build_value_bets(
         ],
         "table_heading": "All Value Bets",
         "table": {"columns": display_cols, "rows": records(table)},
+        **({"static_rows": static_rows} if static_catalog else {}),
         "simulator_heading": "💸 Bankroll Simulator",
         "simulator_caption": (
             "The bankroll chart is a scenario tool. "
@@ -403,3 +424,4 @@ def build_value_bets(
         ),
         "footer": True,
     }
+

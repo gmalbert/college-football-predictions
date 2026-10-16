@@ -1,4 +1,4 @@
-﻿"""Weekly Predictions — mirrors ``pages/1_Weekly_Predictions.py``."""
+"""Weekly Predictions — mirrors ``pages/1_Weekly_Predictions.py``."""
 from __future__ import annotations
 
 import numpy as np
@@ -378,6 +378,7 @@ def build_weekly(
     min_edge: float = 0.0,
     sort_by: str = "Edge (High→Low)",
     timezone_name: str | None = None,
+    static_catalog: bool = False,
 ) -> dict:
     """Return the Weekly Predictions payload."""
     df_all = load_feature_matrix()
@@ -436,8 +437,28 @@ def build_weekly(
 
     if edge_columns:
         df_week["edge"] = df_week[edge_columns].max(axis=1, skipna=True)
-        if min_edge > 0:
-            df_week = df_week[df_week["edge"] >= min_edge]
+
+    static_rows: dict[str, dict] = {}
+    if static_catalog:
+        for _, row in df_week.iterrows():
+            away = str(row.get("away_team") or "—")
+            home = str(row.get("home_team") or "—")
+            kickoff = pd.to_datetime(row.get("start_date"), utc=True, errors="coerce")
+            edge = row.get("edge")
+            win_prob = row.get("win_prob")
+            static_rows[f"{away} @ {home}"] = {
+                "conferences": [
+                    str(value)
+                    for value in (row.get("home_conference"), row.get("away_conference"))
+                    if pd.notna(value)
+                ],
+                "edge": float(edge) if pd.notna(edge) else None,
+                "win_prob": float(win_prob) if pd.notna(win_prob) else None,
+                "start_date": kickoff.isoformat() if pd.notna(kickoff) else None,
+            }
+
+    if edge_columns and min_edge > 0:
+        df_week = df_week[df_week["edge"] >= min_edge]
 
     if sort_by == "Edge (High→Low)" and "edge" in df_week.columns:
         df_week = df_week.sort_values("edge", ascending=False, kind="mergesort")
@@ -486,6 +507,7 @@ def build_weekly(
             },
             "game_count_line": game_count_line,
             "empty_info": "No games match the current filters.",
+            **({"static_rows": static_rows} if static_catalog else {}),
             "footer": True,
         }
 
@@ -525,5 +547,7 @@ def build_weekly(
         ),
         "table": {"columns": table_columns, "rows": table_rows},
         "table_height": min(640, max(140, 36 + 35 * len(compact_rows))),
+        **({"static_rows": static_rows} if static_catalog else {}),
         "footer": True,
     }
+

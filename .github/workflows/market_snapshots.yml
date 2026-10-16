@@ -23,7 +23,7 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4.2.2
       - uses: actions/setup-python@v5.6.0
@@ -61,6 +61,11 @@ jobs:
           python scripts/export_best_bets.py
           python scripts/publish_release.py
           python scripts/audit_pipeline.py --strict --output data_files/audit_report.json
+      - name: Refresh static dashboard payloads
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python scripts/export_static_site.py --scope market
+
       - name: Commit snapshot
         run: |
           git config user.name "github-actions[bot]"
@@ -74,6 +79,9 @@ jobs:
             data_files/best_bets_today.json \
             data_files/shadow_total_signals.json \
             data_files/processed/bet_ledger.parquet \
-            data_files/releases/
+            data_files/releases/ \
+            frontend/public/data/
           git diff --staged --quiet || git commit -m "data: market snapshot $(date -u '+%Y-%m-%dT%H:%MZ')"
           git push
+
+

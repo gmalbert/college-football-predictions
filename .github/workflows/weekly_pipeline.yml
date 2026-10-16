@@ -117,6 +117,13 @@ jobs:
       - name: Enforce data and evaluation contracts
         run: python scripts/audit_pipeline.py --strict --output data_files/audit_report.json
 
+      # Compile the API-backed dashboard pages into static JSON for Cloudflare
+      # Pages. This stage runs after all source artifacts and forecasts refresh.
+      - name: Precompute static dashboard payloads
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python scripts/export_static_site.py
+
       # ── commit artifacts ─────────────────────────────────────────────────────
       - name: Commit updated data files
         run: |
@@ -130,7 +137,10 @@ jobs:
             data_files/audit_report.json \
             data_files/releases/ \
             data_files/best_bets_today.json \
-            data_files/shadow_total_signals.json
+            data_files/shadow_total_signals.json \
+            frontend/public/data/
           git diff --staged --quiet || \
             git commit -m "chore: weekly data pipeline $(date -u '+%Y-%m-%d')"
           git push
+
+

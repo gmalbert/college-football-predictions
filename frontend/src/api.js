@@ -5,7 +5,10 @@
  * kickoff column matches Streamlit's ``st.context.timezone`` behaviour.
  */
 
+import { staticApiGet } from "./staticApi";
+
 const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const STATIC_DATA_ONLY = import.meta.env.VITE_STATIC_DATA_ONLY === "true";
 
 export function browserTimezone() {
   // ``?tz=`` lets the parity harness pin the timezone so the React build can be
@@ -40,6 +43,8 @@ function buildUrl(path, params) {
 const REQUEST_TIMEOUT_MS = 60_000;
 
 export async function apiGet(path, params, signal) {
+  if (STATIC_DATA_ONLY) return staticApiGet(path, params, signal);
+
   const deadline = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   const combined = signal ? AbortSignal.any([signal, deadline]) : deadline;
 
@@ -75,3 +80,4 @@ export function weeklyParams(state) {
     tz: browserTimezone(),
   };
 }
+
