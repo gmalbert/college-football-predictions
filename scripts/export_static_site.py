@@ -396,77 +396,98 @@ def _export_value_bets_catalog() -> dict:
 
 
 def _export_win_probability_catalog() -> dict:
-    """Snapshot CFBD games and charts so the browser makes no live API calls."""
-    schedule: dict[str, dict[str, dict[str, dict]]] = {}
-    games_seen_by_season = {str(year): 0 for year in win_probability.SEASON_OPTIONS}
+    """Export the local schedule without spending CFBD calls on static builds.
 
+    In-game probability charts require one CFBD request per game, which exceeds
+    the account's monthly quota during a full history export. The weekly data
+    pipeline already includes the supported seasons' schedules in games.parquet.
+    Keep the season/week/game selectors available in static mode and provide an
+    explicit unavailable message for charts until those chart payloads can be
+    sourced from a persisted dataset.
+    """
+    import pandas as pd
+
+    games_path = ROOT / "data_files" / "processed" / "games.parquet"
+    if not games_path.exists():
+        raise RuntimeError(f"Missing local game schedule: {games_path.relative_to(ROOT)}")
+    frame = pd.read_parquet(games_path)
+    required = {"game_id", "season", "week", "season_type", "home_team", "away_team"}
+    missing = required.difference(frame.columns)
+    if missing:
+        raise RuntimeError(f"Game schedule is missing columns: {', '.join(sorted(missing))}")
+
+    unavailable_url = _write_snapshot(
+        "win-probability/unavailable.json",
+        {
+            "page": "win_probability",
+            "title": "📈 In-Game Win Probability",
+            "caption": (
+                "Play-by-play home-team win probability from the CFBD model. "
+                "Select a season and week, then pick a game."
+            ),
+            "warnings": [
+                "In-game win probability charts are not included in the static data catalog yet."
+            ],
+            "stopped": True,
+        },
+    )
+    no_games_url = _write_snapshot(
+        "win-probability/no-games.json",
+        {
+            "page": "win_probability",
+            "title": "📈 In-Game Win Probability",
+            "caption": (
+                "Play-by-play home-team win probability from the CFBD model. "
+                "Select a season and week, then pick a game."
+            ),
+            "info": "No games found for the selected week.",
+            "stopped": True,
+        },
+    )
+
+    schedule: dict[str, dict[str, dict[str, dict]]] = {}
+    games_seen_by_season = {str(int(year)): 0 for year in win_probability.SEASON_OPTIONS}
     for season in win_probability.SEASON_OPTIONS:
         season_key = str(int(season))
         schedule[season_key] = {}
         for season_type in win_probability.SEASON_TYPES:
             kind = season_type.lower()
             schedule[season_key][season_type] = {}
+            season_games = frame[
+                (pd.to_numeric(frame["season"], errors="coerce") == int(season))
+                & (frame["season_type"].astype(str).str.lower() == kind)
+            ]
             for week in win_probability._week_options(kind):
-                games = win_probability._load_games(int(season), int(week), kind)
+                week_games = season_games[
+                    pd.to_numeric(season_games["week"], errors="coerce") == int(week)
+                ]
                 game_options: dict[str, int] = {}
-                for game in games:
-                    game_id, away, home = win_probability._game_label(game)
-                    if game_id:
-                        try:
-                            game_options[f"{away} @ {home}"] = int(game_id)
-                        except (TypeError, ValueError):
-                            continue
+                for row in week_games.itertuples(index=False):
+                    if pd.isna(row.game_id):
+                        continue
+                    try:
+                        game_id = int(row.game_id)
+                    except (TypeError, ValueError):
+                        continue
+                    game_options[f"{row.away_team} @ {row.home_team}"] = game_id
 
-                week_entry = {
+                snapshots = {str(game_id): unavailable_url for game_id in game_options.values()}
+                if game_options:
+                    games_seen_by_season[season_key] += len(game_options)
+                schedule[season_key][season_type][str(int(week))] = {
                     "games": sorted(game_options),
                     "game_options": game_options,
-                    "snapshots": {},
+                    "snapshots": snapshots,
+                    **({"empty_url": no_games_url} if not game_options else {}),
                 }
-                if not game_options:
-                    empty = win_probability.build_win_probability(
-                        season=int(season),
-                        season_type_display=season_type,
-                        week=int(week),
-                    )
-                    week_entry["empty_url"] = _write_snapshot(
-                        f"win-probability/{season_key}-{kind}-{week}-empty.json",
-                        empty,
-                    )
 
-                for label, game_id in game_options.items():
-                    relative = f"win-probability/{season_key}-{kind}-{week}-{game_id}.json"
-                    path = OUTPUT_DIR / relative
-                    payload = None
-                    # Keep completed snapshots immutable; retry a prior no-chart
-                    # result on the next workflow run because the game may have
-                    # finished since the previous data refresh.
-                    if path.exists():
-                        try:
-                            existing = json.loads(path.read_text(encoding="utf-8"))
-                            if existing.get("figure"):
-                                payload = existing
-                        except (OSError, json.JSONDecodeError):
-                            pass
-                    if payload is None:
-                        payload = win_probability.build_win_probability(
-                            season=int(season),
-                            season_type_display=season_type,
-                            week=int(week),
-                            game_id=game_id,
-                        )
-                        _write_snapshot(relative, payload)
-                    else:
-                        print(f"win probability {season}/{season_type}/{week}/{game_id}: cached")
-                    week_entry["snapshots"][str(game_id)] = f"/data/snapshots/{relative}"
-                    games_seen_by_season[season_key] += 1
-
-                schedule[season_key][season_type][str(int(week))] = week_entry
-
-    missing = [season for season, count in games_seen_by_season.items() if count == 0]
-    if missing:
+    missing_seasons = [
+        season for season, count in games_seen_by_season.items() if count == 0
+    ]
+    if missing_seasons:
         raise RuntimeError(
-            "CFBD returned no games for Win Probability seasons "
-            f"{', '.join(missing)}. Check CFBD_API_KEY before publishing static data."
+            "Local game schedule has no games for Win Probability seasons "
+            f"{', '.join(missing_seasons)}."
         )
 
     return {
@@ -477,8 +498,6 @@ def _export_win_probability_catalog() -> dict:
         "season_types": win_probability.SEASON_TYPES,
         "schedule": schedule,
     }
-
-
 def _git_revision() -> str | None:
     """Return the workflow checkout revision without requiring GitPython."""
     import os
