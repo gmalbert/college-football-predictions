@@ -103,7 +103,7 @@ export default function ValueBets() {
                   onChange={(value) => setBetType(value)}
                 />
                 <Slider
-                  label="Min Edge (pts)"
+                  label="Min Edge (pts / moneyline pp)"
                   min={0.5}
                   max={10}
                   step={0.5}
@@ -198,3 +198,4 @@ export default function ValueBets() {
     </PageState>
   );
 }
+
