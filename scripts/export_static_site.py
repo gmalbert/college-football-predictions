@@ -60,27 +60,27 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--scope",
-        choices=("full", "market"),
+        choices=("full", "market", "win-probability"),
         default="full",
-        help="Full rebuild for the weekly pipeline, or refresh only market-sensitive pages.",
+        help="Full rebuild, market refresh, or Win Probability catalog refresh.",
     )
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     manifest_path = OUTPUT_DIR / "manifest.json"
     prior_manifest = {}
-    if args.scope == "market":
+    if args.scope in ("market", "win-probability"):
         if not manifest_path.exists():
             raise RuntimeError(
                 "No full static catalog exists yet. Run the weekly pipeline before "
-                "the market-only static refresh."
+                "the requested static refresh."
             )
         prior_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    else:
-        for folder in ("weekly", "teams", "preseason", "total-signals", "historical"):
+    elif args.scope == "full":
+        for folder in ("weekly", "teams", "preseason", "total-signals", "historical", "win-probability"):
             generated = OUTPUT_DIR / folder
             if generated.is_dir():
-                for stale in generated.glob("*.json"):
+                for stale in generated.rglob("*.json"):
                     stale.unlink()
 
     entries: dict[str, dict] = dict(prior_manifest.get("pages", {}))
@@ -93,6 +93,8 @@ def main() -> int:
         page_builders = {
             name: build for name, build in page_builders.items() if name in market_pages
         }
+    elif args.scope == "win-probability":
+        page_builders = {}
 
     for name, build in page_builders.items():
         payload = build()
@@ -130,7 +132,7 @@ def main() -> int:
         historical_catalog = _export_historical_catalog()
         value_bets_catalog = _export_value_bets_catalog()
         win_probability_catalog = _export_win_probability_catalog()
-    else:
+    elif args.scope == "market":
         weekly_catalog = _export_weekly_catalog()
         value_bets_catalog = _export_value_bets_catalog()
         total_signals_catalog = _export_total_signals_catalog()
@@ -138,6 +140,14 @@ def main() -> int:
         preseason_catalog = prior_manifest["preseason_catalog"]
         historical_catalog = prior_manifest["historical_catalog"]
         win_probability_catalog = prior_manifest["win_probability_catalog"]
+    else:
+        weekly_catalog = prior_manifest["weekly_catalog"]
+        team_catalog = prior_manifest["team_catalog"]
+        preseason_catalog = prior_manifest["preseason_catalog"]
+        total_signals_catalog = prior_manifest["total_signals_catalog"]
+        historical_catalog = prior_manifest["historical_catalog"]
+        value_bets_catalog = prior_manifest["value_bets_catalog"]
+        win_probability_catalog = _export_win_probability_catalog()
 
     manifest = {
         "schema_version": 1,
@@ -399,16 +409,197 @@ def _export_value_bets_catalog() -> dict:
     }
 
 
-def _export_win_probability_catalog() -> dict:
-    """Export the local schedule without spending CFBD calls on static builds.
 
-    In-game probability charts require one CFBD request per game, which exceeds
-    the account's monthly quota during a full history export. The weekly data
-    pipeline already includes the supported seasons' schedules in games.parquet.
-    Keep the season/week/game selectors available in static mode and provide an
-    explicit unavailable message for charts until those chart payloads can be
-    sourced from a persisted dataset.
-    """
+def _export_local_win_probability_snapshots(
+    season_options: list[int],
+    games_frame,
+) -> dict[tuple[int, int], str]:
+    """Export cross-fitted in-house charts where cached PBP is available."""
+    import numpy as np
+    import pandas as pd
+    from sklearn.model_selection import GroupKFold
+
+    from api.jsonutil import records
+    from models.epa_model import compute_epa, train_ep_model
+    from models.wpa_model import predict_wp, train_wp_model
+
+    snapshots: dict[tuple[int, int], str] = {}
+    # Keep workflow cost bounded while retaining the current and previous seasons.
+    for season in season_options[:2]:
+        raw_path = ROOT / "data_files" / "raw" / f"plays_{int(season)}.json"
+        if not raw_path.exists() or raw_path.stat().st_size <= 2:
+            continue
+
+        season_games = games_frame[
+            (pd.to_numeric(games_frame["season"], errors="coerce") == int(season))
+            & games_frame["home_score"].notna()
+            & games_frame["away_score"].notna()
+        ].copy()
+        finals = {}
+        for row in season_games.itertuples(index=False):
+            game_id = int(row.game_id)
+            home_score = float(row.home_score)
+            away_score = float(row.away_score)
+            if home_score == away_score:
+                continue
+            finals[game_id] = {
+                "home": str(row.home_team),
+                "away": str(row.away_team),
+                "winner": str(row.home_team if home_score > away_score else row.away_team),
+                "home_score": int(home_score),
+                "away_score": int(away_score),
+            }
+        if len(finals) < 5:
+            continue
+
+        raw_plays = json.loads(raw_path.read_text(encoding="utf-8"))
+        def _number(value, default=0):
+            try:
+                return float(value) if value is not None else default
+            except (TypeError, ValueError):
+                return default
+
+        rows = []
+        for item in raw_plays:
+            try:
+                game_id = int(item.get("gameId"))
+            except (TypeError, ValueError):
+                continue
+            if game_id not in finals:
+                continue
+            clock = item.get("clock") or {}
+            offense = str(item.get("offense") or "")
+            home = str(item.get("home") or "")
+            away = str(item.get("away") or "")
+            if not home or not away or offense not in (home, away):
+                continue
+
+            scoring = item.get("scoring", False)
+            if isinstance(scoring, str):
+                scoring = scoring.strip().lower() in {"true", "1", "yes"}
+
+            offense_score = _number(item.get("offenseScore"))
+            defense_score = _number(item.get("defenseScore"))
+            if offense == home:
+                home_score, away_score = offense_score, defense_score
+            else:
+                home_score, away_score = defense_score, offense_score
+            rows.append(
+                {
+                    "game_id": game_id,
+                    "play_number": item.get("playNumber"),
+                    "period": item.get("period"),
+                    "down": item.get("down"),
+                    "distance": item.get("distance"),
+                    "yards_to_goal": item.get("yardsToGoal"),
+                    "clock_minutes": clock.get("minutes"),
+                    "clock_seconds": clock.get("seconds"),
+                    "score_diff": offense_score - defense_score,
+                    "scoring_play": bool(scoring),
+                    "play_type": item.get("playType") or "",
+                    "home": home,
+                    "away": away,
+                    "pos_team": offense,
+                    "winner": finals[game_id]["winner"],
+                    "pos_team_timeouts_rem_before": item.get("offenseTimeouts"),
+                    "def_pos_team_timeouts_rem_before": item.get("defenseTimeouts"),
+                    "home_score": home_score,
+                    "away_score": away_score,
+                    "play_text": item.get("playText") or "",
+                }
+            )
+
+        plays = pd.DataFrame(rows)
+        if plays.empty:
+            continue
+        plays["game_id"] = pd.to_numeric(plays["game_id"], errors="coerce")
+        plays["play_number"] = pd.to_numeric(plays["play_number"], errors="coerce")
+        plays["period"] = pd.to_numeric(plays["period"], errors="coerce")
+        plays = plays.dropna(
+            subset=["game_id", "play_number", "period", "down", "pos_team", "home", "winner"]
+        ).sort_values(["game_id", "play_number"])
+        game_count = int(plays["game_id"].nunique())
+        if game_count < 5:
+            continue
+
+        predictions = []
+        splitter = GroupKFold(n_splits=min(5, game_count))
+        for train_indices, test_indices in splitter.split(plays, groups=plays["game_id"]):
+            train_plays = plays.iloc[train_indices].copy()
+            test_plays = plays.iloc[test_indices].copy()
+
+            ep_model = train_ep_model(train_plays, persist=False)
+            if not ep_model:
+                continue
+            train_epa = compute_epa(ep_model, train_plays)
+            wp_model = train_wp_model(train_epa, persist=False)
+            if not wp_model:
+                continue
+
+            test_epa = compute_epa(ep_model, test_plays)
+            possession_wp = predict_wp(wp_model, test_epa)
+            scored = test_epa.copy()
+            scored["home_wp"] = np.where(
+                scored["pos_team"].to_numpy() == scored["home"].to_numpy(),
+                possession_wp,
+                1 - possession_wp,
+            )
+            predictions.append(scored)
+
+        if not predictions:
+            continue
+        predicted = pd.concat(predictions, ignore_index=True)
+        for game_id, game in predicted.groupby("game_id", sort=True):
+            game_id = int(game_id)
+            final = finals.get(game_id)
+            if not final:
+                continue
+            chart = game.sort_values("play_number").copy()
+            chart = chart.rename(columns={"play_number": "play"})
+            chart = chart[chart["home_wp"].notna()]
+            if chart.empty:
+                continue
+
+            home_name = final["home"]
+            away_name = final["away"]
+            final_home_wp = float(np.clip(chart["home_wp"].iloc[-1], 0, 1))
+            score = (
+                f"{home_name} {final['home_score']} – "
+                f"{final['away_score']} {away_name}"
+            )
+            payload = {
+                "page": "win_probability",
+                "title": "📈 In-Game Win Probability",
+                "caption": (
+                    f"Research-only in-house model. This {season} game was held out "
+                    "of training; this curve is not the CFBD win-probability model."
+                ),
+                "metrics": [
+                    {"label": f"{home_name} Win Prob", "value": f"{final_home_wp:.1%}", "delta": None, "help": None},
+                    {"label": f"{away_name} Win Prob", "value": f"{1 - final_home_wp:.1%}", "delta": None, "help": None},
+                    {"label": "Final Score", "value": score, "delta": None, "help": None},
+                ],
+                "figure": win_probability._wp_figure(chart, home_name, away_name),
+                "raw_expander": {
+                    "label": "Raw play data",
+                    "expanded": False,
+                    "columns": ["play", "home_wp", "home_score", "away_score", "play_text"],
+                    "rows": records(
+                        chart[["play", "home_wp", "home_score", "away_score", "play_text"]]
+                    ),
+                    "height": 300,
+                },
+            }
+            snapshots[(int(season), game_id)] = _write_snapshot(
+                f"win-probability/{int(season)}/{game_id}.json",
+                payload,
+            )
+        print(f"win probability {season}: {sum(1 for key in snapshots if key[0] == int(season))} game charts")
+    return snapshots
+
+
+def _export_win_probability_catalog() -> dict:
+    """Export schedules plus game-held-out charts from cached local play data."""
     import pandas as pd
 
     games_path = ROOT / "data_files" / "processed" / "games.parquet"
@@ -420,17 +611,21 @@ def _export_win_probability_catalog() -> dict:
     if missing:
         raise RuntimeError(f"Game schedule is missing columns: {', '.join(sorted(missing))}")
 
+    chart_snapshots = _export_local_win_probability_snapshots(
+        win_probability.SEASON_OPTIONS,
+        frame,
+    )
     unavailable_url = _write_snapshot(
         "win-probability/unavailable.json",
         {
             "page": "win_probability",
             "title": "📈 In-Game Win Probability",
             "caption": (
-                "Play-by-play home-team win probability from the CFBD model. "
-                "Select a season and week, then pick a game."
+                "Research-only in-house win-probability charts are generated from "
+                "cached play-by-play where enough data is available."
             ),
             "warnings": [
-                "In-game win probability charts are not included in the static data catalog yet."
+                "No precomputed play-by-play chart is available for this game."
             ],
             "stopped": True,
         },
@@ -441,8 +636,8 @@ def _export_win_probability_catalog() -> dict:
             "page": "win_probability",
             "title": "📈 In-Game Win Probability",
             "caption": (
-                "Play-by-play home-team win probability from the CFBD model. "
-                "Select a season and week, then pick a game."
+                "Research-only in-house win-probability charts are generated from "
+                "cached play-by-play where enough data is available."
             ),
             "info": "No games found for the selected week.",
             "stopped": True,
@@ -475,7 +670,10 @@ def _export_win_probability_catalog() -> dict:
                         continue
                     game_options[f"{row.away_team} @ {row.home_team}"] = game_id
 
-                snapshots = {str(game_id): unavailable_url for game_id in game_options.values()}
+                snapshots = {
+                    str(game_id): chart_snapshots.get((int(season), game_id), unavailable_url)
+                    for game_id in game_options.values()
+                }
                 if game_options:
                     games_seen_by_season[season_key] += len(game_options)
                 schedule[season_key][season_type][str(int(week))] = {
@@ -501,7 +699,11 @@ def _export_win_probability_catalog() -> dict:
         "default_week": 1,
         "season_types": win_probability.SEASON_TYPES,
         "schedule": schedule,
+        "chart_seasons": sorted({season for season, _ in chart_snapshots}),
+        "chart_count": len(chart_snapshots),
     }
+
+
 def _git_revision() -> str | None:
     """Return the workflow checkout revision without requiring GitPython."""
     import os

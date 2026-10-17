@@ -1,6 +1,8 @@
 """Win Probability — mirrors ``pages/7_Win_Probability.py``."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -13,7 +15,12 @@ from utils.cfbd_client import (
     parse_win_probability_rows,
 )
 
-SEASON_OPTIONS = list(range(2025, 2020, -1))
+def _current_football_season() -> int:
+    now = datetime.now(timezone.utc)
+    return now.year if now.month >= 7 else now.year - 1
+
+
+SEASON_OPTIONS = list(range(_current_football_season(), _current_football_season() - 6, -1))
 SEASON_TYPES = ["Regular", "Postseason"]
 
 
@@ -98,7 +105,7 @@ def _wp_figure(df: pd.DataFrame, home_name: str, away_name: str) -> dict:
 
 
 def build_win_probability(
-    season: int = 2025,
+    season: int | None = None,
     season_type_display: str = "Regular",
     week: int = 1,
     search: str = "",
@@ -114,7 +121,7 @@ def build_win_probability(
         ),
     }
 
-    if season not in SEASON_OPTIONS:
+    if season is None or season not in SEASON_OPTIONS:
         season = SEASON_OPTIONS[0]
     if season_type_display not in SEASON_TYPES:
         season_type_display = SEASON_TYPES[0]
