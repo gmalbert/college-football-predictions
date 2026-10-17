@@ -265,7 +265,7 @@ def build_home() -> dict:
         "page": "home",
         "title": "🏈 College Football Predictions",
         "logo": "/api/logo" if LOGO_PATH.exists() else None,
-        "warnings": warnings,
+        "warnings": [],
         "infos": infos,
         "captions": captions,
         "columns": [
