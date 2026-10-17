@@ -60,27 +60,27 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--scope",
-        choices=("full", "market"),
+        choices=("full", "market", "win-probability"),
         default="full",
-        help="Full rebuild for the weekly pipeline, or refresh only market-sensitive pages.",
+        help="Full rebuild, market refresh, or Win Probability catalog refresh.",
     )
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     manifest_path = OUTPUT_DIR / "manifest.json"
     prior_manifest = {}
-    if args.scope == "market":
+    if args.scope in ("market", "win-probability"):
         if not manifest_path.exists():
             raise RuntimeError(
                 "No full static catalog exists yet. Run the weekly pipeline before "
-                "the market-only static refresh."
+                "the requested static refresh."
             )
         prior_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    else:
+    elif args.scope == "full":
         for folder in ("weekly", "teams", "preseason", "total-signals", "historical", "win-probability"):
             generated = OUTPUT_DIR / folder
             if generated.is_dir():
-                for stale in generated.glob("*.json"):
+                for stale in generated.rglob("*.json"):
                     stale.unlink()
 
     entries: dict[str, dict] = dict(prior_manifest.get("pages", {}))
@@ -93,6 +93,8 @@ def main() -> int:
         page_builders = {
             name: build for name, build in page_builders.items() if name in market_pages
         }
+    elif args.scope == "win-probability":
+        page_builders = {}
 
     for name, build in page_builders.items():
         payload = build()
@@ -130,7 +132,7 @@ def main() -> int:
         historical_catalog = _export_historical_catalog()
         value_bets_catalog = _export_value_bets_catalog()
         win_probability_catalog = _export_win_probability_catalog()
-    else:
+    elif args.scope == "market":
         weekly_catalog = _export_weekly_catalog()
         value_bets_catalog = _export_value_bets_catalog()
         total_signals_catalog = _export_total_signals_catalog()
@@ -138,6 +140,14 @@ def main() -> int:
         preseason_catalog = prior_manifest["preseason_catalog"]
         historical_catalog = prior_manifest["historical_catalog"]
         win_probability_catalog = prior_manifest["win_probability_catalog"]
+    else:
+        weekly_catalog = prior_manifest["weekly_catalog"]
+        team_catalog = prior_manifest["team_catalog"]
+        preseason_catalog = prior_manifest["preseason_catalog"]
+        total_signals_catalog = prior_manifest["total_signals_catalog"]
+        historical_catalog = prior_manifest["historical_catalog"]
+        value_bets_catalog = prior_manifest["value_bets_catalog"]
+        win_probability_catalog = _export_win_probability_catalog()
 
     manifest = {
         "schema_version": 1,
