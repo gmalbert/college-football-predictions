@@ -1,0 +1,49 @@
+name: Static Win Probability Export
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/services/win_probability.py"
+      - "models/epa_model.py"
+      - "models/wpa_model.py"
+      - "scripts/export_static_site.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: static-win-probability-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-api.txt
+
+      - name: Export static Win Probability snapshots
+        run: python scripts/export_static_site.py --scope win-probability
+
+      - name: Commit generated snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f \
+            frontend/public/data/snapshots/manifest.json \
+            frontend/public/data/snapshots/win-probability/
+          git diff --staged --quiet || \
+            git commit -m "data: refresh static win probability charts $(date -u '+%Y-%m-%d')"
+          git push
