@@ -243,16 +243,9 @@ def _dataset_metrics(df_dataset: pd.DataFrame) -> dict:
 def build_home() -> dict:
     """Return the complete home-page payload."""
     metrics = load_metrics()
-    release = metrics.get("release_decision", {}) if metrics else {}
     release_metadata = load_current_release()
 
     warnings: list[str] = []
-    if metrics and release.get("decision") != "promote":
-        failed = ", ".join(release.get("failed_gates", [])) or "release gates unavailable"
-        warnings.append(
-            f"Model release status: HOLD ({failed}). Forecasts are shown for research; "
-            "Best Bets are published as provisional research output and are not validated recommendations."
-        )
 
     infos: list[str] = []
     if not MODEL_RUNTIME_AVAILABLE:
