@@ -65,12 +65,7 @@
   "captions": [
     "Artifact release 991c44c52635 · 2026-09-25T20:06:19.080673+00:00"
   ],
-  "alerts": [
-    {
-      "kind": "warning",
-      "text": "Model release status: HOLD (win_market_baseline, spread_market_baseline, closing_line_value). Forecasts are shown for research; Best Bets are published as provisional research output and are not validated recommendations."
-    }
-  ],
+  "alerts": [],
   "markdown": [
     "**South Florida @ Bowling Green** Wk 4 · Spread edge **7.7 pts** · Bet **Take South Florida -17.5** · Win prob 13%",
     "**Notre Dame @ Purdue** Wk 4 · Spread edge **7.0 pts** · Bet **Take Notre Dame -27.5** · Win prob 5%",
