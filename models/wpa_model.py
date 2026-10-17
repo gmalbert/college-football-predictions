@@ -63,7 +63,7 @@ def _prepare_wp_features(pbp_df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def train_wp_model(pbp_df: pd.DataFrame) -> dict:
+def train_wp_model(pbp_df: pd.DataFrame, persist: bool = True) -> dict:
     """
     Train an in-game win probability model.
 
@@ -99,8 +99,9 @@ def train_wp_model(pbp_df: pd.DataFrame) -> dict:
     model.fit(X_scaled, y)
 
     model_dict = {"model": model, "scaler": scaler}
-    joblib.dump(model_dict, WP_MODEL_PATH)
-    logger.info(f"WP model trained on {len(X):,} plays → {WP_MODEL_PATH}")
+    if persist:
+        joblib.dump(model_dict, WP_MODEL_PATH)
+        logger.info(f"WP model trained on {len(X):,} plays → {WP_MODEL_PATH}")
     return model_dict
 
 
