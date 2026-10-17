@@ -1,10 +1,74 @@
 {
   "meta": {
-    "generated_at": "2026-10-17T02:52:03.955174+00:00",
+    "generated_at": "2026-10-17T14:43:24.580454+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "1cf3909cddcc42f68268b8011858b06f",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401866666,
+      "game": "UAlbany @ Stony Brook",
+      "kickoff": "2026-10-17T18:30:00+00:00",
+      "side": "over",
+      "market_total": 46.5,
+      "prediction_time": "2026-10-17T14:43:22.488371+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 46.5,
+      "taken_odds": -113.0,
+      "source_snapshot_at": "2026-10-17T02:52:36.609816+00:00",
+      "ingestion_run_id": "3b85db688c1d4863ab7cda19a7e20f64",
+      "over_probability": 0.641385,
+      "selected_probability": 0.641385,
+      "probability_edge": 0.141385,
+      "opening_total": 47.5,
+      "line_move": -1.0,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401867912,
+      "game": "Long Island University @ Wagner",
+      "kickoff": "2026-10-17T21:00:00+00:00",
+      "side": "over",
+      "market_total": 40.5,
+      "prediction_time": "2026-10-17T14:43:22.488371+00:00",
+      "sportsbook": "FanDuel",
+      "taken_line": 40.5,
+      "taken_odds": -118.0,
+      "source_snapshot_at": "2026-10-17T02:52:36.609816+00:00",
+      "ingestion_run_id": "3b85db688c1d4863ab7cda19a7e20f64",
+      "over_probability": 0.711148,
+      "selected_probability": 0.711148,
+      "probability_edge": 0.211148,
+      "opening_total": 42.5,
+      "line_move": -2.0,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401871091,
+      "game": "Louisiana Tech @ UL Monroe",
+      "kickoff": "2026-10-18T00:00:00+00:00",
+      "side": "over",
+      "market_total": 56.0,
+      "prediction_time": "2026-10-17T14:43:22.488371+00:00",
+      "sportsbook": "BetMGM",
+      "taken_line": 56.5,
+      "taken_odds": -108.0,
+      "source_snapshot_at": "2026-10-17T02:52:36.609816+00:00",
+      "ingestion_run_id": "3b85db688c1d4863ab7cda19a7e20f64",
+      "over_probability": 0.593328,
+      "selected_probability": 0.593328,
+      "probability_edge": 0.093328,
+      "opening_total": 57.5,
+      "line_move": -1.5,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
