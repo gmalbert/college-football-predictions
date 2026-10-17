@@ -103,15 +103,7 @@ def home_page():
     ats_m    = metrics.get("ats", {})
     win_m    = metrics.get("win_model", {})
     spread_m = metrics.get("spread_model", {})
-    release  = metrics.get("release_decision", {})
     release_metadata = load_current_release()
-
-    if metrics and release.get("decision") != "promote":
-        failed = ", ".join(release.get("failed_gates", [])) or "release gates unavailable"
-        st.warning(
-            f"Model release status: HOLD ({failed}). Forecasts are shown for research; "
-            "Best Bets are published as provisional research output and are not validated recommendations."
-        )
     if not model_runtime_available:
         st.info("Native model inference is unavailable in this local runtime; saved evaluation evidence remains available.")
     if release_metadata:
