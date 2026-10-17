@@ -1,54 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-10-16T23:52:23.606293+00:00",
+    "generated_at": "2026-10-17T00:18:30.594983+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "0bc12558803c4f3fba0f9a785a41cbe2",
-    "model_version": "2.2.0",
-    "strategy_version": "total-over-v2.2-locked"
+    "note": "No priced games are within the closing-time window"
   },
-  "signals": [
-    {
-      "game_id": 401858493,
-      "game": "Washington @ Purdue",
-      "kickoff": "2026-10-17T00:00:00+00:00",
-      "side": "over",
-      "market_total": 50.5,
-      "prediction_time": "2026-10-16T23:52:23.439559+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 50.5,
-      "taken_odds": -110.0,
-      "source_snapshot_at": "2026-10-16T23:51:58.430929+00:00",
-      "ingestion_run_id": "098d485b7c2d4fabb7ac1d68966b5e65",
-      "over_probability": 0.643142,
-      "selected_probability": 0.643142,
-      "probability_edge": 0.143142,
-      "opening_total": 50.5,
-      "line_move": 0.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    },
-    {
-      "game_id": 401869844,
-      "game": "App State @ Coastal Carolina",
-      "kickoff": "2026-10-17T00:00:00+00:00",
-      "side": "over",
-      "market_total": 48.5,
-      "prediction_time": "2026-10-16T23:52:23.439559+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 48.5,
-      "taken_odds": -115.0,
-      "source_snapshot_at": "2026-10-16T23:51:58.430929+00:00",
-      "ingestion_run_id": "098d485b7c2d4fabb7ac1d68966b5e65",
-      "over_probability": 0.623421,
-      "selected_probability": 0.623421,
-      "probability_edge": 0.123421,
-      "opening_total": 49.5,
-      "line_move": -1.0,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
