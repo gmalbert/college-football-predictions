@@ -92,7 +92,7 @@ def _prepare_ep_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def train_ep_model(pbp_df: pd.DataFrame) -> dict:
+def train_ep_model(pbp_df: pd.DataFrame, persist: bool = True) -> dict:
     """
     Train a multinomial EP model on play-by-play data and save it.
 
@@ -120,14 +120,15 @@ def train_ep_model(pbp_df: pd.DataFrame) -> dict:
     X_scaled = scaler.fit_transform(X)
 
     model = LogisticRegression(
-        multi_class="multinomial", solver="lbfgs",
+        solver="lbfgs",
         max_iter=2000, C=1.0,
     )
     model.fit(X_scaled, y)
 
     model_dict = {"model": model, "scaler": scaler}
-    joblib.dump(model_dict, EP_MODEL_PATH)
-    logger.info(f"EP model trained on {len(X):,} plays → {EP_MODEL_PATH}")
+    if persist:
+        joblib.dump(model_dict, EP_MODEL_PATH)
+        logger.info(f"EP model trained on {len(X):,} plays → {EP_MODEL_PATH}")
     return model_dict
 
 
