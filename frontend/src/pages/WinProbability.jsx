@@ -17,7 +17,10 @@ import {
 import { useApi } from "../useApi";
 
 export default function WinProbability() {
-  const [season, setSeason] = useState(2025);
+  const [season, setSeason] = useState(() => {
+    const now = new Date();
+    return now.getUTCMonth() >= 6 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+  });
   const [seasonType, setSeasonType] = useState("Regular");
   const [week, setWeek] = useState(1);
   const [search, setSearch] = useState("");
