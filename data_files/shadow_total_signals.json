@@ -1,10 +1,54 @@
 {
   "meta": {
-    "generated_at": "2026-10-19T20:20:53.503281+00:00",
+    "generated_at": "2026-10-20T11:03:56.658646+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "No priced games are within the closing-time window"
+    "note": "Prospective validation only; prices and CLV must pass before promotion",
+    "release_id": "a6e0d96a149343568d200112c6322e8f",
+    "model_version": "2.2.0",
+    "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": []
+  "signals": [
+    {
+      "game_id": 401871069,
+      "game": "Missouri State @ Delaware",
+      "kickoff": "2026-10-20T23:00:00+00:00",
+      "side": "over",
+      "market_total": 51.5,
+      "prediction_time": "2026-10-20T11:03:56.424847+00:00",
+      "sportsbook": "DraftKings",
+      "taken_line": 52.5,
+      "taken_odds": -110.0,
+      "source_snapshot_at": "2026-10-20T11:03:03.609273+00:00",
+      "ingestion_run_id": "fb2a98eafaef48d680deafec669218fa",
+      "over_probability": 0.653385,
+      "selected_probability": 0.653385,
+      "probability_edge": 0.153385,
+      "opening_total": 51.5,
+      "line_move": 0.0,
+      "book_count": 1,
+      "status": "shadow_not_a_bet"
+    },
+    {
+      "game_id": 401871055,
+      "game": "Middle Tennessee @ Florida International",
+      "kickoff": "2026-10-20T23:00:00+00:00",
+      "side": "over",
+      "market_total": 45.0,
+      "prediction_time": "2026-10-20T11:03:56.424847+00:00",
+      "sportsbook": "BetMGM",
+      "taken_line": 45.5,
+      "taken_odds": -108.0,
+      "source_snapshot_at": "2026-10-20T11:03:03.609273+00:00",
+      "ingestion_run_id": "fb2a98eafaef48d680deafec669218fa",
+      "over_probability": 0.663843,
+      "selected_probability": 0.663843,
+      "probability_edge": 0.163843,
+      "opening_total": 45.5,
+      "line_move": -0.5,
+      "book_count": 2,
+      "status": "shadow_not_a_bet"
+    }
+  ]
 }
