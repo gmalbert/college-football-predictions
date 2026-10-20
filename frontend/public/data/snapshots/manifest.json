@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-20T11:18:30.322307+00:00",
-  "source_revision": "3581704fe45703ed4e80ff60722084f1762a51d1",
+  "generated_at": "2026-10-20T18:55:22.384449+00:00",
+  "source_revision": "f5016f611b0726df04d5419072e7d0180deacb0a",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -10,8 +10,8 @@
     },
     "home": {
       "url": "/data/snapshots/home.json",
-      "bytes": 1508,
-      "sha256": "0779fd537083cd02150bf87afc28807d98ff9df1ab77b3cafdd770558a110900"
+      "bytes": 1520,
+      "sha256": "c9f6245de8ea35ebbe718e2ccb4fe28c29e7d5d4f9807f943db2ff2ba68bdb19"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
@@ -45,13 +45,13 @@
     },
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
-      "bytes": 2964,
-      "sha256": "45f395597f57fb97315869ca5a7980791207e336702c17297191e036f8fb1c98"
+      "bytes": 2963,
+      "sha256": "2cfd3b505394be5c7473afb1814322c3ff6532b88bf23d7eb4cb696d1aacf7d8"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
-      "bytes": 36203,
-      "sha256": "92fb4f7ac029b65989d8c1ca3cd73db047b5135bfec7e4992529098d8a53fc6b"
+      "bytes": 35679,
+      "sha256": "f296998c325a85aa2beda47cee9ea1ba8af08c3639eb8d4dbdef4c5de2a0f2b8"
     }
   },
   "weekly_catalog": {
