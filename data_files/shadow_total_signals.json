@@ -1,34 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-10-20T18:53:53.647475+00:00",
+    "generated_at": "2026-10-21T19:06:16.705568+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
     "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "1d3d62e5ce9d4703a6154312765f5481",
+    "release_id": "c4b24ec3d4c44d9989d979eb1de92981",
     "model_version": "2.2.0",
     "strategy_version": "total-over-v2.2-locked"
   },
-  "signals": [
-    {
-      "game_id": 401871055,
-      "game": "Middle Tennessee @ Florida International",
-      "kickoff": "2026-10-20T23:00:00+00:00",
-      "side": "over",
-      "market_total": 45.0,
-      "prediction_time": "2026-10-20T18:53:53.442570+00:00",
-      "sportsbook": "bet365",
-      "taken_line": 45.5,
-      "taken_odds": -108.0,
-      "source_snapshot_at": "2026-10-20T11:03:03.609273+00:00",
-      "ingestion_run_id": "fb2a98eafaef48d680deafec669218fa",
-      "over_probability": 0.663843,
-      "selected_probability": 0.663843,
-      "probability_edge": 0.163843,
-      "opening_total": 45.5,
-      "line_move": -0.5,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
