@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-21T19:07:08.487069+00:00",
+    "generated_at": "2026-10-22T16:22:33.239300+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -24,8 +24,24 @@
       "away_team": "Michigan State",
       "bet_type": "Spread",
       "pick": "Take UCLA -5.0",
-      "probability": 0.649354,
-      "edge": 6.9266,
+      "probability": 0.654468,
+      "edge": 7.1764,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -5.0,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856836,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Colorado @ Oklahoma State",
+      "home_team": "Oklahoma State",
+      "away_team": "Colorado",
+      "bet_type": "Spread",
+      "pick": "Take Oklahoma State -5.0",
+      "probability": 0.625599,
+      "edge": 5.7825,
       "tier": "Elite",
       "odds": -110.0,
       "line": -5.0,
@@ -64,6 +80,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401858270,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T16:00:00+00:00",
+      "game": "California @ SMU",
+      "home_team": "SMU",
+      "away_team": "California",
+      "bet_type": "Spread",
+      "pick": "Take SMU -6.5",
+      "probability": 0.612557,
+      "edge": 5.1644,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -6.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401858272,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T02:30:00+00:00",
@@ -77,22 +109,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 2.0,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401858270,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T16:00:00+00:00",
-      "game": "California @ SMU",
-      "home_team": "SMU",
-      "away_team": "California",
-      "bet_type": "Spread",
-      "pick": "Take SMU -7.0",
-      "probability": 0.606229,
-      "edge": 4.8667,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -7.0,
       "league": "NCAAF"
     },
     {
@@ -112,22 +128,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401869967,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T21:00:00+00:00",
-      "game": "Louisiana @ Southern Miss",
-      "home_team": "Southern Miss",
-      "away_team": "Louisiana",
-      "bet_type": "Spread",
-      "pick": "Take Louisiana -3.5",
-      "probability": 0.600388,
-      "edge": 4.5931,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 3.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856727,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T19:30:00+00:00",
@@ -144,19 +144,19 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856836,
+      "game_id": 401869967,
       "game_date": "2026-10-24",
-      "game_time": "2026-10-24T04:00:00+00:00",
-      "game": "Colorado @ Oklahoma State",
-      "home_team": "Oklahoma State",
-      "away_team": "Colorado",
+      "game_time": "2026-10-24T21:00:00+00:00",
+      "game": "Louisiana @ Southern Miss",
+      "home_team": "Southern Miss",
+      "away_team": "Louisiana",
       "bet_type": "Spread",
-      "pick": "Take Oklahoma State -4.5",
-      "probability": 0.581166,
-      "edge": 3.6997,
+      "pick": "Take Louisiana -4.0",
+      "probability": 0.589657,
+      "edge": 4.0931,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -4.5,
+      "line": 4.0,
       "league": "NCAAF"
     },
     {
@@ -189,6 +189,38 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 1.0,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401871093,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T21:00:00+00:00",
+      "game": "Old Dominion @ Louisiana Tech",
+      "home_team": "Louisiana Tech",
+      "away_team": "Old Dominion",
+      "bet_type": "Spread",
+      "pick": "Take Louisiana Tech -5.0",
+      "probability": 0.573482,
+      "edge": 3.3451,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -5.0,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856841,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T16:00:00+00:00",
+      "game": "West Virginia @ TCU",
+      "home_team": "TCU",
+      "away_team": "West Virginia",
+      "bet_type": "Spread",
+      "pick": "Take TCU -3.5",
+      "probability": 0.573479,
+      "edge": 3.345,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -3.5,
       "league": "NCAAF"
     },
     {
@@ -304,22 +336,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856841,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T16:00:00+00:00",
-      "game": "West Virginia @ TCU",
-      "home_team": "TCU",
-      "away_team": "West Virginia",
-      "bet_type": "Spread",
-      "pick": "Take TCU -4.0",
-      "probability": 0.562595,
-      "edge": 2.845,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -4.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856729,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T23:30:00+00:00",
@@ -384,6 +400,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401862807,
+      "game_date": "2026-10-22",
+      "game_time": "2026-10-22T23:30:00+00:00",
+      "game": "East Carolina @ Memphis",
+      "home_team": "Memphis",
+      "away_team": "East Carolina",
+      "bet_type": "Spread",
+      "pick": "Take Memphis -3.5",
+      "probability": 0.556044,
+      "edge": 2.5452,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -3.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401864527,
       "game_date": "2026-10-25",
       "game_time": "2026-10-25T02:00:00+00:00",
@@ -413,6 +445,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -1.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856838,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Iowa State @ Arizona",
+      "home_team": "Arizona",
+      "away_team": "Iowa State",
+      "bet_type": "Spread",
+      "pick": "Take Arizona -5.5",
+      "probability": 0.553671,
+      "edge": 2.4368,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -5.5,
       "league": "NCAAF"
     },
     {
