@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-10-23T22:47:23.726743+00:00",
+    "generated_at": "2026-10-24T03:09:39.942961+00:00",
     "model_version": "2.2.0",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
@@ -128,22 +128,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858271,
-      "game_date": "2026-10-23",
-      "game_time": "2026-10-23T23:00:00+00:00",
-      "game": "Duke @ Virginia",
-      "home_team": "Virginia",
-      "away_team": "Duke",
-      "bet_type": "Spread",
-      "pick": "Take Duke +1.0",
-      "probability": 0.603208,
-      "edge": 4.7251,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -1.0,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401869967,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T21:00:00+00:00",
@@ -157,6 +141,22 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": 3.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401867962,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T19:00:00+00:00",
+      "game": "Howard @ Morgan State",
+      "home_team": "Morgan State",
+      "away_team": "Howard",
+      "bet_type": "Spread",
+      "pick": "Take Morgan State -6.8",
+      "probability": 0.589297,
+      "edge": 4.0764,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -6.75,
       "league": "NCAAF"
     },
     {
@@ -192,35 +192,19 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401858275,
+      "game_id": 401856834,
       "game_date": "2026-10-24",
-      "game_time": "2026-10-24T23:30:00+00:00",
-      "game": "Syracuse @ North Carolina",
-      "home_team": "North Carolina",
-      "away_team": "Syracuse",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Baylor @ Kansas",
+      "home_team": "Kansas",
+      "away_team": "Baylor",
       "bet_type": "Spread",
-      "pick": "Take North Carolina -3.5",
-      "probability": 0.580433,
-      "edge": 3.6658,
+      "pick": "Take Baylor +0.5",
+      "probability": 0.580884,
+      "edge": 3.6866,
       "tier": "Elite",
       "odds": -110.0,
-      "line": -3.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401867962,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T19:00:00+00:00",
-      "game": "Howard @ Morgan State",
-      "home_team": "Morgan State",
-      "away_team": "Howard",
-      "bet_type": "Spread",
-      "pick": "Take Morgan State -7.2",
-      "probability": 0.578497,
-      "edge": 3.5764,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -7.25,
+      "line": -0.5,
       "league": "NCAAF"
     },
     {
@@ -256,6 +240,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401856732,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T23:30:00+00:00",
+      "game": "Ole Miss @ Texas",
+      "home_team": "Texas",
+      "away_team": "Ole Miss",
+      "bet_type": "Spread",
+      "pick": "Take Ole Miss +1.5",
+      "probability": 0.574805,
+      "edge": 3.4061,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -1.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401871093,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T21:00:00+00:00",
@@ -288,22 +288,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856732,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T23:30:00+00:00",
-      "game": "Ole Miss @ Texas",
-      "home_team": "Texas",
-      "away_team": "Ole Miss",
-      "bet_type": "Spread",
-      "pick": "Take Ole Miss +1.5",
-      "probability": 0.572338,
-      "edge": 3.2925,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": -1.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401856837,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T04:00:00+00:00",
@@ -317,22 +301,6 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -3.5,
-      "league": "NCAAF"
-    },
-    {
-      "game_id": 401856834,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T04:00:00+00:00",
-      "game": "Baylor @ Kansas",
-      "home_team": "Kansas",
-      "away_team": "Baylor",
-      "bet_type": "Spread",
-      "pick": "Take Baylor -0.0",
-      "probability": 0.570036,
-      "edge": 3.1866,
-      "tier": "Elite",
-      "odds": -110.0,
-      "line": 0.0,
       "league": "NCAAF"
     },
     {
@@ -365,6 +333,38 @@
       "tier": "Elite",
       "odds": -110.0,
       "line": -14.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401856838,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Iowa State @ Arizona",
+      "home_team": "Arizona",
+      "away_team": "Iowa State",
+      "bet_type": "Spread",
+      "pick": "Take Arizona -4.5",
+      "probability": 0.566669,
+      "edge": 3.0319,
+      "tier": "Elite",
+      "odds": -110.0,
+      "line": -4.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401868271,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T18:00:00+00:00",
+      "game": "Stetson @ Morehead State",
+      "home_team": "Morehead State",
+      "away_team": "Stetson",
+      "bet_type": "Moneyline",
+      "pick": "Stetson ML (-0)",
+      "probability": 0.47223,
+      "edge": 0.4634,
+      "tier": "Elite",
+      "odds": -0.5,
+      "line": null,
       "league": "NCAAF"
     },
     {
@@ -520,8 +520,8 @@
       "away_team": "Iowa State",
       "bet_type": "Total",
       "pick": "Over 49.5",
-      "probability": 0.565985,
-      "edge": 2.7713,
+      "probability": 0.565704,
+      "edge": 2.7594,
       "tier": "Strong",
       "odds": -110.0,
       "line": 49.5,
@@ -672,22 +672,6 @@
       "league": "NCAAF"
     },
     {
-      "game_id": 401856838,
-      "game_date": "2026-10-24",
-      "game_time": "2026-10-24T04:00:00+00:00",
-      "game": "Iowa State @ Arizona",
-      "home_team": "Arizona",
-      "away_team": "Iowa State",
-      "bet_type": "Spread",
-      "pick": "Take Arizona -4.5",
-      "probability": 0.552984,
-      "edge": 2.4054,
-      "tier": "Strong",
-      "odds": -110.0,
-      "line": -4.5,
-      "league": "NCAAF"
-    },
-    {
       "game_id": 401868230,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T16:00:00+00:00",
@@ -736,6 +720,22 @@
       "league": "NCAAF"
     },
     {
+      "game_id": 401856839,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Kansas State @ Arizona State",
+      "home_team": "Arizona State",
+      "away_team": "Kansas State",
+      "bet_type": "Spread",
+      "pick": "Take Kansas State +0.5",
+      "probability": 0.548498,
+      "edge": 2.2007,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": -0.5,
+      "league": "NCAAF"
+    },
+    {
       "game_id": 401869145,
       "game_date": "2026-10-24",
       "game_time": "2026-10-24T20:00:00+00:00",
@@ -781,6 +781,22 @@
       "tier": "Strong",
       "odds": -110.0,
       "line": -14.5,
+      "league": "NCAAF"
+    },
+    {
+      "game_id": 401858495,
+      "game_date": "2026-10-24",
+      "game_time": "2026-10-24T04:00:00+00:00",
+      "game": "Oregon @ Illinois",
+      "home_team": "Illinois",
+      "away_team": "Oregon",
+      "bet_type": "Spread",
+      "pick": "Take Oregon -2.5",
+      "probability": 0.544636,
+      "edge": 2.0247,
+      "tier": "Strong",
+      "odds": -110.0,
+      "line": 2.5,
       "league": "NCAAF"
     },
     {
