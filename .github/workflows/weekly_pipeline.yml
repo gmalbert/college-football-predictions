@@ -50,6 +50,9 @@ jobs:
       - name: Run predictive-core tests
         run: python -m unittest discover -s tests -p "test_predictive_betting_core.py" -v
 
+      - name: Validate Sports Picks Grid export contract
+        run: python -m unittest discover -s tests -p "test_grid_export.py" -v
+
       # ── pull data ────────────────────────────────────────────────────────────
       - name: Fetch historical data
         env:
@@ -104,7 +107,6 @@ jobs:
       # ── export best bets ─────────────────────────────────────────────────────
       - name: Export best bets for Sports Picks Grid
         run: python scripts/export_best_bets.py
-        continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}
 

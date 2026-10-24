@@ -18,7 +18,7 @@ from utils.betting import (  # noqa: E402
     generate_spread_pick,
     generate_total_pick,
 )
-from utils.market import expected_value, normal_cover_probability  # noqa: E402
+from utils.market import american_to_implied, expected_value, normal_cover_probability  # noqa: E402
 from utils.models import MODEL_VERSION, load_metrics, models_trained, predict_batch  # noqa: E402
 from utils.seasons import current_cfb_season  # noqa: E402
 
@@ -40,6 +40,8 @@ def _write(
             "sport": SPORT,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "model_version": MODEL_VERSION,
+            "tier_definition": "edge-v1",
+            "edge_definition": "pick probability minus quoted implied probability",
             "season": str(current_cfb_season(date.today())),
             "prediction_contract": "latest available line snapshot at export time",
             "release_status": release_status,
@@ -61,13 +63,11 @@ def _write(
     print(f"[{SPORT}] Wrote {len(bets)} bets -> {OUT_PATH}")
 
 
-def _tier(confidence: Confidence) -> str:
-    return {
-        Confidence.STRONG: "Elite",
-        Confidence.MODERATE: "Strong",
-        Confidence.LEAN: "Good",
-        Confidence.NONE: "No Bet",
-    }[confidence]
+def _tier(edge: float) -> str:
+    for tier, threshold in (("Elite", .06), ("Strong", .03), ("Good", .01)):
+        if edge >= threshold:
+            return tier
+    return "Standard"
 
 
 def _record(
@@ -79,6 +79,8 @@ def _record(
     probability: float,
 ) -> dict:
     start = pd.to_datetime(row["start_date"], errors="coerce", utc=True)
+    market_probability = american_to_implied(odds)
+    edge = round(float(probability) - market_probability, 4)
     return {
         "game_id": int(row["game_id"]) if pd.notna(row.get("game_id")) else None,
         "game_date": start.date().isoformat(),
@@ -89,8 +91,12 @@ def _record(
         "bet_type": recommendation.bet_type.title(),
         "pick": recommendation.pick,
         "probability": round(float(probability), 6),
-        "edge": round(float(recommendation.edge), 4),
-        "tier": _tier(recommendation.confidence),
+        "confidence": round(float(probability), 6),
+        "market_probability": round(market_probability, 6),
+        "edge": edge,
+        "tier": _tier(edge),
+        "source_edge": round(float(recommendation.edge), 4),
+        "source_edge_unit": "probability" if recommendation.bet_type == "moneyline" else "points",
         "odds": odds,
         "line": line,
         "league": SPORT,
@@ -150,7 +156,9 @@ def main() -> None:
             ):
                 bets.append(
                     _record(
-                        row, recommendation, line=float(row["market_spread"]), odds=-110.0,
+                        row, recommendation,
+                        line=float(row["market_spread"]) if recommendation.pick.startswith(f"Take {home} ") else -float(row["market_spread"]),
+                        odds=-110.0,
                         probability=probability,
                     )
                 )
