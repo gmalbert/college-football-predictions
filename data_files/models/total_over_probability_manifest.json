@@ -1,8 +1,8 @@
 {
   "model_name": "total_over_probability",
   "version": "2.2.0",
-  "created_at": "2026-10-20T11:03:49.461211+00:00",
-  "git_sha": "3581704fe45703ed4e80ff60722084f1762a51d1",
+  "created_at": "2026-10-27T11:44:20.513785+00:00",
+  "git_sha": "2ba2be4b7ddef195c1c08e969ae4dba782aac17c",
   "training_start": "2021-08-28T17:20:00+00:00",
   "training_end": "2026-10-11T02:30:00+00:00",
   "feature_names": [
@@ -37,7 +37,7 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "5b3b74b8993141c209072e255f5614ccb5dc250fddf4fb48e99608ec623733e6",
+  "data_fingerprint": "f8ac461e70e20535ae444f7485c82556c528aab9e030bc5d33bd272ae57e19e4",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
@@ -47,7 +47,7 @@
     "n": 5197,
     "brier": 0.24996766157569864,
     "log_loss": 0.6932605573801279,
-    "ece": 0.019572197194467914,
+    "ece": 0.019572197194467924,
     "accuracy": 0.5185684048489513,
     "baseline_n": 5197,
     "baseline_brier": 0.25,
@@ -64,7 +64,7 @@
         "n": 1399,
         "brier": 0.250479549771639,
         "log_loss": 0.6941444996155424,
-        "ece": 0.026731486063423064,
+        "ece": 0.0267314860634231,
         "accuracy": 0.5139385275196569,
         "baseline_n": 1399,
         "baseline_brier": 0.25,
@@ -80,14 +80,14 @@
         ],
         "test_season": 2024,
         "n": 1538,
-        "brier": 0.24891875715713277,
+        "brier": 0.2489187571571328,
         "log_loss": 0.6909387098141406,
-        "ece": 0.01105503510197555,
+        "ece": 0.011055035101975474,
         "accuracy": 0.5201560468140443,
         "baseline_n": 1538,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.24891875715713277,
-        "brier_skill": 0.004324971371468922
+        "model_brier_on_baseline_subset": 0.2489187571571328,
+        "brier_skill": 0.004324971371468811
       },
       {
         "fold": 2,
@@ -101,7 +101,7 @@
         "n": 1588,
         "brier": 0.2482139530002642,
         "log_loss": 0.6895599229704256,
-        "ece": 0.014796213221957236,
+        "ece": 0.014796213221957292,
         "accuracy": 0.5270780856423174,
         "baseline_n": 1588,
         "baseline_brier": 0.25,
@@ -119,14 +119,14 @@
         ],
         "test_season": 2026,
         "n": 672,
-        "brier": 0.25544678750936517,
+        "brier": 0.2554467875093651,
         "log_loss": 0.7054792684095188,
-        "ece": 0.07494005328730624,
+        "ece": 0.07494005328730632,
         "accuracy": 0.5044642857142857,
         "baseline_n": 672,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.25544678750936517,
-        "brier_skill": -0.02178715003746068
+        "model_brier_on_baseline_subset": 0.2554467875093651,
+        "brier_skill": -0.021787150037460457
       }
     ],
     "n_samples": 5197,

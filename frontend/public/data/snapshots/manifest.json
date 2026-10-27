@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-26T20:20:06.193849+00:00",
-  "source_revision": "89fb9138199a2fd28fabf15214f372061b2d1727",
+  "generated_at": "2026-10-27T11:53:53.589784+00:00",
+  "source_revision": "2ba2be4b7ddef195c1c08e969ae4dba782aac17c",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -10,23 +10,23 @@
     },
     "home": {
       "url": "/data/snapshots/home.json",
-      "bytes": 1518,
-      "sha256": "acf5d8c4857944d84494c28cdad75d1f9047aba7b43c56576407917f797ab3e2"
+      "bytes": 1505,
+      "sha256": "65cc494f8aad1adc3cff16cd5ef42886a37aef5d001f69e9b3953778d65a8b4c"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
-      "bytes": 1316746,
-      "sha256": "7cd84d6e8983b66eb9479e744824f7149724dc667ca5f08330345b8ee1031e62"
+      "bytes": 1315521,
+      "sha256": "be32eeeb5533e19d38f09292ab184c0794d0b982fd353e0fc951c45e9858e4d3"
     },
     "value-bets": {
       "url": "/data/snapshots/value-bets.json",
-      "bytes": 17556,
-      "sha256": "8b4de997f1bf3d54ef26b5afed1908bfc30036dd68e9ba30e8652990a678ec8c"
+      "bytes": 11201,
+      "sha256": "5ca8a50771879b76ce5c48dd43fc784de3e0ffd8e69822c47dbdaf192f246bcb"
     },
     "team-explorer": {
       "url": "/data/snapshots/team-explorer.json",
-      "bytes": 44298,
-      "sha256": "de9cd432dab487eadafcebc12a8586dfe6e5968f71b457b8aecd4af23dcc5948"
+      "bytes": 44299,
+      "sha256": "28f142ce9434e2700fd50946cafb2f1dc8526d2a020323344a2f65fe361f7cf9"
     },
     "historical-analysis": {
       "url": "/data/snapshots/historical-analysis.json",
@@ -45,13 +45,13 @@
     },
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
-      "bytes": 2963,
-      "sha256": "85167232f859939cbf16054265b8f9d498b234df216b6d056fa4b85fb6056cec"
+      "bytes": 2964,
+      "sha256": "8acde86dc14bc7a4db6cdb8aa8e37c6a6676ab91d88f83f44d99ba6e0771aa01"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
-      "bytes": 34915,
-      "sha256": "0f9fd8f5587f4e7d74d79f000548084d65836a66b65ccfa6e022727ac19259c4"
+      "bytes": 35677,
+      "sha256": "00eda5bf018f9ab5cd5d40acd7ec9a00aecd59ac2ee3012432f077dcfb5c2840"
     }
   },
   "weekly_catalog": {

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T11:03:58.015821+00:00",
+  "generated_at": "2026-10-27T11:44:26.912348+00:00",
   "summary": {
     "pass": 12,
     "warn": 4,
@@ -46,7 +46,7 @@
       "name": "release_metadata",
       "status": "pass",
       "message": "Release metadata is present",
-      "value": "1d3d62e5ce9d4703a6154312765f5481"
+      "value": "5c5fab15fa284654a5709803f7fdb6bc"
     },
     {
       "name": "empty_raw_cache",
@@ -57,8 +57,8 @@
     {
       "name": "market_snapshot_history",
       "status": "pass",
-      "message": "Timestamped market history contains 425,450 quotes; movement and CLV require forward collection",
-      "value": 425450
+      "message": "Timestamped market history contains 501,654 quotes; movement and CLV require forward collection",
+      "value": 501654
     },
     {
       "name": "context_feature_observations",
@@ -94,13 +94,13 @@
       "name": "best_bets_freshness",
       "status": "pass",
       "message": "Best-bets export age is 0.0 hours",
-      "value": 0.0008945855555555556
+      "value": 0.0006838852777777778
     },
     {
       "name": "shadow_total_freshness",
       "status": "pass",
       "message": "Shadow-total export age is 0.0 hours",
-      "value": 0.00037698194444444445
+      "value": 0.00029413333333333335
     }
   ],
   "release_status": "shadow",

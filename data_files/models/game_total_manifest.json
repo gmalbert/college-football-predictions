@@ -1,8 +1,8 @@
 {
   "model_name": "game_total",
   "version": "2.2.0",
-  "created_at": "2026-10-20T11:03:49.445516+00:00",
-  "git_sha": "3581704fe45703ed4e80ff60722084f1762a51d1",
+  "created_at": "2026-10-27T11:44:20.504263+00:00",
+  "git_sha": "2ba2be4b7ddef195c1c08e969ae4dba782aac17c",
   "training_start": "2021-08-28T17:20:00+00:00",
   "training_end": "2026-10-11T15:00:00+00:00",
   "feature_names": [
@@ -37,7 +37,7 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "f35e3e8e754fbc3a2e7fb7824bfe6431519fbda8369486b457546d4603f67fbd",
+  "data_fingerprint": "5462706052fe851892a509671150e7c214b171c7e804d0cfb7956f188c39f919",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
@@ -46,8 +46,8 @@
   "metrics": {
     "n": 13286,
     "rmse": 16.67911755489552,
-    "mae": 13.215367298453936,
-    "bias": -0.22016300496171884,
+    "mae": 13.21536729845394,
+    "bias": -0.22016300496167537,
     "residual_std": 16.67829210062364,
     "baseline_n": 5232,
     "baseline_rmse": 15.785097613587611,
@@ -63,15 +63,15 @@
         ],
         "test_season": 2023,
         "n": 3730,
-        "rmse": 16.739837343274953,
-        "mae": 13.292493026146273,
-        "bias": -0.3063895219880583,
+        "rmse": 16.73983734327495,
+        "mae": 13.292493026146278,
+        "bias": -0.3063895219880273,
         "residual_std": 16.73927720349435,
         "baseline_n": 1411,
         "baseline_rmse": 15.779587869715042,
         "baseline_mae": 12.617647058823529,
         "model_rmse_on_baseline_subset": 15.74662301164962,
-        "model_mae_on_baseline_subset": 12.614234620492924
+        "model_mae_on_baseline_subset": 12.614234620492926
       },
       {
         "fold": 1,
@@ -84,13 +84,13 @@
         "n": 3799,
         "rmse": 16.761496583100282,
         "mae": 13.251154410495634,
-        "bias": -0.1383871824739581,
-        "residual_std": 16.763131694484176,
+        "bias": -0.13838718247395432,
+        "residual_std": 16.763131694484173,
         "baseline_n": 1553,
         "baseline_rmse": 16.360532248492408,
         "baseline_mae": 12.92369607211848,
         "model_rmse_on_baseline_subset": 16.321466430124953,
-        "model_mae_on_baseline_subset": 12.898954993521512
+        "model_mae_on_baseline_subset": 12.898954993521514
       },
       {
         "fold": 2,
@@ -103,13 +103,13 @@
         "test_season": 2025,
         "n": 3829,
         "rmse": 16.52466754393891,
-        "mae": 13.108474521569503,
-        "bias": -0.4150851230766747,
+        "mae": 13.108474521569507,
+        "bias": -0.4150851230766847,
         "residual_std": 16.521611007067264,
         "baseline_n": 1594,
         "baseline_rmse": 15.34149001472869,
         "baseline_mae": 12.337045169385194,
-        "model_rmse_on_baseline_subset": 15.303384663467934,
+        "model_rmse_on_baseline_subset": 15.303384663467936,
         "model_mae_on_baseline_subset": 12.31188785712569
       },
       {
@@ -123,10 +123,10 @@
         ],
         "test_season": 2026,
         "n": 1928,
-        "rmse": 16.704007222540284,
-        "mae": 13.20792862612595,
-        "bias": 0.17263541264170915,
-        "residual_std": 16.70744851432584,
+        "rmse": 16.704007222540277,
+        "mae": 13.207928626125957,
+        "bias": 0.1726354126419611,
+        "residual_std": 16.70744851432583,
         "baseline_n": 674,
         "baseline_rmse": 15.477968452558548,
         "baseline_mae": 12.408753709198812,
@@ -142,7 +142,7 @@
         "test_season": 2023,
         "train_n": 2346,
         "test_n": 1411,
-        "shrinkage": 0.19575051806991683,
+        "shrinkage": 0.19575051806991103,
         "shrinkage_oos_n": 1459
       },
       {
@@ -150,7 +150,7 @@
         "test_season": 2024,
         "train_n": 3757,
         "test_n": 1553,
-        "shrinkage": 0.27485816721759243,
+        "shrinkage": 0.27485816721758627,
         "shrinkage_oos_n": 2870
       },
       {
@@ -158,7 +158,7 @@
         "test_season": 2025,
         "train_n": 5310,
         "test_n": 1594,
-        "shrinkage": 0.33266209900955135,
+        "shrinkage": 0.3326620990095443,
         "shrinkage_oos_n": 4423
       },
       {
@@ -166,11 +166,11 @@
         "test_season": 2026,
         "train_n": 6904,
         "test_n": 674,
-        "shrinkage": 0.3647890266059116,
+        "shrinkage": 0.36478902660590506,
         "shrinkage_oos_n": 6017
       }
     ],
-    "final_residual_shrinkage": 0.34656520587211975,
+    "final_residual_shrinkage": 0.34656520587211176,
     "final_residual_shrinkage_oos_n": 6691
   },
   "prediction_contract": "home_score + away_score in points",

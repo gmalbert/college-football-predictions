@@ -219,7 +219,7 @@
         "shrinkage_oos_n": 6026
       }
     ],
-    "final_residual_shrinkage": 0.059449191106632354,
+    "final_residual_shrinkage": 0.05944919110663475,
     "final_residual_shrinkage_oos_n": 6755,
     "market_residual_metrics": {
       "n": 13286,
@@ -237,8 +237,8 @@
   "total_model": {
     "n": 13286,
     "rmse": 16.67911755489552,
-    "mae": 13.215367298453936,
-    "bias": -0.22016300496171884,
+    "mae": 13.21536729845394,
+    "bias": -0.22016300496167537,
     "residual_std": 16.67829210062364,
     "baseline_n": 5232,
     "baseline_rmse": 15.785097613587611,
@@ -254,15 +254,15 @@
         ],
         "test_season": 2023,
         "n": 3730,
-        "rmse": 16.739837343274953,
-        "mae": 13.292493026146273,
-        "bias": -0.3063895219880583,
+        "rmse": 16.73983734327495,
+        "mae": 13.292493026146278,
+        "bias": -0.3063895219880273,
         "residual_std": 16.73927720349435,
         "baseline_n": 1411,
         "baseline_rmse": 15.779587869715042,
         "baseline_mae": 12.617647058823529,
         "model_rmse_on_baseline_subset": 15.74662301164962,
-        "model_mae_on_baseline_subset": 12.614234620492924
+        "model_mae_on_baseline_subset": 12.614234620492926
       },
       {
         "fold": 1,
@@ -275,13 +275,13 @@
         "n": 3799,
         "rmse": 16.761496583100282,
         "mae": 13.251154410495634,
-        "bias": -0.1383871824739581,
-        "residual_std": 16.763131694484176,
+        "bias": -0.13838718247395432,
+        "residual_std": 16.763131694484173,
         "baseline_n": 1553,
         "baseline_rmse": 16.360532248492408,
         "baseline_mae": 12.92369607211848,
         "model_rmse_on_baseline_subset": 16.321466430124953,
-        "model_mae_on_baseline_subset": 12.898954993521512
+        "model_mae_on_baseline_subset": 12.898954993521514
       },
       {
         "fold": 2,
@@ -294,13 +294,13 @@
         "test_season": 2025,
         "n": 3829,
         "rmse": 16.52466754393891,
-        "mae": 13.108474521569503,
-        "bias": -0.4150851230766747,
+        "mae": 13.108474521569507,
+        "bias": -0.4150851230766847,
         "residual_std": 16.521611007067264,
         "baseline_n": 1594,
         "baseline_rmse": 15.34149001472869,
         "baseline_mae": 12.337045169385194,
-        "model_rmse_on_baseline_subset": 15.303384663467934,
+        "model_rmse_on_baseline_subset": 15.303384663467936,
         "model_mae_on_baseline_subset": 12.31188785712569
       },
       {
@@ -314,10 +314,10 @@
         ],
         "test_season": 2026,
         "n": 1928,
-        "rmse": 16.704007222540284,
-        "mae": 13.20792862612595,
-        "bias": 0.17263541264170915,
-        "residual_std": 16.70744851432584,
+        "rmse": 16.704007222540277,
+        "mae": 13.207928626125957,
+        "bias": 0.1726354126419611,
+        "residual_std": 16.70744851432583,
         "baseline_n": 674,
         "baseline_rmse": 15.477968452558548,
         "baseline_mae": 12.408753709198812,
@@ -333,7 +333,7 @@
         "test_season": 2023,
         "train_n": 2346,
         "test_n": 1411,
-        "shrinkage": 0.19575051806991683,
+        "shrinkage": 0.19575051806991103,
         "shrinkage_oos_n": 1459
       },
       {
@@ -341,7 +341,7 @@
         "test_season": 2024,
         "train_n": 3757,
         "test_n": 1553,
-        "shrinkage": 0.27485816721759243,
+        "shrinkage": 0.27485816721758627,
         "shrinkage_oos_n": 2870
       },
       {
@@ -349,7 +349,7 @@
         "test_season": 2025,
         "train_n": 5310,
         "test_n": 1594,
-        "shrinkage": 0.33266209900955135,
+        "shrinkage": 0.3326620990095443,
         "shrinkage_oos_n": 4423
       },
       {
@@ -357,18 +357,18 @@
         "test_season": 2026,
         "train_n": 6904,
         "test_n": 674,
-        "shrinkage": 0.3647890266059116,
+        "shrinkage": 0.36478902660590506,
         "shrinkage_oos_n": 6017
       }
     ],
-    "final_residual_shrinkage": 0.34656520587211975,
+    "final_residual_shrinkage": 0.34656520587211176,
     "final_residual_shrinkage_oos_n": 6691
   },
   "total_cover_model": {
     "n": 5197,
     "brier": 0.24996766157569864,
     "log_loss": 0.6932605573801279,
-    "ece": 0.019572197194467914,
+    "ece": 0.019572197194467924,
     "accuracy": 0.5185684048489513,
     "baseline_n": 5197,
     "baseline_brier": 0.25,
@@ -385,7 +385,7 @@
         "n": 1399,
         "brier": 0.250479549771639,
         "log_loss": 0.6941444996155424,
-        "ece": 0.026731486063423064,
+        "ece": 0.0267314860634231,
         "accuracy": 0.5139385275196569,
         "baseline_n": 1399,
         "baseline_brier": 0.25,
@@ -401,14 +401,14 @@
         ],
         "test_season": 2024,
         "n": 1538,
-        "brier": 0.24891875715713277,
+        "brier": 0.2489187571571328,
         "log_loss": 0.6909387098141406,
-        "ece": 0.01105503510197555,
+        "ece": 0.011055035101975474,
         "accuracy": 0.5201560468140443,
         "baseline_n": 1538,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.24891875715713277,
-        "brier_skill": 0.004324971371468922
+        "model_brier_on_baseline_subset": 0.2489187571571328,
+        "brier_skill": 0.004324971371468811
       },
       {
         "fold": 2,
@@ -422,7 +422,7 @@
         "n": 1588,
         "brier": 0.2482139530002642,
         "log_loss": 0.6895599229704256,
-        "ece": 0.014796213221957236,
+        "ece": 0.014796213221957292,
         "accuracy": 0.5270780856423174,
         "baseline_n": 1588,
         "baseline_brier": 0.25,
@@ -440,14 +440,14 @@
         ],
         "test_season": 2026,
         "n": 672,
-        "brier": 0.25544678750936517,
+        "brier": 0.2554467875093651,
         "log_loss": 0.7054792684095188,
-        "ece": 0.07494005328730624,
+        "ece": 0.07494005328730632,
         "accuracy": 0.5044642857142857,
         "baseline_n": 672,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.25544678750936517,
-        "brier_skill": -0.02178715003746068
+        "model_brier_on_baseline_subset": 0.2554467875093651,
+        "brier_skill": -0.021787150037460457
       }
     ],
     "n_samples": 5197,
