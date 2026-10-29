@@ -1,34 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-10-29T20:03:00.508331+00:00",
+    "generated_at": "2026-10-29T23:45:24.415168+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "2c83b1248145447fa8a2beba34350e9a",
-    "model_version": "2.2.0",
-    "strategy_version": "total-over-v2.2-locked"
+    "note": "No priced games are within the closing-time window"
   },
-  "signals": [
-    {
-      "game_id": 401869963,
-      "game": "Troy @ James Madison",
-      "kickoff": "2026-10-29T23:30:00+00:00",
-      "side": "over",
-      "market_total": 51.0,
-      "prediction_time": "2026-10-29T20:03:00.380218+00:00",
-      "sportsbook": "FanDuel",
-      "taken_line": 50.5,
-      "taken_odds": -115.0,
-      "source_snapshot_at": "2026-10-29T20:02:44.078750+00:00",
-      "ingestion_run_id": "2684afc3fbd9474a93e02e1111ffc74a",
-      "over_probability": 0.633633,
-      "selected_probability": 0.633633,
-      "probability_edge": 0.133633,
-      "opening_total": 50.5,
-      "line_move": 0.5,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
