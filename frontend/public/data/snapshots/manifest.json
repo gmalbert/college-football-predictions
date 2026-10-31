@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-30T23:26:01.788035+00:00",
-  "source_revision": "cf4a6be2e2d758da542fbb2acd984559484462e8",
+  "generated_at": "2026-10-31T03:59:06.239552+00:00",
+  "source_revision": "b4322b2272f016e76b4f84599d7c6541dd7d5b28",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -10,18 +10,18 @@
     },
     "home": {
       "url": "/data/snapshots/home.json",
-      "bytes": 1486,
-      "sha256": "09ee03538c9f9e1f54801d89715639fa650e7a328697a05acd52b1190e1f5419"
+      "bytes": 1503,
+      "sha256": "4de003015c71ff1a2e28243c4f28a46709b4376fca641e953aa6850138b04cba"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
-      "bytes": 1241130,
-      "sha256": "f402c2f5292860c3bf7af3c42e1088cecddca59b458b63ee4a9c0d9eecff3a57"
+      "bytes": 1238472,
+      "sha256": "96bd780a115ecc62ff64ed0558c131a0fa4a2f136696355004f5314d074a5d86"
     },
     "value-bets": {
       "url": "/data/snapshots/value-bets.json",
       "bytes": 14903,
-      "sha256": "2bfe11aae8a7a8cba5e23c7981fd886ab0eaad093f724497a9222ff97cddf98f"
+      "sha256": "73c42f82b4d8866641fa0a33bf8c667b77ab20936c90b1d4a6f22ac29676604e"
     },
     "team-explorer": {
       "url": "/data/snapshots/team-explorer.json",
@@ -45,13 +45,13 @@
     },
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
-      "bytes": 2954,
-      "sha256": "8676945b2942725f6b554efba5b2ab59c56e0c82445509cd6b694eec6db918ca"
+      "bytes": 2962,
+      "sha256": "eda6100dc5fc55c52f86d83ffd2553819b9449693735374b732887876923efb5"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
-      "bytes": 52244,
-      "sha256": "017e0a391659174b12e8d89a3867ddb2654f7326363df6e67c83dc610372ffd1"
+      "bytes": 51718,
+      "sha256": "b59b16a5555cee06528eb9269fca48e94437a1e959c2039467c0bc611a503343"
     }
   },
   "weekly_catalog": {
