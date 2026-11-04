@@ -48,7 +48,7 @@ def _write(
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "model_version": MODEL_VERSION,
             "tier_definition": "edge-v1",
-            "edge_definition": "pick probability minus quoted implied probability",
+            "edge_definition": "pick probability minus median no-vig probability from paired sportsbook quotes",
             "season": str(current_cfb_season(date.today())),
             "prediction_contract": "latest available line snapshot at export time",
             "release_status": release_status,
