@@ -210,6 +210,8 @@ def _record(
         "confidence": round(float(probability), 6),
         "market_probability": round(market_probability, 6),
         "edge": round(edge, 4),
+        "edge_unit": "probability",
+        "edge_display": f"{edge * 100:.1f} pp",
         "tier": _tier(edge),
         "source_edge": round(float(recommendation.edge), 4),
         "source_edge_unit": "probability" if recommendation.bet_type == "moneyline" else "points",
