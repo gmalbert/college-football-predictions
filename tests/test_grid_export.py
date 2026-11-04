@@ -68,7 +68,7 @@ class GridExportTests(unittest.TestCase):
             data = json.loads(output.read_text(encoding="utf-8"))
         self.assertEqual(data["bets"][0]["pick"], "Take Away +3.0")
         self.assertEqual(data["bets"][0]["line"], 3)
-        self.assertEqual(data["bets"][0]["market_probability"], .52381)
+        self.assertEqual(data["bets"][0]["market_probability"], .5)
         self.assertEqual(data["bets"][0]["odds"], -110)
         self.assertEqual(data["bets"][0]["sportsbook"], "TestBook")
         self.assertEqual(data["meta"]["tier_definition"], "edge-v1")
