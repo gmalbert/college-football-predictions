@@ -141,6 +141,9 @@ jobs:
             data_files/best_bets_today.json \
             data_files/shadow_total_signals.json \
             frontend/public/data/
+          # This generated play-by-play dump can exceed GitHub's 100 MB file limit.
+          # Keep it in the runner for feature generation, but never include it in the artifact push.
+          git reset -q HEAD -- data_files/raw/plays_*.json
           git diff --staged --quiet || \
             git commit -m "chore: weekly data pipeline $(date -u '+%Y-%m-%d')"
           git push
