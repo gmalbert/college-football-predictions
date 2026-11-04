@@ -99,7 +99,10 @@ def _load_current_quotes() -> pd.DataFrame:
     quotes["captured_at"] = pd.to_datetime(quotes["captured_at"], utc=True, errors="coerce")
     quotes["source"] = quotes["source"].astype("string").fillna("unknown").str.casefold()
     quotes = quotes.dropna(subset=["game_id", "captured_at", "odds"])
-    quotes = quotes[quotes["odds"].ne(0)]
+    # Snapshot odds are American prices; values strictly between -100 and +100
+    # are malformed (and would create false implied probabilities).
+    valid_american = quotes["odds"].le(-100) | quotes["odds"].ge(100)
+    quotes = quotes[valid_american]
     quotes = quotes[~quotes["source"].isin({"parlay", "parlay_api"})]
 
     now = pd.Timestamp.now(tz="UTC")
