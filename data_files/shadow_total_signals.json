@@ -1,34 +1,10 @@
 {
   "meta": {
-    "generated_at": "2026-11-06T00:39:53.863266+00:00",
+    "generated_at": "2026-11-06T04:57:16.527155+00:00",
     "deployment_status": "shadow_not_actionable",
     "prediction_contract": "final eligible pre-kickoff snapshot",
     "maximum_hours_to_kickoff": 12,
-    "note": "Prospective validation only; prices and CLV must pass before promotion",
-    "release_id": "b94b0e68a4074980b7480452c4bbc3dd",
-    "model_version": "2.2.0",
-    "strategy_version": "total-over-v2.2-locked"
+    "note": "No priced games are within the closing-time window"
   },
-  "signals": [
-    {
-      "game_id": 401869964,
-      "game": "James Madison @ Southern Miss",
-      "kickoff": "2026-11-06T01:00:00+00:00",
-      "side": "over",
-      "market_total": 58.5,
-      "prediction_time": "2026-11-06T00:39:53.670169+00:00",
-      "sportsbook": "Pinnacle",
-      "taken_line": 58.0,
-      "taken_odds": -113.0,
-      "source_snapshot_at": "2026-11-05T21:21:32.888874+00:00",
-      "ingestion_run_id": "e47b1a878a7345feaf7e7cbcacbbcc56",
-      "over_probability": 0.58985,
-      "selected_probability": 0.58985,
-      "probability_edge": 0.08985,
-      "opening_total": 55.0,
-      "line_move": 3.5,
-      "book_count": 2,
-      "status": "shadow_not_a_bet"
-    }
-  ]
+  "signals": []
 }
