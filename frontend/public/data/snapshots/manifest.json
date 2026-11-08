@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-08T04:17:33.510953+00:00",
-  "source_revision": "678759dd33055d5ac2c433f5f348d631bd78f36d",
+  "generated_at": "2026-11-08T19:21:02.910421+00:00",
+  "source_revision": "5d3ebe1e0aab2bf7dd411444eab07a21f241f696",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -10,8 +10,8 @@
     },
     "home": {
       "url": "/data/snapshots/home.json",
-      "bytes": 1510,
-      "sha256": "1f27dcd5f47f367a704d6da0e33bf63f546680d9d4bb5ed40ef1630fa79c6e27"
+      "bytes": 1543,
+      "sha256": "97acb85f4302bc13378b12289909e237829121f0110399de2b9e6d60df6984cb"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
@@ -46,7 +46,7 @@
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
       "bytes": 2963,
-      "sha256": "caa3fb555dceb1bf9a8de63c3766d140d36fbc79f35c1738dc884f05d0427170"
+      "sha256": "7599066cab776dfa12b8783c716dde9e699ffb3586b230388ad1c6a6d1107d70"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
