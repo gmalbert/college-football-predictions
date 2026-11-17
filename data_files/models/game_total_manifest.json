@@ -1,10 +1,10 @@
 {
   "model_name": "game_total",
   "version": "2.2.0",
-  "created_at": "2026-11-10T13:59:06.191845+00:00",
-  "git_sha": "d1dc1f7d82df127c50a4f72658035d5c6cde78b3",
+  "created_at": "2026-11-17T15:15:04.964398+00:00",
+  "git_sha": "6f53d92c122d94797c378c5da476f3a5cd0bab41",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-08T03:30:00+00:00",
+  "training_end": "2026-11-15T18:00:00+00:00",
   "feature_names": [
     "home_points_for_l5",
     "away_points_for_l5",
@@ -37,23 +37,23 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "c8a5f52960e108e7e65949a78cdcccc06f04c12b2a02bac07aaa729dfaf46029",
+  "data_fingerprint": "6e34ea2a1e9205a19a590119ebb94f1b680f5da74d9599de34bf15abe06be1ca",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "median_with_indicator"
   },
   "metrics": {
-    "n": 14522,
-    "rmse": 16.700267130115545,
-    "mae": 13.251637295337298,
-    "bias": -0.2409965078392098,
-    "residual_std": 16.69910313438224,
-    "baseline_n": 5656,
-    "baseline_rmse": 15.803996999600017,
-    "baseline_mae": 12.627077439886845,
-    "model_rmse_on_baseline_subset": 15.772987929402943,
-    "model_mae_on_baseline_subset": 12.614113791575644,
+    "n": 14839,
+    "rmse": 16.67215778077954,
+    "mae": 13.245239148335708,
+    "bias": -0.18970664228172573,
+    "residual_std": 16.67164020339574,
+    "baseline_n": 5782,
+    "baseline_rmse": 15.803672487057357,
+    "baseline_mae": 12.638922518159806,
+    "model_rmse_on_baseline_subset": 15.772675667327967,
+    "model_mae_on_baseline_subset": 12.625892595971806,
     "folds": [
       {
         "fold": 0,
@@ -64,8 +64,8 @@
         "test_season": 2023,
         "n": 3730,
         "rmse": 16.739837343274953,
-        "mae": 13.292493026146275,
-        "bias": -0.30638952198804825,
+        "mae": 13.292493026146273,
+        "bias": -0.3063895219880583,
         "residual_std": 16.73927720349435,
         "baseline_n": 1411,
         "baseline_rmse": 15.779587869715042,
@@ -83,9 +83,9 @@
         "test_season": 2024,
         "n": 3799,
         "rmse": 16.761496583100282,
-        "mae": 13.25115441049563,
-        "bias": -0.13838718247395598,
-        "residual_std": 16.763131694484173,
+        "mae": 13.251154410495634,
+        "bias": -0.1383871824739581,
+        "residual_std": 16.763131694484176,
         "baseline_n": 1553,
         "baseline_rmse": 16.360532248492408,
         "baseline_mae": 12.92369607211848,
@@ -103,9 +103,9 @@
         "test_season": 2025,
         "n": 3829,
         "rmse": 16.52466754393891,
-        "mae": 13.108474521569507,
-        "bias": -0.4150851230766778,
-        "residual_std": 16.521611007067268,
+        "mae": 13.108474521569503,
+        "bias": -0.4150851230766747,
+        "residual_std": 16.521611007067264,
         "baseline_n": 1594,
         "baseline_rmse": 15.34149001472869,
         "baseline_mae": 12.337045169385194,
@@ -122,19 +122,19 @@
           2025
         ],
         "test_season": 2026,
-        "n": 3164,
-        "rmse": 16.79105293025804,
-        "mae": 13.37730507800256,
-        "bias": -0.07643000232187928,
-        "residual_std": 16.793533036225337,
-        "baseline_n": 1098,
-        "baseline_rmse": 15.695561077029666,
-        "baseline_mae": 12.640710382513662,
-        "model_rmse_on_baseline_subset": 15.688954856661692,
-        "model_mae_on_baseline_subset": 12.649832610600233
+        "n": 3481,
+        "rmse": 16.66324345201243,
+        "mae": 13.338586666493947,
+        "bias": 0.1272249051066028,
+        "residual_std": 16.665151662310834,
+        "baseline_n": 1224,
+        "baseline_rmse": 15.705215662944838,
+        "baseline_mae": 12.695261437908497,
+        "model_rmse_on_baseline_subset": 15.696143872446045,
+        "model_mae_on_baseline_subset": 12.70179705163089
       }
     ],
-    "n_samples": 14522,
+    "n_samples": 14839,
     "strategy": "nested_oos_shrunk_market_residual_ridge",
     "residual_folds": [
       {
@@ -142,7 +142,7 @@
         "test_season": 2023,
         "train_n": 2346,
         "test_n": 1411,
-        "shrinkage": 0.19575051806991303,
+        "shrinkage": 0.19575051806991683,
         "shrinkage_oos_n": 1459
       },
       {
@@ -150,7 +150,7 @@
         "test_season": 2024,
         "train_n": 3757,
         "test_n": 1553,
-        "shrinkage": 0.27485816721758854,
+        "shrinkage": 0.27485816721759243,
         "shrinkage_oos_n": 2870
       },
       {
@@ -158,20 +158,20 @@
         "test_season": 2025,
         "train_n": 5310,
         "test_n": 1594,
-        "shrinkage": 0.33266209900954713,
+        "shrinkage": 0.33266209900955135,
         "shrinkage_oos_n": 4423
       },
       {
         "fold": 3,
         "test_season": 2026,
         "train_n": 6904,
-        "test_n": 1098,
-        "shrinkage": 0.3647890266059074,
+        "test_n": 1224,
+        "shrinkage": 0.3647890266059116,
         "shrinkage_oos_n": 6017
       }
     ],
-    "final_residual_shrinkage": 0.3190974581371744,
-    "final_residual_shrinkage_oos_n": 7115
+    "final_residual_shrinkage": 0.32040177854965257,
+    "final_residual_shrinkage_oos_n": 7241
   },
   "prediction_contract": "home_score + away_score in points",
   "status": "challenger"

@@ -1,10 +1,10 @@
 {
   "model_name": "home_margin",
   "version": "2.2.0",
-  "created_at": "2026-11-10T13:59:06.181131+00:00",
-  "git_sha": "d1dc1f7d82df127c50a4f72658035d5c6cde78b3",
+  "created_at": "2026-11-17T15:15:04.950958+00:00",
+  "git_sha": "6f53d92c122d94797c378c5da476f3a5cd0bab41",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-08T03:30:00+00:00",
+  "training_end": "2026-11-15T18:00:00+00:00",
   "feature_names": [
     "market_home_prob",
     "elo_diff",
@@ -32,23 +32,23 @@
     "market_spread"
   ],
   "feature_schema_hash": "ddadf381fdb955669f8158a402a4d1c50914dbc74233eda0c5adc5901c3d3604",
-  "data_fingerprint": "95a6293b0a1ccf89d9b2c583974312cea10bdd4c211a4ffc00f239d763469b9c",
+  "data_fingerprint": "6937b3999a541b0213d69366cec77e90b117ae8e6d5a6f1197ddbf1fa5a32cd9",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "native_missing"
   },
   "metrics": {
-    "n": 14522,
-    "rmse": 18.013726220978587,
-    "mae": 14.068598176841782,
-    "bias": -0.12568161099323266,
-    "residual_std": 18.01390801477379,
-    "baseline_n": 5741,
-    "baseline_rmse": 15.30239485146723,
-    "baseline_mae": 12.035577425535621,
-    "model_rmse_on_baseline_subset": 15.568565506192664,
-    "model_mae_on_baseline_subset": 12.30902926434077,
+    "n": 14839,
+    "rmse": 18.003957045030138,
+    "mae": 14.059495355705483,
+    "bias": -0.10547277313355283,
+    "residual_std": 18.00425475970243,
+    "baseline_n": 5863,
+    "baseline_rmse": 15.306180993836014,
+    "baseline_mae": 12.030146682585707,
+    "model_rmse_on_baseline_subset": 15.567034969885038,
+    "model_mae_on_baseline_subset": 12.30357100363637,
     "folds": [
       {
         "fold": 0,
@@ -117,21 +117,21 @@
           2025
         ],
         "test_season": 2026,
-        "n": 3164,
-        "rmse": 19.119818837585406,
-        "mae": 14.830723107791554,
-        "bias": -0.5162166046510261,
-        "residual_std": 19.115869970653314,
-        "baseline_n": 1174,
-        "baseline_rmse": 15.700060764430637,
-        "baseline_mae": 12.330068143100512,
-        "model_rmse_on_baseline_subset": 15.717421628098757,
-        "model_mae_on_baseline_subset": 12.406918880017237
+        "n": 3481,
+        "rmse": 18.982285771938066,
+        "mae": 14.722515590999652,
+        "bias": -0.39450487296780024,
+        "residual_std": 18.98091242805294,
+        "baseline_n": 1296,
+        "baseline_rmse": 15.679783589894534,
+        "baseline_mae": 12.277777777777779,
+        "model_rmse_on_baseline_subset": 15.696603395440173,
+        "model_mae_on_baseline_subset": 12.373011229073997
       }
     ],
-    "n_samples": 14522,
+    "n_samples": 14839,
     "strategy": "structural_xgb_with_market_residual_shadow",
-    "market_anchored_n": 5741,
+    "market_anchored_n": 5863,
     "residual_folds": [
       {
         "fold": 0,
@@ -161,24 +161,24 @@
         "fold": 3,
         "test_season": 2026,
         "train_n": 6913,
-        "test_n": 1174,
+        "test_n": 1296,
         "shrinkage": 0.0,
         "shrinkage_oos_n": 6026
       }
     ],
-    "final_residual_shrinkage": 0.06798149052006096,
-    "final_residual_shrinkage_oos_n": 7200,
+    "final_residual_shrinkage": 0.06959311589201318,
+    "final_residual_shrinkage_oos_n": 7322,
     "market_residual_metrics": {
-      "n": 14522,
-      "rmse": 17.923334454326742,
-      "mae": 13.960494127359592,
-      "bias": -0.17142848305123545,
-      "residual_std": 17.923131731478993,
-      "baseline_n": 5741,
-      "baseline_rmse": 15.30239485146723,
-      "baseline_mae": 12.035577425535621,
-      "model_rmse_on_baseline_subset": 15.30239485146723,
-      "model_mae_on_baseline_subset": 12.035577425535621
+      "n": 14839,
+      "rmse": 17.91537078024919,
+      "mae": 13.951463359322975,
+      "bias": -0.14451922874791526,
+      "residual_std": 17.915391538023687,
+      "baseline_n": 5863,
+      "baseline_rmse": 15.306180993836014,
+      "baseline_mae": 12.030146682585707,
+      "model_rmse_on_baseline_subset": 15.306180993836014,
+      "model_mae_on_baseline_subset": 12.030146682585707
     }
   },
   "prediction_contract": "home_score - away_score; positive means home by N",
