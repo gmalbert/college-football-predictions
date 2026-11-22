@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-21T20:46:55.250093+00:00",
-  "source_revision": "9319257fc504d82bc7e5f84bfd8d9c96da4ede1a",
+  "generated_at": "2026-11-22T00:02:15.283955+00:00",
+  "source_revision": "a3a501932cb7934c21ee7eff869dce2afa147f80",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -10,13 +10,13 @@
     },
     "home": {
       "url": "/data/snapshots/home.json",
-      "bytes": 1527,
-      "sha256": "d15b25eaee4ba6f6543c36c74672af78e80bef7f2d46f804ea18a2e4e2d7b260"
+      "bytes": 1515,
+      "sha256": "f1359772c6f301c27c878f870918dc951d6cb5176caf9c29240bd3d5402873b9"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
-      "bytes": 1570350,
-      "sha256": "1bb5bc566bee2af7acc458baa3102b4d627bd3eebbf930304923ebfe76e5b40e"
+      "bytes": 1570719,
+      "sha256": "4b4515a24375fa188a0513fce7d636bec08b38bef03fddb61f95ab45fd99d768"
     },
     "value-bets": {
       "url": "/data/snapshots/value-bets.json",
@@ -45,8 +45,8 @@
     },
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
-      "bytes": 2961,
-      "sha256": "c4541560135e67b01cf4cf83e0555d2fddef4c0c2704c3eb45ab6a3e93c4e16b"
+      "bytes": 2960,
+      "sha256": "117561a5d415c752fb405bc6bcecc27c25817f6a3483373e06dd5351be5a86db"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
