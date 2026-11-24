@@ -1,10 +1,10 @@
 {
   "model_name": "win_probability",
   "version": "2.2.0",
-  "created_at": "2026-11-17T15:15:04.936387+00:00",
-  "git_sha": "6f53d92c122d94797c378c5da476f3a5cd0bab41",
+  "created_at": "2026-11-24T16:46:32.386181+00:00",
+  "git_sha": "f6e2a5c72d3f35739022a2e1720c5666725f71b8",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-15T18:00:00+00:00",
+  "training_end": "2026-11-22T03:30:00+00:00",
   "feature_names": [
     "market_home_prob",
     "elo_diff",
@@ -31,21 +31,21 @@
     "sacks_diff_l5"
   ],
   "feature_schema_hash": "0d3f6ab5ba3effe8730dbac008b3f10ecb3c3b50b80930a2f032c2ea6928cca5",
-  "data_fingerprint": "0db45d349bedb18d967442800bbe0796242474fe421643d5b0dad7f875f619d3",
+  "data_fingerprint": "195003c62959969e3b91946750be263e3d55eeea68458189699a0deebde251ae",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "native_missing"
   },
   "metrics": {
-    "n": 14839,
-    "brier": 0.1633588716166329,
-    "log_loss": 0.4897672328189102,
-    "ece": 0.0073516456985515,
-    "accuracy": 0.7536896017251836,
-    "baseline_n": 3699,
-    "baseline_brier": 0.17327112739164457,
-    "model_brier_on_baseline_subset": 0.17327112739164457,
+    "n": 15008,
+    "brier": 0.16351539103141718,
+    "log_loss": 0.49018281756676096,
+    "ece": 0.007496198433081255,
+    "accuracy": 0.7533981876332623,
+    "baseline_n": 3814,
+    "baseline_brier": 0.17330332231038928,
+    "model_brier_on_baseline_subset": 0.17330332231038928,
     "brier_skill": 0.0,
     "folds": [
       {
@@ -112,20 +112,20 @@
           2025
         ],
         "test_season": 2026,
-        "n": 3481,
-        "brier": 0.16689329198890265,
-        "log_loss": 0.49737914720165466,
-        "ece": 0.01724732555858031,
-        "accuracy": 0.7471990807239299,
-        "baseline_n": 1207,
-        "baseline_brier": 0.17257075720709483,
-        "model_brier_on_baseline_subset": 0.17257075720709483,
+        "n": 3650,
+        "brier": 0.16737321701196273,
+        "log_loss": 0.4987354985345479,
+        "ece": 0.016568647249555805,
+        "accuracy": 0.7463013698630137,
+        "baseline_n": 1322,
+        "baseline_brier": 0.17272456506739403,
+        "model_brier_on_baseline_subset": 0.17272456506739403,
         "brier_skill": 0.0
       }
     ],
-    "n_samples": 14839,
+    "n_samples": 15008,
     "strategy": "no_vig_market_when_available_structural_fallback",
-    "market_anchored_n": 3699
+    "market_anchored_n": 3814
   },
   "prediction_contract": "P(home win), calibrated probability in [0,1]",
   "status": "challenger"

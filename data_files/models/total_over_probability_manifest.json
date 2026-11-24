@@ -1,10 +1,10 @@
 {
   "model_name": "total_over_probability",
   "version": "2.2.0",
-  "created_at": "2026-11-17T15:15:04.978459+00:00",
-  "git_sha": "6f53d92c122d94797c378c5da476f3a5cd0bab41",
+  "created_at": "2026-11-24T16:46:32.416272+00:00",
+  "git_sha": "f6e2a5c72d3f35739022a2e1720c5666725f71b8",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-15T18:00:00+00:00",
+  "training_end": "2026-11-22T03:30:00+00:00",
   "feature_names": [
     "home_points_for_l5",
     "away_points_for_l5",
@@ -37,22 +37,22 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "ff3ababe3c212018cb42fdb54fe43744679fd0839430da70b1cd080c0d7d9e15",
+  "data_fingerprint": "da33d983d28c49690025bbc58779569cad1e2741e565ae5e39047cd3adbb1df0",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "median_with_indicator"
   },
   "metrics": {
-    "n": 5746,
-    "brier": 0.2503433615273986,
-    "log_loss": 0.6940498165272356,
-    "ece": 0.022410093091964674,
-    "accuracy": 0.5165332405151409,
-    "baseline_n": 5746,
+    "n": 5871,
+    "brier": 0.2501499446671063,
+    "log_loss": 0.6936559651062616,
+    "ece": 0.020516475896866056,
+    "accuracy": 0.5183103389541815,
+    "baseline_n": 5871,
     "baseline_brier": 0.25,
-    "model_brier_on_baseline_subset": 0.2503433615273986,
-    "brier_skill": -0.001373446109594445,
+    "model_brier_on_baseline_subset": 0.2501499446671063,
+    "brier_skill": -0.0005997786684253104,
     "folds": [
       {
         "fold": 0,
@@ -64,7 +64,7 @@
         "n": 1399,
         "brier": 0.250479549771639,
         "log_loss": 0.6941444996155424,
-        "ece": 0.026731486063423064,
+        "ece": 0.0267314860634231,
         "accuracy": 0.5139385275196569,
         "baseline_n": 1399,
         "baseline_brier": 0.25,
@@ -80,14 +80,14 @@
         ],
         "test_season": 2024,
         "n": 1538,
-        "brier": 0.24891875715713277,
+        "brier": 0.2489187571571328,
         "log_loss": 0.6909387098141406,
-        "ece": 0.01105503510197555,
+        "ece": 0.011055035101975474,
         "accuracy": 0.5201560468140443,
         "baseline_n": 1538,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.24891875715713277,
-        "brier_skill": 0.004324971371468922
+        "model_brier_on_baseline_subset": 0.2489187571571328,
+        "brier_skill": 0.004324971371468811
       },
       {
         "fold": 2,
@@ -101,7 +101,7 @@
         "n": 1588,
         "brier": 0.2482139530002642,
         "log_loss": 0.6895599229704256,
-        "ece": 0.014796213221957236,
+        "ece": 0.014796213221957292,
         "accuracy": 0.5270780856423174,
         "baseline_n": 1588,
         "baseline_brier": 0.25,
@@ -118,26 +118,26 @@
           2025
         ],
         "test_season": 2026,
-        "n": 1221,
-        "brier": 0.25475123614563444,
-        "log_loss": 0.7036995883965339,
-        "ece": 0.0668021576795383,
-        "accuracy": 0.5012285012285013,
-        "baseline_n": 1221,
+        "n": 1346,
+        "brier": 0.25349823858690096,
+        "log_loss": 0.7010855295732046,
+        "ece": 0.05441996256373528,
+        "accuracy": 0.5104011887072808,
+        "baseline_n": 1346,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.25475123614563444,
-        "brier_skill": -0.019004944582537764
+        "model_brier_on_baseline_subset": 0.25349823858690096,
+        "brier_skill": -0.013992954347603836
       }
     ],
-    "n_samples": 5746,
+    "n_samples": 5871,
     "strategy": {
-      "n": 657,
-      "wins": 365,
-      "losses": 292,
-      "win_rate": 0.5555555555555556,
-      "wilson_95_low": 0.5173458303801381,
-      "wilson_95_high": 0.5931193939571369,
-      "flat_stake_roi_at_minus_110": 0.0606060606060606,
+      "n": 669,
+      "wins": 375,
+      "losses": 294,
+      "win_rate": 0.5605381165919282,
+      "wilson_95_low": 0.5226888525102983,
+      "wilson_95_high": 0.5976961192213346,
+      "flat_stake_roi_at_minus_110": 0.07011822258459025,
       "probability_edge_threshold": 0.075,
       "minimum_selected_probability": 0.575,
       "assumed_odds": -110.0,
@@ -189,33 +189,33 @@
           "flat_stake_roi_at_minus_110": 0.21657754010695182
         },
         "2026": {
-          "n": 334,
-          "wins": 180,
-          "losses": 154,
-          "win_rate": 0.5389221556886228,
-          "wilson_95_low": 0.4853230336870911,
-          "wilson_95_high": 0.5916361414560616,
-          "flat_stake_roi_at_minus_110": 0.02885138813282523
+          "n": 346,
+          "wins": 190,
+          "losses": 156,
+          "win_rate": 0.5491329479768786,
+          "wilson_95_low": 0.4964501175155627,
+          "wilson_95_high": 0.600736762834791,
+          "flat_stake_roi_at_minus_110": 0.04834471886495006
         }
       },
       "by_side": {
         "over": {
-          "n": 498,
-          "wins": 274,
-          "losses": 224,
-          "win_rate": 0.5502008032128514,
-          "wilson_95_low": 0.5062902353303141,
-          "wilson_95_high": 0.5933428243166465,
-          "flat_stake_roi_at_minus_110": 0.05038335158817087
+          "n": 504,
+          "wins": 279,
+          "losses": 225,
+          "win_rate": 0.5535714285714286,
+          "wilson_95_low": 0.5099281674344326,
+          "wilson_95_high": 0.5964042303288348,
+          "flat_stake_roi_at_minus_110": 0.056818181818181795
         },
         "under": {
-          "n": 159,
-          "wins": 91,
-          "losses": 68,
-          "win_rate": 0.5723270440251572,
-          "wilson_95_low": 0.49461392600604825,
-          "wilson_95_high": 0.6466277465174426,
-          "flat_stake_roi_at_minus_110": 0.09262435677530012
+          "n": 165,
+          "wins": 96,
+          "losses": 69,
+          "win_rate": 0.5818181818181818,
+          "wilson_95_low": 0.5055313557464033,
+          "wilson_95_high": 0.6543819747151238,
+          "flat_stake_roi_at_minus_110": 0.11074380165289252
         }
       },
       "by_season_and_side": {
@@ -321,22 +321,22 @@
         },
         "2026": {
           "over": {
-            "n": 261,
-            "wins": 135,
-            "losses": 126,
-            "win_rate": 0.5172413793103449,
-            "wilson_95_low": 0.45680875865705217,
-            "wilson_95_high": 0.577173836213388,
-            "flat_stake_roi_at_minus_110": -0.012539184952978085
+            "n": 267,
+            "wins": 140,
+            "losses": 127,
+            "win_rate": 0.5243445692883895,
+            "wilson_95_low": 0.46452181440143725,
+            "wilson_95_high": 0.5834767455553912,
+            "flat_stake_roi_at_minus_110": 0.0010214504596526826
           },
           "under": {
-            "n": 73,
-            "wins": 45,
-            "losses": 28,
-            "win_rate": 0.6164383561643836,
-            "wilson_95_low": 0.501740834746836,
-            "wilson_95_high": 0.719493903126487,
-            "flat_stake_roi_at_minus_110": 0.17683686176836858
+            "n": 79,
+            "wins": 50,
+            "losses": 29,
+            "win_rate": 0.6329113924050633,
+            "wilson_95_low": 0.5227691853982361,
+            "wilson_95_high": 0.730727074795025,
+            "flat_stake_roi_at_minus_110": 0.20828538550057535
           }
         }
       },
@@ -347,7 +347,9 @@
     "strategy_release": {
       "status": "hold",
       "retrospective_gates_passed": false,
-      "eligible_sides": [],
+      "eligible_sides": [
+        "over"
+      ],
       "prospective_clv_passed": false,
       "reason": "Retrospective probability/confirmation gates did not pass."
     }
