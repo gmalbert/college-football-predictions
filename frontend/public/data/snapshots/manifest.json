@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-24T16:55:33.081404+00:00",
-  "source_revision": "f6e2a5c72d3f35739022a2e1720c5666725f71b8",
+  "generated_at": "2026-11-24T23:47:06.957716+00:00",
+  "source_revision": "36b6e54a62b280da944dccbf705dce51e77006fd",
   "pages": {
     "meta": {
       "url": "/data/snapshots/meta.json",
@@ -11,17 +11,17 @@
     "home": {
       "url": "/data/snapshots/home.json",
       "bytes": 1525,
-      "sha256": "dab83b0d86f9fb62ecfd70b983a38990dfd93d52699584acc6eec20ba145a22f"
+      "sha256": "0a708b82af557edc0cddc51dff66dcffb8fdd7b618edfbb1d6340d762014ce8f"
     },
     "weekly-predictions": {
       "url": "/data/snapshots/weekly-predictions.json",
-      "bytes": 1575206,
-      "sha256": "78e3df1cb97596d8a5dbba8d2e2b5eaf331bafdb06cb46ef4a75203dac5fc38b"
+      "bytes": 1155554,
+      "sha256": "c9af28298f7ba1ebc98607e60d75b7cb27d5a5b5843b1da95186d533ac4a3911"
     },
     "value-bets": {
       "url": "/data/snapshots/value-bets.json",
-      "bytes": 19877,
-      "sha256": "2c1b0898d5355b672877b075c0ebfb8d7833bef28e3532d6e83f86cc4d092916"
+      "bytes": 8258,
+      "sha256": "9d79f97e4a34e084654d84c511e0c1cce7895736e4e66d244222fcc4b61bd133"
     },
     "team-explorer": {
       "url": "/data/snapshots/team-explorer.json",
@@ -45,8 +45,8 @@
     },
     "data-quality": {
       "url": "/data/snapshots/data-quality.json",
-      "bytes": 2961,
-      "sha256": "b6d0b3529be3aebb8e0bd80f64d65684f12727f4c0f84a710a2b8113f383171a"
+      "bytes": 2960,
+      "sha256": "ffc35c206acff42c6bb77aeed1f91c720856529b717bf9643a1de96f83e2cd9a"
     },
     "total-market-signals": {
       "url": "/data/snapshots/total-market-signals.json",
@@ -64,7 +64,7 @@
       2021
     ],
     "default_season": 2026,
-    "default_week": 12,
+    "default_week": 13,
     "weeks_by_season": {
       "2026": [
         1,
@@ -9527,7 +9527,7 @@
       2021
     ],
     "default_season": 2026,
-    "default_week": 12,
+    "default_week": 13,
     "weeks_by_season": {
       "2026": [
         1,
@@ -9635,7 +9635,7 @@
       ]
     },
     "default_week_by_season": {
-      "2026": 12,
+      "2026": 13,
       "2025": 16,
       "2024": 16,
       "2023": 15,
