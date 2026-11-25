@@ -278,6 +278,7 @@ def closing_line_value(
     closing_line: float | None = None,
     taken_odds: float | None = None,
     closing_odds: float | None = None,
+    side: Side | str | None = None,
 ) -> float:
     """Return bettor-positive CLV in points (spread/total) or decimal-price %."""
     market = Market(market)
@@ -287,4 +288,10 @@ def closing_line_value(
         return american_to_decimal(taken_odds) / american_to_decimal(closing_odds) - 1.0
     if taken_line is None or closing_line is None:
         return float("nan")
+    if market == Market.TOTAL and side is not None:
+        side = Side(side)
+        if side == Side.OVER:
+            return float(closing_line) - float(taken_line)
+        if side != Side.UNDER:
+            raise ValueError("total CLV requires the over or under side")
     return float(taken_line) - float(closing_line)

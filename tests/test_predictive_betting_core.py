@@ -427,6 +427,12 @@ class MarketTests(unittest.TestCase):
         movement = line_movement_features(quotes)
         self.assertAlmostEqual(movement.iloc[0]["line_move"], -1.25)
         self.assertGreater(closing_line_value(market="spread", taken_line=-6.5, closing_line=-7), 0)
+        self.assertEqual(closing_line_value(
+            market="total", side="under", taken_line=46.5, closing_line=45.5
+        ), 1.0)
+        self.assertEqual(closing_line_value(
+            market="total", side="over", taken_line=46.5, closing_line=45.5
+        ), -1.0)
 
     def test_cfbd_quote_normalization(self):
         payload = [
