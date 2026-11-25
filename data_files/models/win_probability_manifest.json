@@ -1,10 +1,10 @@
 {
   "model_name": "win_probability",
-  "version": "2.2.0",
-  "created_at": "2026-11-24T16:46:32.386181+00:00",
-  "git_sha": "f6e2a5c72d3f35739022a2e1720c5666725f71b8",
+  "version": "2.3.0",
+  "created_at": "2026-11-25T19:23:41.703382+00:00",
+  "git_sha": "06f247740ee784f58dfc5a3b157c43e84e9b1f29",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-22T03:30:00+00:00",
+  "training_end": "2026-11-25T00:00:00+00:00",
   "feature_names": [
     "market_home_prob",
     "elo_diff",
@@ -31,22 +31,22 @@
     "sacks_diff_l5"
   ],
   "feature_schema_hash": "0d3f6ab5ba3effe8730dbac008b3f10ecb3c3b50b80930a2f032c2ea6928cca5",
-  "data_fingerprint": "195003c62959969e3b91946750be263e3d55eeea68458189699a0deebde251ae",
+  "data_fingerprint": "3b5595318042cb1e1322b60ac50e055b6e7de245a476de0fecffaafd0b85bacb",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "native_missing"
   },
   "metrics": {
-    "n": 15008,
-    "brier": 0.16351539103141718,
-    "log_loss": 0.49018281756676096,
-    "ece": 0.007496198433081255,
-    "accuracy": 0.7533981876332623,
-    "baseline_n": 3814,
-    "baseline_brier": 0.17330332231038928,
-    "model_brier_on_baseline_subset": 0.17330332231038928,
-    "brier_skill": 0.0,
+    "n": 15010,
+    "brier": 0.16382630523904487,
+    "log_loss": 0.49109921614751034,
+    "ece": 0.006846383137401623,
+    "accuracy": 0.752964690206529,
+    "baseline_n": 3701,
+    "baseline_brier": 0.17515424179230563,
+    "model_brier_on_baseline_subset": 0.1751260908826521,
+    "brier_skill": 0.00016072068461181477,
     "folds": [
       {
         "fold": 0,
@@ -93,14 +93,14 @@
         ],
         "test_season": 2025,
         "n": 3829,
-        "brier": 0.16173010533507245,
-        "log_loss": 0.4861755617960884,
-        "ece": 0.010953305820987972,
+        "brier": 0.1617229006248366,
+        "log_loss": 0.48609127623984266,
+        "ece": 0.009471337894570582,
         "accuracy": 0.7597283886132149,
         "baseline_n": 867,
         "baseline_brier": 0.16897546142266104,
-        "model_brier_on_baseline_subset": 0.16897546142266104,
-        "brier_skill": 0.0
+        "model_brier_on_baseline_subset": 0.1689436426966021,
+        "brier_skill": 0.000188303827023506
       },
       {
         "fold": 3,
@@ -112,20 +112,56 @@
           2025
         ],
         "test_season": 2026,
-        "n": 3650,
-        "brier": 0.16737321701196273,
-        "log_loss": 0.4987354985345479,
-        "ece": 0.016568647249555805,
-        "accuracy": 0.7463013698630137,
-        "baseline_n": 1322,
-        "baseline_brier": 0.17272456506739403,
-        "model_brier_on_baseline_subset": 0.17272456506739403,
-        "brier_skill": 0.0
+        "n": 3652,
+        "brier": 0.16865653942160755,
+        "log_loss": 0.502585653718003,
+        "ece": 0.012677162059595673,
+        "accuracy": 0.7445235487404163,
+        "baseline_n": 1209,
+        "baseline_brier": 0.17833651993432034,
+        "model_brier_on_baseline_subset": 0.17827316205083438,
+        "brier_skill": 0.0003552715030510356
       }
     ],
-    "n_samples": 15008,
-    "strategy": "no_vig_market_when_available_structural_fallback",
-    "market_anchored_n": 3814
+    "n_samples": 15010,
+    "strategy": "nested_shrunk_moneyline_calibration",
+    "market_residual_folds": [
+      {
+        "fold": 0,
+        "test_season": 2023,
+        "train_n": 1456,
+        "test_n": 794,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 718
+      },
+      {
+        "fold": 1,
+        "test_season": 2024,
+        "train_n": 2250,
+        "test_n": 831,
+        "shrinkage": 0.0,
+        "shrinkage_oos_n": 1512
+      },
+      {
+        "fold": 2,
+        "test_season": 2025,
+        "train_n": 3081,
+        "test_n": 867,
+        "shrinkage": 0.09163129987855685,
+        "shrinkage_oos_n": 2343
+      },
+      {
+        "fold": 3,
+        "test_season": 2026,
+        "train_n": 3948,
+        "test_n": 1209,
+        "shrinkage": 0.3106885979493338,
+        "shrinkage_oos_n": 3210
+      }
+    ],
+    "final_residual_shrinkage": 0.39927220271528835,
+    "final_residual_shrinkage_oos_n": 4419,
+    "market_anchored_n": 3701
   },
   "prediction_contract": "P(home win), calibrated probability in [0,1]",
   "status": "challenger"

@@ -1,25 +1,56 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-11-25T18:02:06Z",
-    "model_version": "2.2.0",
+    "generated_at": "2026-11-25T19:23:52.525448+00:00",
+    "model_version": "2.3.0",
     "tier_definition": "edge-v1",
     "edge_definition": "pick probability minus displayed price break-even probability",
     "market_edge_definition": "pick probability minus median no-vig probability across paired sportsbooks",
     "market_quote_count_definition": "number of sportsbooks with both sides paired",
     "price_contract": "same sportsbook and provider, exact line, pregame quotes within 24 hours and no more than 30 minutes apart",
-    "market_release_status": {},
+    "market_release_status": {
+      "moneyline": {
+        "status": "hold",
+        "required_gates": [
+          "out_of_sample_games",
+          "brier",
+          "calibration",
+          "win_market_baseline"
+        ],
+        "baseline_passed": true,
+        "clv_key": "moneyline:all",
+        "clv_passed": false
+      },
+      "spread": {
+        "status": "hold",
+        "required_gates": [
+          "out_of_sample_games",
+          "spread_market_baseline"
+        ],
+        "baseline_passed": true,
+        "clv_key": "spread:all",
+        "clv_passed": false
+      },
+      "total": {
+        "status": "hold",
+        "required_gates": [
+          "out_of_sample_games",
+          "total_market_baseline"
+        ],
+        "baseline_passed": false,
+        "clv_key": "total:over",
+        "clv_passed": false
+      }
+    },
     "totals_publication": "research_only",
     "season": "2026",
     "prediction_contract": "latest available line snapshot at export time",
     "release_status": "hold",
     "publication_mode": "provisional_research",
     "release_failed_gates": [
-      "win_market_baseline",
-      "spread_market_baseline",
       "closing_line_value"
     ],
-    "notes": "RESEARCH ONLY. Public picks withheld while the release is on hold (win_market_baseline, spread_market_baseline, closing_line_value)."
+    "notes": "RESEARCH ONLY. Public picks withheld while the release is on hold (closing_line_value)."
   },
   "bets": []
 }

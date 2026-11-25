@@ -1,10 +1,10 @@
 {
   "model_name": "total_over_probability",
-  "version": "2.2.0",
-  "created_at": "2026-11-24T16:46:32.416272+00:00",
-  "git_sha": "f6e2a5c72d3f35739022a2e1720c5666725f71b8",
+  "version": "2.3.0",
+  "created_at": "2026-11-25T19:23:41.736800+00:00",
+  "git_sha": "06f247740ee784f58dfc5a3b157c43e84e9b1f29",
   "training_start": "2021-08-28T17:20:00+00:00",
-  "training_end": "2026-11-22T03:30:00+00:00",
+  "training_end": "2026-11-25T00:00:00+00:00",
   "feature_names": [
     "home_points_for_l5",
     "away_points_for_l5",
@@ -37,22 +37,22 @@
     "market_spread_book_count"
   ],
   "feature_schema_hash": "3f280bab0a261089bda5cc05dcfa4ed1af1eaea8b36d40fc93233ed5c8eda89d",
-  "data_fingerprint": "da33d983d28c49690025bbc58779569cad1e2741e565ae5e39047cd3adbb1df0",
+  "data_fingerprint": "72b34128aea9c8179af97bcc721e8c59d5fd53b00fb1258ce6b69ac1e8512d1a",
   "parameters": {
     "validation": "expanding-season-walk-forward",
     "min_train_seasons": 2,
     "imputation": "median_with_indicator"
   },
   "metrics": {
-    "n": 5871,
-    "brier": 0.2501499446671063,
-    "log_loss": 0.6936559651062616,
-    "ece": 0.020516475896866056,
-    "accuracy": 0.5183103389541815,
-    "baseline_n": 5871,
+    "n": 5718,
+    "brier": 0.25013129998553524,
+    "log_loss": 0.6936265038819945,
+    "ece": 0.019241548111610208,
+    "accuracy": 0.5178384050367262,
+    "baseline_n": 5718,
     "baseline_brier": 0.25,
-    "model_brier_on_baseline_subset": 0.2501499446671063,
-    "brier_skill": -0.0005997786684253104,
+    "model_brier_on_baseline_subset": 0.25013129998553524,
+    "brier_skill": -0.0005251999421409526,
     "folds": [
       {
         "fold": 0,
@@ -118,26 +118,26 @@
           2025
         ],
         "test_season": 2026,
-        "n": 1346,
-        "brier": 0.25349823858690096,
-        "log_loss": 0.7010855295732046,
-        "ece": 0.05441996256373528,
-        "accuracy": 0.5104011887072808,
-        "baseline_n": 1346,
+        "n": 1193,
+        "brier": 0.25383828777424805,
+        "log_loss": 0.7018971507660658,
+        "ece": 0.05054906657813668,
+        "accuracy": 0.5071248952221291,
+        "baseline_n": 1193,
         "baseline_brier": 0.25,
-        "model_brier_on_baseline_subset": 0.25349823858690096,
-        "brier_skill": -0.013992954347603836
+        "model_brier_on_baseline_subset": 0.25383828777424805,
+        "brier_skill": -0.015353151096992201
       }
     ],
-    "n_samples": 5871,
+    "n_samples": 5718,
     "strategy": {
-      "n": 669,
-      "wins": 375,
-      "losses": 294,
-      "win_rate": 0.5605381165919282,
-      "wilson_95_low": 0.5226888525102983,
-      "wilson_95_high": 0.5976961192213346,
-      "flat_stake_roi_at_minus_110": 0.07011822258459025,
+      "n": 583,
+      "wins": 327,
+      "losses": 256,
+      "win_rate": 0.5608919382504288,
+      "wilson_95_low": 0.520338823818827,
+      "wilson_95_high": 0.6006478565406014,
+      "flat_stake_roi_at_minus_110": 0.07079370029627316,
       "probability_edge_threshold": 0.075,
       "minimum_selected_probability": 0.575,
       "assumed_odds": -110.0,
@@ -189,33 +189,33 @@
           "flat_stake_roi_at_minus_110": 0.21657754010695182
         },
         "2026": {
-          "n": 346,
-          "wins": 190,
-          "losses": 156,
-          "win_rate": 0.5491329479768786,
-          "wilson_95_low": 0.4964501175155627,
-          "wilson_95_high": 0.600736762834791,
-          "flat_stake_roi_at_minus_110": 0.04834471886495006
+          "n": 260,
+          "wins": 142,
+          "losses": 118,
+          "win_rate": 0.5461538461538461,
+          "wilson_95_low": 0.48540384485488464,
+          "wilson_95_high": 0.6055598729295532,
+          "flat_stake_roi_at_minus_110": 0.04265734265734267
         }
       },
       "by_side": {
         "over": {
-          "n": 504,
-          "wins": 279,
-          "losses": 225,
-          "win_rate": 0.5535714285714286,
-          "wilson_95_low": 0.5099281674344326,
-          "wilson_95_high": 0.5964042303288348,
-          "flat_stake_roi_at_minus_110": 0.056818181818181795
+          "n": 435,
+          "wins": 242,
+          "losses": 193,
+          "win_rate": 0.5563218390804597,
+          "wilson_95_low": 0.5093435036052818,
+          "wilson_95_high": 0.6023141326893346,
+          "flat_stake_roi_at_minus_110": 0.06206896551724138
         },
         "under": {
-          "n": 165,
-          "wins": 96,
-          "losses": 69,
-          "win_rate": 0.5818181818181818,
-          "wilson_95_low": 0.5055313557464033,
-          "wilson_95_high": 0.6543819747151238,
-          "flat_stake_roi_at_minus_110": 0.11074380165289252
+          "n": 148,
+          "wins": 85,
+          "losses": 63,
+          "win_rate": 0.5743243243243243,
+          "wilson_95_low": 0.4937765409597366,
+          "wilson_95_high": 0.6511114242301874,
+          "flat_stake_roi_at_minus_110": 0.09643734643734639
         }
       },
       "by_season_and_side": {
@@ -321,22 +321,22 @@
         },
         "2026": {
           "over": {
-            "n": 267,
-            "wins": 140,
-            "losses": 127,
-            "win_rate": 0.5243445692883895,
-            "wilson_95_low": 0.46452181440143725,
-            "wilson_95_high": 0.5834767455553912,
-            "flat_stake_roi_at_minus_110": 0.0010214504596526826
+            "n": 198,
+            "wins": 103,
+            "losses": 95,
+            "win_rate": 0.5202020202020202,
+            "wilson_95_low": 0.4508944210601662,
+            "wilson_95_high": 0.5887406472094642,
+            "flat_stake_roi_at_minus_110": -0.006887052341597776
           },
           "under": {
-            "n": 79,
-            "wins": 50,
-            "losses": 29,
-            "win_rate": 0.6329113924050633,
-            "wilson_95_low": 0.5227691853982361,
-            "wilson_95_high": 0.730727074795025,
-            "flat_stake_roi_at_minus_110": 0.20828538550057535
+            "n": 62,
+            "wins": 39,
+            "losses": 23,
+            "win_rate": 0.6290322580645161,
+            "wilson_95_low": 0.5045796412346053,
+            "wilson_95_high": 0.7384283401585888,
+            "flat_stake_roi_at_minus_110": 0.20087976539589442
           }
         }
       },
@@ -347,9 +347,7 @@
     "strategy_release": {
       "status": "hold",
       "retrospective_gates_passed": false,
-      "eligible_sides": [
-        "over"
-      ],
+      "eligible_sides": [],
       "prospective_clv_passed": false,
       "reason": "Retrospective probability/confirmation gates did not pass."
     }
