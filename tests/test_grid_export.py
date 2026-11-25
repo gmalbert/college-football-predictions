@@ -8,6 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from scripts import export_best_bets
+from utils.market import remove_vig
 
 
 class TestPublicBestBetsExport(unittest.TestCase):
