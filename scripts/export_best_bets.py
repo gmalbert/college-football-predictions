@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import sys
 from datetime import date, datetime, timedelta, timezone
-from statistics import NormalDist
+from math import isfinite
 from pathlib import Path
 
 import pandas as pd
@@ -16,9 +16,9 @@ from utils.betting import (  # noqa: E402
     BetRecommendation,
     Confidence,
     generate_spread_pick,
-    generate_total_pick,
 )
 from utils.market import (  # noqa: E402
+    american_to_decimal,
     american_to_implied,
     expected_value,
     normal_cover_probability,
@@ -34,29 +34,39 @@ MAX_QUOTE_AGE = pd.Timedelta(hours=24)
 MAX_PAIR_AGE = pd.Timedelta(minutes=30)
 
 
+def _release_is_promoted(decision: dict) -> bool:
+    return decision.get("decision") == "promote" and not decision.get("failed_gates")
+
+
 def _write(
     bets: list[dict],
     notes: str = "",
     *,
-    release_decision: dict | None = None,
+    release_decision: dict,
+    market_statuses: dict,
 ) -> None:
-    release_decision = release_decision or {}
-    release_status = release_decision.get("decision", "unknown")
+    promoted = _release_is_promoted(release_decision)
+    release_status = "promote" if promoted else "hold"
     payload: dict = {
         "meta": {
             "sport": SPORT,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "model_version": MODEL_VERSION,
             "tier_definition": "edge-v1",
-            "edge_definition": "pick probability minus median no-vig probability from paired sportsbook quotes",
+            "edge_definition": "pick probability minus displayed price break-even probability",
+            "market_edge_definition": "pick probability minus median no-vig probability across paired sportsbooks",
+            "market_quote_count_definition": "number of sportsbooks with both sides paired",
+            "price_contract": "same sportsbook and provider, exact line, pregame quotes within 24 hours and no more than 30 minutes apart",
+            "market_release_status": market_statuses,
+            "totals_publication": "research_only",
             "season": str(current_cfb_season(date.today())),
             "prediction_contract": "latest available line snapshot at export time",
             "release_status": release_status,
             "publication_mode": (
-                "validated" if release_status == "promote" else "provisional_research"
+                "validated" if promoted else "provisional_research"
             ),
         },
-        "bets": bets,
+        "bets": bets if promoted else [],
     }
     failed_gates = release_decision.get("failed_gates", [])
     if failed_gates:
@@ -67,7 +77,7 @@ def _write(
     temporary = OUT_PATH.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     temporary.replace(OUT_PATH)
-    print(f"[{SPORT}] Wrote {len(bets)} bets -> {OUT_PATH}")
+    print(f"[{SPORT}] Wrote {len(payload['bets'])} bets -> {OUT_PATH}")
 
 
 def _tier(edge: float) -> str:
@@ -77,7 +87,7 @@ def _tier(edge: float) -> str:
     return "Standard"
 
 
-def _load_current_quotes() -> pd.DataFrame:
+def _load_current_quotes(now: pd.Timestamp) -> pd.DataFrame:
     """Load fresh, pregame sportsbook snapshots; ParlayAPI remains shadow-only."""
     required = {
         "game_id", "sportsbook", "market", "side", "line", "odds",
@@ -97,15 +107,16 @@ def _load_current_quotes() -> pd.DataFrame:
     quotes["line"] = pd.to_numeric(quotes["line"], errors="coerce")
     quotes["odds"] = pd.to_numeric(quotes["odds"], errors="coerce")
     quotes["captured_at"] = pd.to_datetime(quotes["captured_at"], utc=True, errors="coerce")
-    quotes["source"] = quotes["source"].astype("string").fillna("unknown").str.casefold()
-    quotes = quotes.dropna(subset=["game_id", "captured_at", "odds"])
+    quotes["source"] = quotes["source"].astype("string").str.strip().str.casefold()
+    quotes["sportsbook"] = quotes["sportsbook"].astype("string").str.strip()
+    quotes = quotes.dropna(subset=["game_id", "source", "sportsbook", "captured_at", "odds"])
+    quotes = quotes[quotes["source"].ne("") & quotes["sportsbook"].ne("")]
     # Snapshot odds are American prices; values strictly between -100 and +100
     # are malformed (and would create false implied probabilities).
     valid_american = quotes["odds"].le(-100) | quotes["odds"].ge(100)
-    quotes = quotes[valid_american]
+    quotes = quotes[valid_american & quotes["odds"].map(isfinite)]
     quotes = quotes[~quotes["source"].isin({"parlay", "parlay_api"})]
 
-    now = pd.Timestamp.now(tz="UTC")
     quotes = quotes[quotes["captured_at"].between(now - MAX_QUOTE_AGE, now)]
     if "is_live" in quotes.columns:
         live = quotes["is_live"].astype("string").str.casefold().isin({"1", "true", "yes", "y"})
@@ -136,7 +147,7 @@ def _price_for_pick(
         quotes["game_id"].eq(game_id) & quotes["market"].eq(market)
     ]
     opposite = {"home": "away", "away": "home", "over": "under", "under": "over"}[side]
-    pairs: list[dict] = []
+    pairs_by_book: dict[str, dict] = {}
 
     for (source, sportsbook), book in game_quotes.groupby(
         ["source", "sportsbook"], dropna=False, sort=False
@@ -145,8 +156,8 @@ def _price_for_pick(
         other = book[book["side"].eq(opposite)]
         if line is not None:
             opposite_line = -line if market == "spread" else line
-            chosen = chosen[chosen["line"].sub(line).abs().le(0.01)]
-            other = other[other["line"].sub(opposite_line).abs().le(0.01)]
+            chosen = chosen[chosen["line"].eq(line)]
+            other = other[other["line"].eq(opposite_line)]
         if chosen.empty or other.empty:
             continue
 
@@ -164,21 +175,29 @@ def _price_for_pick(
         total = picked_implied + other_implied
         if not 0 < total:
             continue
-        pairs.append(
-            {
-                "market_probability": picked_implied / total,
-                "odds": picked_odds,
-                "source": str(source),
-                "sportsbook": str(sportsbook),
-                "captured_at": chosen_quote["captured_at"],
-            }
-        )
+        pair = {
+            "market_probability": picked_implied / total,
+            "price_implied_probability": picked_implied,
+            "odds": picked_odds,
+            "opposing_odds": other_odds,
+            "source": str(source),
+            "sportsbook": str(sportsbook),
+            "captured_at": chosen_quote["captured_at"],
+            "opposing_captured_at": other_quote["captured_at"],
+        }
+        # A sportsbook can arrive through multiple providers. Count it once.
+        book_key = str(sportsbook).casefold()
+        previous_pair = pairs_by_book.get(book_key)
+        if previous_pair is None or pair["captured_at"] > previous_pair["captured_at"]:
+            pairs_by_book[book_key] = pair
 
-    if not pairs:
+    if not pairs_by_book:
         return None
-    best_price = max(pairs, key=lambda quote: quote["odds"])
+    pairs = list(pairs_by_book.values())
+    best_price = max(pairs, key=lambda quote: american_to_decimal(quote["odds"]))
     return {
         **best_price,
+        "selected_book_no_vig_probability": best_price["market_probability"],
         "market_probability": float(pd.Series(
             [quote["market_probability"] for quote in pairs], dtype=float
         ).median()),
@@ -196,7 +215,9 @@ def _record(
 ) -> dict:
     start = pd.to_datetime(row["start_date"], errors="coerce", utc=True)
     market_probability = float(market_quote["market_probability"])
-    edge = float(probability) - market_probability
+    price_implied = market_quote["price_implied_probability"]
+    edge = round(probability - price_implied, 4)
+    market_edge = probability - market_probability
     return {
         "game_id": int(row["game_id"]) if pd.notna(row.get("game_id")) else None,
         "game_date": start.date().isoformat(),
@@ -209,7 +230,13 @@ def _record(
         "probability": round(float(probability), 6),
         "confidence": round(float(probability), 6),
         "market_probability": round(market_probability, 6),
-        "edge": round(edge, 4),
+        "price_implied_probability": round(price_implied, 6),
+        "selected_book_no_vig_probability": round(market_quote["selected_book_no_vig_probability"], 6),
+        "edge": edge,
+        "price_edge": edge,
+        "market_edge": round(market_edge, 4),
+        "market_edge_display": f"{market_edge * 100:.1f} pp",
+        "expected_value_per_unit": round(expected_value(probability, market_quote["odds"]), 4),
         "edge_unit": "probability",
         "edge_display": f"{edge * 100:.1f} pp",
         "tier": _tier(edge),
@@ -219,47 +246,57 @@ def _record(
         "sportsbook": market_quote["sportsbook"],
         "odds_source": market_quote["source"],
         "price_captured_at": market_quote["captured_at"].isoformat(),
+        "opposing_odds": market_quote["opposing_odds"],
+        "opposing_price_captured_at": market_quote["opposing_captured_at"].isoformat(),
         "market_quote_count": int(market_quote["paired_book_count"]),
         "line": line,
         "league": SPORT,
     }
+
 def main() -> None:
-    today = date.today()
+    now = pd.Timestamp.now(tz="UTC")
+    today = now.date()
+    metrics = load_metrics()
+    decision = metrics.get("release_decision", {})
+    export_metadata = {
+        "release_decision": decision,
+        "market_statuses": metrics.get("market_release_status", {}),
+    }
+    if not _release_is_promoted(decision):
+        failed = ", ".join(decision.get("failed_gates", [])) or "release approval unavailable"
+        _write([], f"RESEARCH ONLY. Public picks withheld while the release is on hold ({failed}).", **export_metadata)
+        return
     if today.month not in {8, 9, 10, 11, 12, 1}:
-        _write([], "NCAAF off-season")
+        _write([], "NCAAF off-season", **export_metadata)
         return
     feature_path = ROOT / "data_files" / "features" / "feature_matrix.parquet"
     if not feature_path.exists() or not models_trained():
-        _write([], "Feature matrix or trained models are unavailable")
+        _write([], "Feature matrix or trained models are unavailable", **export_metadata)
         return
-
-    metrics = load_metrics()
-    decision = metrics.get("release_decision", {})
-    release_on_hold = decision.get("decision") != "promote"
-    failed = ", ".join(decision.get("failed_gates", [])) or "release gates unavailable"
 
     frame = pd.read_parquet(feature_path).drop_duplicates("game_id", keep="last")
     if "start_date" not in frame.columns:
-        _write([], "Feature matrix has no start_date")
+        _write([], "Feature matrix has no start_date", **export_metadata)
         return
     frame["start_date"] = pd.to_datetime(frame["start_date"], errors="coerce", utc=True)
     end = today + timedelta(days=LOOKAHEAD_DAYS)
     game_dates = frame["start_date"].dt.date
-    upcoming = frame[(game_dates >= today) & (game_dates <= end)].copy()
+    upcoming = frame[(frame["start_date"] > now) & (game_dates <= end)].copy()
     if upcoming.empty:
         _write(
             [],
             f"No NCAAF games in next {LOOKAHEAD_DAYS} days",
-            release_decision=decision,
+            **export_metadata,
         )
         return
     upcoming = predict_batch(upcoming)
 
     spread_std = float(metrics.get("spread_model", {}).get("residual_std", 0) or 0)
-    total_std = float(metrics.get("total_model", {}).get("residual_std", 0) or 0)
 
-    quotes = _load_current_quotes()
+    quotes = _load_current_quotes(now)
     bets: list[dict] = []
+    # Totals remain in the closing-time shadow feed. The points regressor
+    # has no validated export-time cover probabilities.
     for _, row in upcoming.iterrows():
         home, away = str(row["home_team"]), str(row["away_team"])
         game_id = int(row["game_id"])
@@ -272,7 +309,7 @@ def main() -> None:
             home_cover = normal_cover_probability(
                 float(row["predicted_spread"]), float(row["market_spread"]), spread_std
             ) if spread_std > 0 else 0.5
-            is_home_pick = recommendation.pick.startswith(f"Take {home} ")
+            is_home_pick = float(row["predicted_spread"]) + float(row["market_spread"]) > 0
             side = "home" if is_home_pick else "away"
             probability = home_cover if is_home_pick else 1 - home_cover
             selected_line = (
@@ -294,34 +331,6 @@ def main() -> None:
                     )
                 )
 
-        if pd.notna(row.get("predicted_total")) and pd.notna(row.get("market_total")):
-            over_probability = (
-                1 - NormalDist(float(row["predicted_total"]), total_std).cdf(float(row["market_total"]))
-                if total_std > 0 else 0.5
-            )
-            model_over = float(row["predicted_total"]) > float(row["market_total"])
-            side = "over" if model_over else "under"
-            probability = over_probability if model_over else 1 - over_probability
-            recommendation = generate_total_pick(
-                home, away, float(row["predicted_total"]), float(row["market_total"]),
-                game_id=game_id, win_prob=probability,
-            )
-            market_quote = _price_for_pick(
-                quotes, game_id=game_id, market="total", side=side,
-                line=float(row["market_total"]),
-            )
-            if (
-                market_quote is not None
-                and probability - market_quote["market_probability"] >= 0.02
-                and expected_value(probability, market_quote["odds"]) >= 0.02
-            ):
-                bets.append(
-                    _record(
-                        row, recommendation, line=float(row["market_total"]),
-                        probability=probability, market_quote=market_quote,
-                    )
-                )
-
         if pd.notna(row.get("win_prob")):
             try:
                 home_probability = float(row["win_prob"])
@@ -339,16 +348,17 @@ def main() -> None:
                 continue
 
             candidates = []
-            for side, team, probability, quote in (
-                ("home", home, home_probability, home_quote),
-                ("away", away, 1 - home_probability, away_quote),
+            for team, probability, quote in (
+                (home, home_probability, home_quote),
+                (away, 1 - home_probability, away_quote),
             ):
                 edge = probability - quote["market_probability"]
                 if edge >= 0.04 and expected_value(probability, quote["odds"]) >= 0.02:
-                    candidates.append((edge, side, team, probability, quote))
+                    price_edge = probability - quote["price_implied_probability"]
+                    candidates.append((price_edge, edge, team, probability, quote))
             if candidates:
-                edge, side, team, probability, quote = max(candidates, key=lambda item: item[0])
-                confidence = Confidence.STRONG if edge >= 0.08 else Confidence.MODERATE
+                _, market_edge, team, probability, quote = max(candidates, key=lambda item: item[0])
+                confidence = Confidence.STRONG if market_edge >= 0.08 else Confidence.MODERATE
                 recommendation = BetRecommendation(
                     game_id=game_id,
                     home_team=home,
@@ -356,7 +366,7 @@ def main() -> None:
                     bet_type="moneyline",
                     model_line=probability,
                     book_line=quote["market_probability"],
-                    edge=edge,
+                    edge=market_edge,
                     confidence=confidence,
                     pick=f"{team} ML ({quote['odds']:+.0f})",
                     win_prob=probability,
@@ -367,18 +377,9 @@ def main() -> None:
                         probability=probability, market_quote=quote,
                     )
                 )
-    bets.sort(key=lambda bet: (bet["tier"] != "Elite", -float(bet["edge"])))
-    if bets and release_on_hold:
-        notes = f"Published provisionally while model release is on hold: {failed}"
-    elif bets:
-        notes = ""
-    else:
-        notes = "No bets met export thresholds"
-        if quotes.empty:
-            notes += "; no paired non-shadow market quotes from the last 24 hours"
-        if release_on_hold:
-            notes += f"; model release remains on hold: {failed}"
-    _write(bets, notes, release_decision=decision)
+    bets.sort(key=lambda bet: (-bet["edge"], bet["game_time"]))
+    notes = "" if bets else "No bets met export thresholds with fresh, paired pregame prices."
+    _write(bets, notes, **export_metadata)
 
 
 if __name__ == "__main__":
