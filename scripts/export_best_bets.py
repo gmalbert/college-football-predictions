@@ -25,6 +25,7 @@ from utils.market import (  # noqa: E402
     normal_cover_probability,
 )
 from utils.models import MODEL_VERSION, load_metrics, models_trained, predict_batch  # noqa: E402
+from utils.odds_ingestion import recorded_provider_matches  # noqa: E402
 from utils.prospective_ledger import PROSPECTIVE_STRATEGIES, append_shadow_signals  # noqa: E402
 from utils.release import load_current_release  # noqa: E402
 from utils.seasons import current_cfb_season  # noqa: E402
@@ -105,7 +106,7 @@ def _load_current_quotes(now: pd.Timestamp) -> pd.DataFrame:
     if not required.issubset(quotes.columns):
         return pd.DataFrame()
 
-    quotes = quotes.copy()
+    quotes = quotes.loc[recorded_provider_matches(quotes)].copy()
     quotes["game_id"] = pd.to_numeric(quotes["game_id"], errors="coerce")
     quotes["line"] = pd.to_numeric(quotes["line"], errors="coerce")
     quotes["odds"] = pd.to_numeric(quotes["odds"], errors="coerce")
@@ -192,7 +193,9 @@ def _price_for_pick(
         # A sportsbook can arrive through multiple providers. Count it once.
         book_key = str(sportsbook).casefold()
         previous_pair = pairs_by_book.get(book_key)
-        if previous_pair is None or pair["captured_at"] > previous_pair["captured_at"]:
+        if previous_pair is None or max(pair["captured_at"], pair["opposing_captured_at"]) > max(
+            previous_pair["captured_at"], previous_pair["opposing_captured_at"]
+        ):
             pairs_by_book[book_key] = pair
 
     if not pairs_by_book:
@@ -327,12 +330,31 @@ def main(*, record_prospective: bool = False) -> None:
             **export_metadata,
         )
         return
-    upcoming = predict_batch(upcoming)
-
     spread_metrics = metrics.get("spread_model", {})
     spread_std = float(spread_metrics.get("priced_residual_std", spread_metrics.get("residual_std")) or 0)
 
     quotes = _load_current_quotes(now)
+    quotes_by_game = {
+        game_id: group for game_id, group in quotes.groupby("game_id", sort=False)
+    } if not quotes.empty else {}
+    moneyline_prices = {}
+    for game_id in upcoming["game_id"]:
+        game_quotes = quotes_by_game.get(game_id)
+        if game_quotes is None:
+            continue
+        home_quote = _price_for_pick(game_quotes, game_id=int(game_id), market="moneyline", side="home", line=None)
+        away_quote = _price_for_pick(game_quotes, game_id=int(game_id), market="moneyline", side="away", line=None)
+        if home_quote is not None and away_quote is not None:
+            moneyline_prices[game_id] = (home_quote, away_quote)
+
+    # Score and compare moneyline prices using one as-of market. A cached
+    # feature built from older snapshots can otherwise create a phantom edge.
+    fresh_market = upcoming["game_id"].map({
+        game_id: home_quote["market_probability"]
+        for game_id, (home_quote, _) in moneyline_prices.items()
+    })
+    upcoming["market_home_prob"] = fresh_market.fillna(upcoming.get("market_home_prob", fresh_market))
+    upcoming = predict_batch(upcoming)
     bets: list[dict] = []
     # Totals remain in the closing-time shadow feed. The points regressor
     # has no validated export-time cover probabilities.
@@ -356,7 +378,8 @@ def main(*, record_prospective: bool = False) -> None:
                 if is_home_pick else -float(row["market_spread"])
             )
             market_quote = _price_for_pick(
-                quotes, game_id=game_id, market="spread", side=side, line=selected_line
+                quotes_by_game.get(game_id, quotes.iloc[:0]),
+                game_id=game_id, market="spread", side=side, line=selected_line
             )
             if (
                 market_quote is not None
@@ -377,14 +400,9 @@ def main(*, record_prospective: bool = False) -> None:
                 home_probability = float("nan")
             if not 0 < home_probability < 1:
                 continue
-            home_quote = _price_for_pick(
-                quotes, game_id=game_id, market="moneyline", side="home", line=None
-            )
-            away_quote = _price_for_pick(
-                quotes, game_id=game_id, market="moneyline", side="away", line=None
-            )
-            if home_quote is None or away_quote is None:
+            if game_id not in moneyline_prices:
                 continue
+            home_quote, away_quote = moneyline_prices[game_id]
 
             candidates = []
             for side, team, probability, quote in (

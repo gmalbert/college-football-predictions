@@ -226,6 +226,17 @@ def build_market_consensus(games: Iterable[dict]) -> pd.DataFrame:
     return consensus
 
 
+def recorded_provider_matches(quotes: pd.DataFrame) -> pd.Series:
+    """Exclude rows whose archived file contradicts their normalized provider."""
+    if not {"raw_payload_path", "source"}.issubset(quotes.columns):
+        return pd.Series(True, index=quotes.index)
+    recorded = quotes["raw_payload_path"].astype("string").str.extract(
+        r"(?:^|[/\\])snapshots[/\\]([^/\\]+)[/\\]", expand=False
+    ).str.casefold()
+    source = quotes["source"].astype("string").str.strip().str.casefold()
+    return recorded.isna() | recorded.eq(source).fillna(False)
+
+
 def build_market_consensus_from_snapshots(
     snapshots: pd.DataFrame,
     games: pd.DataFrame,
@@ -260,7 +271,7 @@ def build_market_consensus_from_snapshots(
     # Boolean masking already returns a new frame, and pandas copies on write, so
     # the explicit .copy() calls that used to follow only forced extra full
     # materialisations of a 200k-row frame.
-    frame = frame[frame["game_id"].isin(set(game_ids))]
+    frame = frame[frame["game_id"].isin(set(game_ids)) & recorded_provider_matches(frame)]
     excluded = {str(source) for source in exclude_sources}
     if "source" in frame.columns and excluded:
         frame = frame[~frame["source"].astype(str).isin(excluded)]

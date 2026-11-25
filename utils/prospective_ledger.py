@@ -11,6 +11,7 @@ import pandas as pd
 from utils.contracts import ensure_utc
 from utils.evaluation import cluster_bootstrap_interval
 from utils.market import closing_line_value, settle_bet
+from utils.odds_ingestion import recorded_provider_matches
 from utils.storage import DATA_DIR, atomic_write_json, atomic_write_parquet
 
 
@@ -210,7 +211,7 @@ def enrich_ledger_with_closing_and_results(
     result["prediction_time"] = ensure_utc(result["prediction_time"])
     result["kickoff"] = ensure_utc(result["kickoff"])
     result["settled_at"] = ensure_utc(result["settled_at"]).astype("datetime64[ns, UTC]")
-    quotes = snapshots.copy()
+    quotes = snapshots.loc[recorded_provider_matches(snapshots)].copy()
     quotes["game_id"] = pd.to_numeric(quotes["game_id"], errors="coerce")
     quotes["captured_at"] = ensure_utc(quotes["captured_at"])
     quotes["odds"] = pd.to_numeric(quotes["odds"], errors="coerce")

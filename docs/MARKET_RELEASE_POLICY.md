@@ -20,6 +20,8 @@ cutoffs, and retrospective records are not promotion criteria.
   consensus. Neither is a validated edge unless the release gates pass.
 - `market_quote_count` counts sportsbooks with a complete pair. The feed
   includes both prices and capture times for the selected sportsbook.
+- Moneyline scoring uses the same fresh paired consensus used to measure the
+  market edge. A stale feature snapshot cannot become a pricing signal.
 - CLV compares the entry quote to a strictly later pre-kickoff, non-live quote
   from the same sportsbook and provider. Without a later observation the row
   has no CLV evidence. Total CLV is side-aware: line movement toward the chosen

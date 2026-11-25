@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import minimize
+from scipy.special import expit, ndtr
 from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression, Ridge
@@ -446,6 +448,54 @@ def moneyline_calibration_features(market_probability: np.ndarray) -> pd.DataFra
         "market_probability": market,
         "signed_squared_logit": market_logit * np.abs(market_logit),
     })
+
+
+def cross_market_win_probabilities(train: pd.DataFrame, test: pd.DataFrame) -> np.ndarray:
+    """Fit a research challenger using differences between spreads and moneylines."""
+    def design(frame: pd.DataFrame) -> tuple[pd.DataFrame, np.ndarray]:
+        market = frame["market_home_prob"].to_numpy(float)
+        offset = logit(market)
+        total = frame["market_total"].fillna(52.0).clip(31.0, 85.0).to_numpy(float)
+        implied_margin = -frame["market_spread"].to_numpy(float)
+        spread_probability = ndtr(implied_margin / (15.0 * np.sqrt(total / 52.0)))
+        return pd.DataFrame({
+            "market_logit": offset,
+            "signed_squared_logit": offset * np.abs(offset),
+            "spread_disagreement": spread_probability - market,
+            "spread_movement": -frame["market_spread_move"],
+            "moneyline_book_count": frame["moneyline_book_count"],
+        }, index=frame.index), offset
+
+    output = np.full(len(test), np.nan)
+    train = train[train["market_home_prob"].between(0, 1, inclusive="neither") & train["home_win"].notna()]
+    valid_test = test["market_home_prob"].between(0, 1, inclusive="neither")
+    if train.empty or not valid_test.any():
+        return output
+
+    train_features, train_offset = design(train)
+    test_features, test_offset = design(test.loc[valid_test])
+    transformer = Pipeline([
+        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
+        ("scale", StandardScaler()),
+    ])
+    training = np.column_stack([np.ones(len(train)), transformer.fit_transform(train_features)])
+    testing = np.column_stack([np.ones(len(test_features)), transformer.transform(test_features)])
+    y = train["home_win"].to_numpy(float)
+    penalty = 0.005
+
+    def penalized_log_loss(weights: np.ndarray) -> tuple[float, np.ndarray]:
+        raw = train_offset + training @ weights
+        loss = np.mean(np.logaddexp(0, raw) - y * raw) + penalty * np.dot(weights, weights) / 2
+        gradient = training.T @ (expit(raw) - y) / len(y) + penalty * weights
+        return loss, gradient
+
+    result = minimize(
+        penalized_log_loss, np.zeros(training.shape[1]), jac=True, method="L-BFGS-B"
+    )
+    if not result.success:
+        raise RuntimeError(f"Cross-market moneyline fit failed: {result.message}")
+    output[valid_test.to_numpy()] = expit(test_offset + testing @ result.x)
+    return output
 
 
 @dataclass

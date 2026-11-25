@@ -63,7 +63,9 @@ from utils.temporal import (
     to_team_game_long,
     walk_forward_season_splits,
 )
-from utils.challenger_models import MarketBaselineClassifier, MarketBaselineRegressor
+from utils.challenger_models import (
+    MarketBaselineClassifier, MarketBaselineRegressor, cross_market_win_probabilities,
+)
 import utils.fetch_historical as fetch_historical
 import utils.cfbd_client as cfbd_client
 import utils.ui_components as ui_components
@@ -165,6 +167,11 @@ class IngestionTests(unittest.TestCase):
             {
                 "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
                 "captured_at": "2026-09-12T12:01:00Z", "line": 20, "odds": -110, "source": "parlay_api",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T12:03:00Z", "line": -4.5, "odds": -110, "source": "cfbd",
+                "raw_payload_path": "data_files/raw/snapshots/therundown/season=2026/observed.json",
             },
             {
                 "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
@@ -470,6 +477,9 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["spread"], -3.5)
         self.assertEqual(quote["overUnder"], 51.5)
         self.assertEqual(quote["homeMoneyline"], -150)
+        event = events[0]
+        event["home_team"], event["away_team"] = event["away_team"], event["home_team"]
+        self.assertEqual(to_cfbd_line_payload(events, games, season=2026), payload)
 
     def test_parlay_payload_preserves_event_and_freshness_metadata(self):
         games = pd.DataFrame({
@@ -508,6 +518,11 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(payload[0]["provider_event_id"], "parlay-event-1")
         self.assertEqual(payload[0]["lines"][0]["provider_observed_at"], "2026-09-12T12:00:00Z")
         self.assertEqual(payload[0]["lines"][0]["spread"], -3.5)
+        event = events[0]
+        event["home_team"], event["away_team"] = event["away_team"], event["home_team"]
+        self.assertEqual(parlay_to_cfbd_line_payload(
+            events, games, season=2026, observed_at="2026-09-12T12:01:00Z"
+        ), payload)
 
     def test_snapshot_normalization_is_source_aware(self):
         payload = [{
@@ -545,6 +560,32 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["spread"], "-3.5")
         self.assertEqual(quote["overUnder"], "51.5")
 
+    def test_rundown_keeps_flipped_teams_and_overlapping_school_names_separate(self):
+        games = pd.DataFrame({
+            "game_id": [401856637], "season": [2026],
+            "home_team": ["Florida"], "away_team": ["Florida Atlantic"],
+        })
+        def participant(name, line, price):
+            return {"name": name, "lines": [{"value": line, "prices": {"19": {"price": price}}}]}
+
+        event = {
+            "teams": [{"name": "Florida Atlantic", "is_home": True}, {"name": "Florida", "is_away": True}],
+            "markets": [
+                {"market_id": 1, "period_id": 0, "participants": [
+                    participant("Florida", "", -3000), participant("Florida Atlantic", "", 1300),
+                ]},
+                {"market_id": 2, "period_id": 0, "participants": [
+                    participant("Florida", "-26.5", -108), participant("Florida Atlantic", "+26.5", -112),
+                ]},
+            ],
+        }
+        quote = rundown_to_cfbd_line_payload([event], games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["homeMoneyline"], -3000)
+        self.assertEqual(quote["awayMoneyline"], 1300)
+        self.assertEqual(quote["spread"], "-26.5")
+        self.assertEqual(quote["homeSpreadOdds"], -108)
+        self.assertEqual(quote["awaySpreadOdds"], -112)
+
     def test_odds_api_io_payload_maps_decimal_main_markets(self):
         games = pd.DataFrame({"game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"]})
         events = [{"home": "Ohio State", "away": "Texas", "bookmakers": {"Book A": [
@@ -556,6 +597,28 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["homeMoneyline"], -150)
         self.assertEqual(quote["awayMoneyline"], 130)
         self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["overUnder"], 51.5)
+
+    def test_odds_api_io_uses_full_game_main_lines_and_scheduled_sides(self):
+        games = pd.DataFrame({
+            "game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"],
+        })
+        event = {"home": "Texas", "away": "Ohio State", "bookmakers": {"Book A": [
+            {"name": "ML", "odds": [{"home": 2.3, "away": 1.667}]},
+            {"name": "Spread", "odds": [
+                {"hdp": 17.5, "home": 1.06, "away": 9},
+                {"hdp": 3.5, "home": 1.95, "away": 1.870},
+            ]},
+            {"name": "Spread HT", "odds": [{"hdp": 1.5, "home": 1.90, "away": 1.90}]},
+            {"name": "Totals", "odds": [{"hdp": 51.5, "over": 1.95, "under": 1.87}]},
+            {"name": "Totals HT", "odds": [{"hdp": 24.5, "over": 1.90, "under": 1.90}]},
+        ]}}
+        quote = odds_api_io_to_cfbd_line_payload([event], games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["homeMoneyline"], -150)
+        self.assertEqual(quote["awayMoneyline"], 130)
+        self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["homeSpreadOdds"], -115)
+        self.assertEqual(quote["awaySpreadOdds"], -105)
         self.assertEqual(quote["overUnder"], 51.5)
 
     def test_team_matching_supports_fbs_acronyms_and_mascots(self):
@@ -763,6 +826,20 @@ class ContractAndFeatureTests(unittest.TestCase):
 
 
 class EvaluationAndRiskTests(unittest.TestCase):
+    def test_cross_market_challenger_can_distinguish_equal_moneyline_prices(self):
+        train = pd.DataFrame({
+            "market_home_prob": [0.5] * 100,
+            "market_spread": [-7.0, 7.0] * 50,
+            "market_total": [49.5] * 100,
+            "market_spread_move": [0.0] * 100,
+            "moneyline_book_count": [2] * 100,
+            "home_win": [1, 0] * 50,
+        })
+        test = train.iloc[:2].drop(columns="home_win")
+        favored, unfavored = cross_market_win_probabilities(train, test)
+        self.assertGreater(favored, 0.5)
+        self.assertLess(unfavored, 0.5)
+
     def test_probability_and_calibration_metrics(self):
         y = [0, 0, 1, 1]
         p = [0.1, 0.2, 0.8, 0.9]
