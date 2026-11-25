@@ -1,7 +1,7 @@
 {
   "meta": {
     "sport": "NCAAF",
-    "generated_at": "2026-11-25T19:23:52.525448+00:00",
+    "generated_at": "2026-11-25T23:29:29.894265+00:00",
     "model_version": "2.3.0",
     "tier_definition": "edge-v1",
     "edge_definition": "pick probability minus displayed price break-even probability",
