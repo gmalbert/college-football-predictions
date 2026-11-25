@@ -2,79 +2,103 @@
 import json
 import tempfile
 import unittest
-from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
 
-from scripts import export_best_bets as exporter
-from utils.betting import generate_spread_pick
+from scripts import export_best_bets
 
 
-class SeasonDate(date):
-    @classmethod
-    def today(cls):
-        return cls(2026, 10, 24)
+class TestPublicBestBetsExport(unittest.TestCase):
+    def test_hold_overwrites_previous_public_picks(self):
+        decision = {"decision": "hold", "failed_gates": ["closing_line_value"]}
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "best_bets_today.json"
+            output.write_text('{"bets": [{"tier": "Elite"}]}', encoding="utf-8")
+            with (
+                patch.object(export_best_bets, "OUT_PATH", output),
+                patch.object(export_best_bets, "load_metrics", return_value={"release_decision": decision}),
+                patch.object(export_best_bets, "predict_batch") as predict,
+            ):
+                export_best_bets.main()
+                predict.assert_not_called()
+            payload = json.loads(output.read_text(encoding="utf-8"))
 
+        self.assertEqual(payload["bets"], [])
+        self.assertEqual(payload["meta"]["release_status"], "hold")
+        self.assertEqual(payload["meta"]["release_failed_gates"], ["closing_line_value"])
 
-class GridExportTests(unittest.TestCase):
-    def test_spread_edge_uses_probability_instead_of_points(self):
-        row = pd.Series({"game_id": 1, "start_date": "2026-10-24T20:00:00Z", "home_team": "Home", "away_team": "Away"})
-        recommendation = generate_spread_pick("Home", "Away", 10, -3)
-        market_quote = {
-            "market_probability": 0.5238095238,
-            "odds": -110,
-            "sportsbook": "TestBook",
-            "source": "test",
-            "captured_at": pd.Timestamp("2026-10-24T19:00:00Z"),
-            "paired_book_count": 1,
+    def test_promoted_export_keeps_spread_price_edge_and_withholds_totals(self):
+        now = pd.Timestamp("2026-11-25T20:00:00Z")
+        game = {
+            "game_id": 401934100,
+            "home_team": "Tennessee Tech",
+            "away_team": "Dayton",
+            "start_date": now + pd.Timedelta(days=3),
+            "market_spread": -21.5,
+            "predicted_spread": 26.1681,
+            "market_total": 42.5,
+            "predicted_total": 51.0,
         }
-        bet = exporter._record(
-            row, recommendation, line=-3, probability=.65, market_quote=market_quote
-        )
-        self.assertEqual(bet["confidence"], .65)
-        self.assertEqual(bet["probability"], .65)
-        self.assertEqual(bet["market_probability"], .52381)
-        self.assertEqual(bet["edge"], .1262)
-        self.assertEqual(bet["edge_unit"], "probability")
-        self.assertEqual(bet["edge_display"], "12.6 pp")
-        self.assertEqual(bet["source_edge"], 7)
-        self.assertEqual(bet["source_edge_unit"], "points")
-        self.assertEqual(bet["tier"], "Elite")
-        self.assertEqual(bet["odds"], -110)
-        self.assertEqual(bet["sportsbook"], "TestBook")
+        quotes = pd.DataFrame([
+            {
+                "game_id": game["game_id"], "market": market, "side": side,
+                "line": line, "odds": odds, "sportsbook": "FanDuel",
+                "source": "therundown", "captured_at": now - pd.Timedelta(minutes=10),
+            }
+            for market, side, line, odds in (
+                ("spread", "home", -21.5, -104),
+                ("spread", "away", 21.5, -122),
+                ("total", "over", 42.5, -110),
+                ("total", "under", 42.5, -110),
+            )
+        ])
+        metrics = {
+            "release_decision": {"decision": "promote"},
+            "spread_model": {"residual_std": 18},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            features = root / "data_files" / "features" / "feature_matrix.parquet"
+            features.parent.mkdir(parents=True)
+            pd.DataFrame([game]).to_parquet(features)
+            snapshot = root / "line_snapshots.parquet"
+            quotes.to_parquet(snapshot)
+            output = root / "best_bets_today.json"
+            with (
+                patch.object(export_best_bets, "ROOT", root),
+                patch.object(export_best_bets, "OUT_PATH", output),
+                patch.object(export_best_bets, "SNAPSHOT_PATH", snapshot),
+                patch.object(export_best_bets.pd.Timestamp, "now", return_value=now),
+                patch.object(export_best_bets, "load_metrics", return_value=metrics),
+                patch.object(export_best_bets, "models_trained", return_value=True),
+                patch.object(export_best_bets, "predict_batch", side_effect=lambda frame: frame),
+            ):
+                export_best_bets.main()
+                payload = json.loads(output.read_text(encoding="utf-8"))
+                # An opposing quote from a different provider cannot complete the pair.
+                quotes.loc[quotes["side"].eq("away"), "source"] = "odds_api"
+                quotes.to_parquet(snapshot)
+                export_best_bets.main()
+                unpaired_payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(unpaired_payload["bets"], [])
+        self.assertEqual(payload["meta"]["publication_mode"], "validated")
+        self.assertEqual(payload["meta"]["totals_publication"], "research_only")
+        bet, = payload["bets"]
+        self.assertEqual(bet["bet_type"], "Spread")
+        self.assertEqual(bet["line"], -21.5)
+        self.assertEqual(bet["market_quote_count"], 1)
+        self.assertEqual(bet["opposing_odds"], -122)
+        self.assertAlmostEqual(bet["price_implied_probability"], 104 / 204, places=6)
+        self.assertAlmostEqual(bet["edge"], bet["probability"] - 104 / 204, places=4)
+        self.assertGreater(bet["market_edge"], bet["edge"])
 
     def test_edge_tier_boundaries(self):
         for edge, tier in [(0, "Standard"), (.0099, "Standard"), (.01, "Good"), (.03, "Strong"), (.06, "Elite")]:
             with self.subTest(edge=edge):
-                self.assertEqual(exporter._tier(edge), tier)
-
-    def test_away_spread_exports_the_picked_sides_line_and_preserves_release_hold(self):
-        frame = pd.DataFrame([{"game_id": 1, "start_date": "2026-10-24T20:00:00Z", "home_team": "Home", "away_team": "Away", "predicted_spread": -10, "market_spread": -3}])
-        captured_at = pd.Timestamp.now(tz="UTC")
-        quotes = pd.DataFrame([
-            {"game_id": 1, "source": "test", "sportsbook": "TestBook", "market": "spread", "side": "home", "line": -3.0, "odds": -110.0, "captured_at": captured_at},
-            {"game_id": 1, "source": "test", "sportsbook": "TestBook", "market": "spread", "side": "away", "line": 3.0, "odds": -110.0, "captured_at": captured_at},
-        ])
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            feature = root / "data_files/features/feature_matrix.parquet"
-            feature.parent.mkdir(parents=True)
-            feature.touch()
-            output = root / "best_bets_today.json"
-            with patch.object(exporter, "date", SeasonDate), patch.object(exporter, "ROOT", root), patch.object(exporter, "OUT_PATH", output), patch.object(exporter, "models_trained", return_value=True), patch.object(exporter, "load_metrics", return_value={"spread_model": {"residual_std": 10}, "release_decision": {"decision": "hold", "failed_gates": ["closing_line_value"]}}), patch.object(exporter.pd, "read_parquet", return_value=frame), patch.object(exporter, "_load_current_quotes", return_value=quotes), patch.object(exporter, "predict_batch", side_effect=lambda f: f):
-                exporter.main()
-            data = json.loads(output.read_text(encoding="utf-8"))
-        self.assertEqual(data["bets"][0]["pick"], "Take Away +3.0")
-        self.assertEqual(data["bets"][0]["line"], 3)
-        self.assertEqual(data["bets"][0]["market_probability"], .5)
-        self.assertEqual(data["bets"][0]["odds"], -110)
-        self.assertEqual(data["bets"][0]["sportsbook"], "TestBook")
-        self.assertEqual(data["meta"]["tier_definition"], "edge-v1")
-        self.assertEqual(data["meta"]["publication_mode"], "provisional_research")
-        self.assertEqual(data["meta"]["release_status"], "hold")
-
+                self.assertEqual(export_best_bets._tier(edge), tier)
 
 if __name__ == "__main__":
     unittest.main()
