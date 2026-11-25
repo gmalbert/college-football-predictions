@@ -9,7 +9,7 @@ import requests
 
 from utils.config import get_secret
 from utils.logger import get_logger
-from utils.odds_api import _same_team, match_scheduled_game
+from utils.odds_api import _same_team, _team_key, match_market_event
 
 logger = get_logger(__name__)
 
@@ -64,7 +64,8 @@ def get_ncaaf_events(*, start: date | None = None, days: int = 8) -> list[dict]:
                 time.sleep(1.05)
         return events
     except (requests.RequestException, ValueError) as exc:
-        logger.error("TheRundown NCAAF snapshot error: %s", exc)
+        # Requests exceptions can include sensitive request details.
+        logger.error("TheRundown NCAAF snapshot error: %s", type(exc).__name__)
         return []
 
 
@@ -76,10 +77,14 @@ def to_cfbd_line_payload(events: list[dict], games: pd.DataFrame, *, season: int
         teams = event.get("teams") or []
         away = next((team.get("name") for team in teams if team.get("is_away")), None)
         home = next((team.get("name") for team in teams if team.get("is_home")), None)
-        game = match_scheduled_game(schedule, home, away, event.get("event_date"))
-        if game is None:
+        match = match_market_event(schedule, home, away, event.get("event_date"))
+        if match is None:
             logger.warning("Skipping unmatched/ambiguous TheRundown event: %s at %s", away, home)
             continue
+        game, reversed_teams = match
+        if reversed_teams:
+            home, away = away, home
+        home_key, away_key = _team_key(home), _team_key(away)
         quotes: dict[str, dict] = {}
         for market in event.get("markets") or []:
             market_id = market.get("market_id")
@@ -87,6 +92,13 @@ def to_cfbd_line_payload(events: list[dict], games: pd.DataFrame, *, season: int
                 continue
             for participant in market.get("participants") or []:
                 name = participant.get("name")
+                team_key = _team_key(name)
+                is_home = team_key == home_key or (
+                    team_key != away_key and _same_team(name, home) and not _same_team(name, away)
+                )
+                is_away = team_key == away_key or (
+                    team_key != home_key and _same_team(name, away) and not _same_team(name, home)
+                )
                 for line in participant.get("lines") or []:
                     for affiliate_id, price in (line.get("prices") or {}).items():
                         value = price.get("price")
@@ -96,13 +108,16 @@ def to_cfbd_line_payload(events: list[dict], games: pd.DataFrame, *, season: int
                             str(affiliate_id), {"provider": AFFILIATE_NAMES.get(str(affiliate_id), str(affiliate_id))}
                         )
                         if market_id == 1:
-                            if _same_team(name, home): quote["homeMoneyline"] = value
-                            elif _same_team(name, away): quote["awayMoneyline"] = value
+                            if is_home:
+                                quote["homeMoneyline"] = value
+                            elif is_away:
+                                quote["awayMoneyline"] = value
                         elif market_id == 2:
-                            if _same_team(name, home):
+                            if is_home:
                                 quote["spread"] = line.get("value")
                                 quote["homeSpreadOdds"] = value
-                            elif _same_team(name, away): quote["awaySpreadOdds"] = value
+                            elif is_away:
+                                quote["awaySpreadOdds"] = value
                         elif market_id == 3:
                             quote["overUnder"] = line.get("value")
                             if str(name).casefold() == "over": quote["overOdds"] = value

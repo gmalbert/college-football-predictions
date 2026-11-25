@@ -111,7 +111,8 @@ def get_ncaaf_odds() -> list[dict]:
         )
         return response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.error("Odds API NCAAF snapshot error: %s", exc)
+        # ``requests`` may include the full query URL, including the API key.
+        logger.error("Odds API NCAAF snapshot error: %s", type(exc).__name__)
         return []
 
 
@@ -157,6 +158,35 @@ def match_scheduled_game(
     return None
 
 
+def match_market_event(
+    schedule: pd.DataFrame, home: str, away: str, start_date: object | None = None,
+) -> tuple[pd.Series, bool] | None:
+    """Match an event and identify whether its provider uses the reverse orientation."""
+    if schedule.empty or not home or not away:
+        return None
+    direct = match_scheduled_game(schedule, home, away, start_date)
+    reverse = match_scheduled_game(schedule, away, home, start_date)
+    if direct is None:
+        return (reverse, True) if reverse is not None else None
+    if reverse is None:
+        return direct, False
+
+    def rank(game: pd.Series, provider_home: str, provider_away: str) -> tuple[int, float]:
+        kickoff = pd.to_datetime(game.get("start_date"), utc=True, errors="coerce")
+        provider_kickoff = pd.to_datetime(start_date, utc=True, errors="coerce")
+        hours = abs((kickoff - provider_kickoff).total_seconds()) if pd.notna(kickoff) and pd.notna(provider_kickoff) else float("inf")
+        exact_matches = (
+            int(_team_key(game["home_team"]) == _team_key(provider_home))
+            + int(_team_key(game["away_team"]) == _team_key(provider_away))
+        )
+        return exact_matches, -hours
+
+    direct_rank, reverse_rank = rank(direct, home, away), rank(reverse, away, home)
+    if direct_rank == reverse_rank:
+        return None
+    return (direct, False) if direct_rank > reverse_rank else (reverse, True)
+
+
 def _outcome(markets: Iterable[dict], market_key: str, name: str) -> dict:
     for market in markets:
         if market.get("key") == market_key:
@@ -179,25 +209,27 @@ def to_cfbd_line_payload(events: Iterable[dict], games: pd.DataFrame, *, season:
     schedule = schedule[schedule["season"].eq(season)].copy()
     rows: list[dict] = []
     for event in events:
-        game = match_scheduled_game(
-            schedule, event.get("home_team"), event.get("away_team"), event.get("commence_time")
-        )
-        if game is None:
+        home, away = event.get("home_team"), event.get("away_team")
+        match = match_market_event(schedule, home, away, event.get("commence_time"))
+        if match is None:
             logger.warning(
                 "Skipping unmatched/ambiguous Odds API event: %s at %s",
                 event.get("away_team"), event.get("home_team"),
             )
             continue
+        game, reversed_teams = match
+        if reversed_teams:
+            home, away = away, home
         game_id = game["game_id"]
         lines: list[dict] = []
         for bookmaker in event.get("bookmakers") or []:
             markets = bookmaker.get("markets") or []
-            home_spread = _outcome(markets, "spreads", event.get("home_team"))
-            away_spread = _outcome(markets, "spreads", event.get("away_team"))
+            home_spread = _outcome(markets, "spreads", home)
+            away_spread = _outcome(markets, "spreads", away)
             over = _outcome(markets, "totals", "Over")
             under = _outcome(markets, "totals", "Under")
-            home_moneyline = _outcome(markets, "h2h", event.get("home_team"))
-            away_moneyline = _outcome(markets, "h2h", event.get("away_team"))
+            home_moneyline = _outcome(markets, "h2h", home)
+            away_moneyline = _outcome(markets, "h2h", away)
             quote = {
                 "provider": bookmaker.get("title") or bookmaker.get("key"),
                 "spread": home_spread.get("point"),

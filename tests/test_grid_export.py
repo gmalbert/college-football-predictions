@@ -8,6 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from scripts import export_best_bets
+from utils.market import remove_vig
 
 
 class TestPublicBestBetsExport(unittest.TestCase):
@@ -40,6 +41,7 @@ class TestPublicBestBetsExport(unittest.TestCase):
             "predicted_spread": 26.1681,
             "market_total": 42.5,
             "predicted_total": 51.0,
+            "market_home_prob": 0.283,
         }
         quotes = pd.DataFrame([
             {
@@ -52,6 +54,8 @@ class TestPublicBestBetsExport(unittest.TestCase):
                 ("spread", "away", 21.5, -122),
                 ("total", "over", 42.5, -110),
                 ("total", "under", 42.5, -110),
+                ("moneyline", "home", None, 1600),
+                ("moneyline", "away", None, -5000),
             )
         ])
         metrics = {
@@ -73,10 +77,25 @@ class TestPublicBestBetsExport(unittest.TestCase):
                 patch.object(export_best_bets.pd.Timestamp, "now", return_value=now),
                 patch.object(export_best_bets, "load_metrics", return_value=metrics),
                 patch.object(export_best_bets, "models_trained", return_value=True),
-                patch.object(export_best_bets, "predict_batch", side_effect=lambda frame: frame),
+                patch.object(
+                    export_best_bets, "predict_batch",
+                    side_effect=lambda frame: frame.assign(win_prob=frame["market_home_prob"]),
+                ) as predict,
             ):
                 export_best_bets.main()
+                self.assertAlmostEqual(
+                    predict.call_args.args[0]["market_home_prob"].item(), remove_vig([1600, -5000])[0]
+                )
                 payload = json.loads(output.read_text(encoding="utf-8"))
+                metrics["model_version"] = export_best_bets.MODEL_VERSION
+                metrics["release_decision"] = {"decision": "hold"}
+                with patch.object(export_best_bets, "append_shadow_signals") as append:
+                    export_best_bets.main(record_prospective=True)
+                    signals = append.call_args.args[0]
+                    self.assertEqual([signal["market"] for signal in signals], ["spread"])
+                    self.assertEqual(signals[0]["taken_line"], -21.5)
+                    self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["bets"], [])
+                metrics["release_decision"] = {"decision": "promote"}
                 # An opposing quote from a different provider cannot complete the pair.
                 quotes.loc[quotes["side"].eq("away"), "source"] = "odds_api"
                 quotes.to_parquet(snapshot)

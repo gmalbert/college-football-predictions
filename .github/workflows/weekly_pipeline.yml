@@ -25,6 +25,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ncaaf-artifact-writer
+  cancel-in-progress: false
+
 jobs:
   data-pipeline:
     runs-on: ubuntu-latest
@@ -95,6 +99,11 @@ jobs:
       - name: Train prediction models
         run: python -m utils.models --force
 
+      - name: Export and settle prospective research signals
+        run: |
+          python scripts/export_shadow_totals.py
+          python scripts/settle_shadow_ledger.py
+
       # Materialise every forecast and diagnostic the dashboard shows. The site
       # reads these artifacts and never runs inference or loads a model — that
       # is what lets the API deploy without scikit-learn or XGBoost.
@@ -106,12 +115,9 @@ jobs:
 
       # ── export best bets ─────────────────────────────────────────────────────
       - name: Export best bets for Sports Picks Grid
-        run: python scripts/export_best_bets.py
+        run: python scripts/export_best_bets.py --record-prospective
         env:
           PYTHONPATH: ${{ github.workspace }}
-
-      - name: Export prospective shadow total signals
-        run: python scripts/export_shadow_totals.py
 
       - name: Publish coherent release metadata
         run: python scripts/publish_release.py

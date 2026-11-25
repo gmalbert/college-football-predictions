@@ -12,11 +12,18 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from scripts import export_best_bets
 from utils.advanced_features import build_context_features
 from utils.betting import generate_moneyline_pick, generate_spread_pick
 from utils.contracts import safe_merge, validate_feature_matrix, validate_games
 from utils.feature_observations import attach_game_observations
-from utils.prospective_ledger import select_quote_as_of
+from utils.prospective_ledger import (
+    PROSPECTIVE_STRATEGIES,
+    append_shadow_signals,
+    enrich_ledger_with_closing_and_results,
+    prospective_clv_summary,
+    select_quote_as_of,
+)
 from utils.evaluation import (
     calibration_table,
     conformal_interval,
@@ -56,10 +63,61 @@ from utils.temporal import (
     to_team_game_long,
     walk_forward_season_splits,
 )
-from utils.challenger_models import MarketBaselineClassifier, MarketBaselineRegressor
+from utils.challenger_models import (
+    MarketBaselineClassifier, MarketBaselineRegressor, cross_market_win_probabilities,
+)
 import utils.fetch_historical as fetch_historical
 import utils.cfbd_client as cfbd_client
 import utils.ui_components as ui_components
+
+
+class ProspectiveClosingEvidenceTests(unittest.TestCase):
+    def test_first_entry_is_frozen_and_only_later_same_source_close_counts(self):
+        entry = pd.Timestamp("2026-09-10T12:00:00Z")
+        kickoff = entry + pd.Timedelta(hours=6)
+        books = [{
+            "game_id": game, "market": market, "side": side, "sportsbook": "book",
+            "odds_source": "feed", "kickoff": kickoff, "prediction_time": entry,
+            "source_snapshot_at": entry, "taken_line": line, "taken_odds": -110,
+            "strategy_version": PROSPECTIVE_STRATEGIES[(market, None)],
+        } for game, market, side, line in [(1, "spread", "away", 3.0), (2, "moneyline", "home", None)]]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.parquet"
+            with patch("utils.prospective_ledger.LEDGER_PATH", path):
+                append_shadow_signals(books, metadata={})
+                append_shadow_signals([{
+                    **books[0], "side": "home", "taken_line": -3.5,
+                    "prediction_time": entry + pd.Timedelta(minutes=30),
+                }], metadata={})
+                ledger = pd.read_parquet(path)
+
+        self.assertEqual(len(ledger), 2)
+        self.assertEqual(ledger.loc[ledger["game_id"].eq(1), "side"].item(), "away")
+
+        quotes = pd.DataFrame([
+            {
+                "game_id": game, "market": market, "side": side, "sportsbook": "book",
+                "source": source, "captured_at": at, "is_live": live, "line": line, "odds": odds,
+            }
+            for game, market, side, source, at, live, line, odds in [
+                (1, "spread", "away", "feed", entry, False, 3, -110),
+                (1, "spread", "away", "feed", entry + pd.Timedelta(hours=2), False, 2, -110),
+                (1, "spread", "away", "other", entry + pd.Timedelta(hours=3), False, 1, -110),
+                (1, "spread", "away", "feed", entry + pd.Timedelta(hours=4), True, 1, -110),
+                (1, "spread", "away", "feed", kickoff, False, 0, -110),
+                (2, "moneyline", "home", "feed", entry, False, None, -110),
+            ]
+        ])
+        finals = pd.DataFrame({"game_id": [1, 2], "home_score": [24, 31], "away_score": [21, 14]})
+        settled = enrich_ledger_with_closing_and_results(ledger, quotes, finals).set_index("game_id")
+        self.assertEqual(settled.loc[1, "clv"], 1.0)
+        self.assertEqual(settled.loc[1, "result"], "P")
+        self.assertTrue(pd.isna(settled.loc[2, "closing_snapshot_at"]))
+        self.assertEqual(settled.loc[2, "result"], "W")
+        summary = prospective_clv_summary(settled.reset_index())
+        self.assertEqual(summary["spread:all"]["n"], 1)
+        self.assertFalse(summary["spread:all"]["passed"])
+        self.assertEqual(summary["moneyline:all"]["n"], 0)
 
 
 class _ConstantClassifier:
@@ -79,6 +137,7 @@ class IngestionTests(unittest.TestCase):
             "season": [2026],
             "home_team": ["Kansas"],
             "away_team": ["Missouri"],
+            "start_date": ["2026-09-12T18:00:00Z"],
         })
         snapshots = pd.DataFrame([
             {
@@ -109,6 +168,27 @@ class IngestionTests(unittest.TestCase):
                 "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
                 "captured_at": "2026-09-12T12:01:00Z", "line": 20, "odds": -110, "source": "parlay_api",
             },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T12:03:00Z", "line": -4.5, "odds": -110, "source": "cfbd",
+                "raw_payload_path": "data_files/raw/snapshots/therundown/season=2026/observed.json",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T18:00:00Z", "line": 40, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "total", "side": "over",
+                "captured_at": "2026-09-12T17:00:00Z", "line": 71, "odds": -110, "source": "cfbd", "is_live": True,
+            },
+            {
+                "game_id": 101, "sportsbook": "Book B", "market": "moneyline", "side": "home",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": 700, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book B", "market": "moneyline", "side": "away",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": -900, "source": "therundown",
+            },
         ])
 
         result = build_market_consensus_from_snapshots(snapshots, games, season=2026)
@@ -116,8 +196,8 @@ class IngestionTests(unittest.TestCase):
         self.assertEqual(result.loc[0, "game_id"], 101)
         self.assertEqual(result.loc[0, "market_spread"], 4.5)
         self.assertEqual(result.loc[0, "market_total"], 51.5)
-        self.assertEqual(result.loc[0, "home_moneyline"], 170)
-        self.assertEqual(result.loc[0, "away_moneyline"], -208)
+        self.assertEqual(result.loc[0, "moneyline_book_count"], 1)
+        self.assertAlmostEqual(result.loc[0, "market_home_prob"], remove_vig([170, -208])[0])
 
     def test_cfbd_key_normalizes_bearer_prefix_and_rejects_empty(self):
         with patch.object(cfbd_client, "get_secret", return_value="Bearer token-value"):
@@ -397,6 +477,9 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["spread"], -3.5)
         self.assertEqual(quote["overUnder"], 51.5)
         self.assertEqual(quote["homeMoneyline"], -150)
+        event = events[0]
+        event["home_team"], event["away_team"] = event["away_team"], event["home_team"]
+        self.assertEqual(to_cfbd_line_payload(events, games, season=2026), payload)
 
     def test_parlay_payload_preserves_event_and_freshness_metadata(self):
         games = pd.DataFrame({
@@ -435,6 +518,11 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(payload[0]["provider_event_id"], "parlay-event-1")
         self.assertEqual(payload[0]["lines"][0]["provider_observed_at"], "2026-09-12T12:00:00Z")
         self.assertEqual(payload[0]["lines"][0]["spread"], -3.5)
+        event = events[0]
+        event["home_team"], event["away_team"] = event["away_team"], event["home_team"]
+        self.assertEqual(parlay_to_cfbd_line_payload(
+            events, games, season=2026, observed_at="2026-09-12T12:01:00Z"
+        ), payload)
 
     def test_snapshot_normalization_is_source_aware(self):
         payload = [{
@@ -472,6 +560,32 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["spread"], "-3.5")
         self.assertEqual(quote["overUnder"], "51.5")
 
+    def test_rundown_keeps_flipped_teams_and_overlapping_school_names_separate(self):
+        games = pd.DataFrame({
+            "game_id": [401856637], "season": [2026],
+            "home_team": ["Florida"], "away_team": ["Florida Atlantic"],
+        })
+        def participant(name, line, price):
+            return {"name": name, "lines": [{"value": line, "prices": {"19": {"price": price}}}]}
+
+        event = {
+            "teams": [{"name": "Florida Atlantic", "is_home": True}, {"name": "Florida", "is_away": True}],
+            "markets": [
+                {"market_id": 1, "period_id": 0, "participants": [
+                    participant("Florida", "", -3000), participant("Florida Atlantic", "", 1300),
+                ]},
+                {"market_id": 2, "period_id": 0, "participants": [
+                    participant("Florida", "-26.5", -108), participant("Florida Atlantic", "+26.5", -112),
+                ]},
+            ],
+        }
+        quote = rundown_to_cfbd_line_payload([event], games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["homeMoneyline"], -3000)
+        self.assertEqual(quote["awayMoneyline"], 1300)
+        self.assertEqual(quote["spread"], "-26.5")
+        self.assertEqual(quote["homeSpreadOdds"], -108)
+        self.assertEqual(quote["awaySpreadOdds"], -112)
+
     def test_odds_api_io_payload_maps_decimal_main_markets(self):
         games = pd.DataFrame({"game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"]})
         events = [{"home": "Ohio State", "away": "Texas", "bookmakers": {"Book A": [
@@ -483,6 +597,28 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(quote["homeMoneyline"], -150)
         self.assertEqual(quote["awayMoneyline"], 130)
         self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["overUnder"], 51.5)
+
+    def test_odds_api_io_uses_full_game_main_lines_and_scheduled_sides(self):
+        games = pd.DataFrame({
+            "game_id": [101], "season": [2026], "home_team": ["Ohio State"], "away_team": ["Texas"],
+        })
+        event = {"home": "Texas", "away": "Ohio State", "bookmakers": {"Book A": [
+            {"name": "ML", "odds": [{"home": 2.3, "away": 1.667}]},
+            {"name": "Spread", "odds": [
+                {"hdp": 17.5, "home": 1.06, "away": 9},
+                {"hdp": 3.5, "home": 1.95, "away": 1.870},
+            ]},
+            {"name": "Spread HT", "odds": [{"hdp": 1.5, "home": 1.90, "away": 1.90}]},
+            {"name": "Totals", "odds": [{"hdp": 51.5, "over": 1.95, "under": 1.87}]},
+            {"name": "Totals HT", "odds": [{"hdp": 24.5, "over": 1.90, "under": 1.90}]},
+        ]}}
+        quote = odds_api_io_to_cfbd_line_payload([event], games, season=2026)[0]["lines"][0]
+        self.assertEqual(quote["homeMoneyline"], -150)
+        self.assertEqual(quote["awayMoneyline"], 130)
+        self.assertEqual(quote["spread"], -3.5)
+        self.assertEqual(quote["homeSpreadOdds"], -115)
+        self.assertEqual(quote["awaySpreadOdds"], -105)
         self.assertEqual(quote["overUnder"], 51.5)
 
     def test_team_matching_supports_fbs_acronyms_and_mascots(self):
@@ -690,6 +826,20 @@ class ContractAndFeatureTests(unittest.TestCase):
 
 
 class EvaluationAndRiskTests(unittest.TestCase):
+    def test_cross_market_challenger_can_distinguish_equal_moneyline_prices(self):
+        train = pd.DataFrame({
+            "market_home_prob": [0.5] * 100,
+            "market_spread": [-7.0, 7.0] * 50,
+            "market_total": [49.5] * 100,
+            "market_spread_move": [0.0] * 100,
+            "moneyline_book_count": [2] * 100,
+            "home_win": [1, 0] * 50,
+        })
+        test = train.iloc[:2].drop(columns="home_win")
+        favored, unfavored = cross_market_win_probabilities(train, test)
+        self.assertGreater(favored, 0.5)
+        self.assertLess(unfavored, 0.5)
+
     def test_probability_and_calibration_metrics(self):
         y = [0, 0, 1, 1]
         p = [0.1, 0.2, 0.8, 0.9]
@@ -744,6 +894,24 @@ class EvaluationAndRiskTests(unittest.TestCase):
         gates = {gate["name"]: gate for gate in evaluate_release_gates(metrics)}
         self.assertFalse(gates["spread_market_baseline"]["passed"])
         self.assertTrue(gates["total_market_baseline"]["passed"])
+
+    def test_clv_cannot_promote_a_totals_candidate_without_retrospective_skill(self):
+        metrics = {
+            "prospective_clv": {
+                "moneyline:all": {"passed": True},
+                "spread:all": {"passed": True},
+                "total:over": {"passed": True},
+            },
+            "total_cover_model": {
+                "strategy_release": {"eligible_sides": ["over"], "retrospective_gates_passed": False}
+            },
+        }
+        gate = next(gate for gate in evaluate_release_gates(metrics) if gate["name"] == "closing_line_value")
+        self.assertFalse(gate["passed"])
+        self.assertFalse(gate["actual"]["total:over"]["retrospective_eligible"])
+        metrics["total_cover_model"]["strategy_release"]["retrospective_gates_passed"] = True
+        gate = next(gate for gate in evaluate_release_gates(metrics) if gate["name"] == "closing_line_value")
+        self.assertTrue(gate["passed"])
 
 
 class JointScoreTests(unittest.TestCase):

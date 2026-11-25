@@ -226,6 +226,17 @@ def build_market_consensus(games: Iterable[dict]) -> pd.DataFrame:
     return consensus
 
 
+def recorded_provider_matches(quotes: pd.DataFrame) -> pd.Series:
+    """Exclude rows whose archived file contradicts their normalized provider."""
+    if not {"raw_payload_path", "source"}.issubset(quotes.columns):
+        return pd.Series(True, index=quotes.index)
+    recorded = quotes["raw_payload_path"].astype("string").str.extract(
+        r"(?:^|[/\\])snapshots[/\\]([^/\\]+)[/\\]", expand=False
+    ).str.casefold()
+    source = quotes["source"].astype("string").str.strip().str.casefold()
+    return recorded.isna() | recorded.eq(source).fillna(False)
+
+
 def build_market_consensus_from_snapshots(
     snapshots: pd.DataFrame,
     games: pd.DataFrame,
@@ -260,7 +271,7 @@ def build_market_consensus_from_snapshots(
     # Boolean masking already returns a new frame, and pandas copies on write, so
     # the explicit .copy() calls that used to follow only forced extra full
     # materialisations of a 200k-row frame.
-    frame = frame[frame["game_id"].isin(set(game_ids))]
+    frame = frame[frame["game_id"].isin(set(game_ids)) & recorded_provider_matches(frame)]
     excluded = {str(source) for source in exclude_sources}
     if "source" in frame.columns and excluded:
         frame = frame[~frame["source"].astype(str).isin(excluded)]
@@ -271,6 +282,15 @@ def build_market_consensus_from_snapshots(
     frame["line"] = pd.to_numeric(frame["line"], errors="coerce")
     frame["odds"] = pd.to_numeric(frame["odds"], errors="coerce")
     frame = frame.dropna(subset=["game_id", "captured_at"])
+    if "is_live" in frame.columns:
+        live = frame["is_live"].astype("string").str.strip().str.casefold().isin({"1", "true", "yes", "y"})
+        frame = frame[~live]
+    if "start_date" in schedule.columns:
+        kickoff = schedule.assign(
+            game_id=pd.to_numeric(schedule["game_id"], errors="coerce"),
+            start_date=ensure_utc(schedule["start_date"]),
+        ).drop_duplicates("game_id").set_index("game_id")["start_date"]
+        frame = frame[frame["captured_at"].lt(frame["game_id"].map(kickoff))]
     if frame.empty:
         return pd.DataFrame()
     frame["game_id"] = frame["game_id"].astype("int64")
@@ -305,6 +325,24 @@ def build_market_consensus_from_snapshots(
         .median()
         .to_dict()
     )
+    odds = ordered.loc[
+        ordered["market"].eq("moneyline") & np.isfinite(ordered["odds"]) & ordered["odds"].abs().ge(100)
+    ].copy()
+    odds["source"] = odds.get("source", pd.Series("legacy", index=odds.index)).fillna("legacy")
+    pair_keys = ["game_id", "sportsbook", "source"]
+    odds = odds.drop_duplicates([*pair_keys, "side"], keep="last")
+    homes = odds[odds["side"].eq("home")]
+    aways = odds[odds["side"].eq("away")]
+    pairs = homes.merge(aways, on=pair_keys, suffixes=("_home", "_away"), validate="one_to_one")
+    pairs = pairs[
+        (pairs["captured_at_home"] - pairs["captured_at_away"]).abs().le(pd.Timedelta(minutes=30))
+    ].assign(pair_at=lambda f: f[["captured_at_home", "captured_at_away"]].max(axis=1))
+    pairs = pairs.sort_values("pair_at").drop_duplicates(["game_id", "sportsbook"], keep="last")
+    paired_probabilities: dict[int, list[float]] = {}
+    for row in pairs.itertuples(index=False):
+        paired_probabilities.setdefault(row.game_id, []).append(
+            float(remove_vig([row.odds_home, row.odds_away])[0])
+        )
 
     def line_stat(stats: dict, game_id: int, market: str, side: str) -> dict | None:
         return stats.get((game_id, market, side))
@@ -338,7 +376,7 @@ def build_market_consensus_from_snapshots(
 
         home_moneylines: list[float] = []
         away_moneylines: list[float] = []
-        market_home_probs: list[float] = []
+        market_home_probs = paired_probabilities.get(game_id, [])
         for book in group["sportsbook"].unique():
             home_ml = book_moneyline.get((game_id, book, "home"))
             away_ml = book_moneyline.get((game_id, book, "away"))
@@ -348,8 +386,6 @@ def build_market_consensus_from_snapshots(
                 home_moneylines.append(float(home_ml))
             if away_priced:
                 away_moneylines.append(float(away_ml))
-            if home_priced and away_priced and home_ml != 0 and away_ml != 0:
-                market_home_probs.append(float(remove_vig([home_ml, away_ml])[0]))
 
         rows.append(
             {

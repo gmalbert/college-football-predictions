@@ -44,8 +44,9 @@ from utils.feature_engine import (
 )
 from utils.challenger_models import (
     MarketAnchoredRegressor,
-    MarketBaselineClassifier,
+    MarketResidualClassifier,
     fit_market_residual,
+    moneyline_calibration_features,
     walk_forward_market_residual,
 )
 from utils.evaluation import evaluate_release_gates, probability_metrics, regression_metrics
@@ -162,6 +163,7 @@ def train_all(force: bool = False) -> dict:
     all_feats = list(dict.fromkeys(
         WIN_FEATURES + SPREAD_FEATURES + TOTAL_FEATURES + TOTAL_COVER_FEATURES
     ))
+    df["market_home_prob"] = _market_home_probability(df)
     for f in all_feats:
         if f not in df.columns:
             df[f] = np.nan
@@ -169,18 +171,33 @@ def train_all(force: bool = False) -> dict:
     # ── Win probability ──────────────────────────────────────────────────────
     win_feats = WIN_FEATURES
     df_win = df.dropna(subset=["home_win", "season"]).copy()
+    market_home = _market_home_probability(df_win)
+    df_win["market_home_prob"] = market_home
     X_win  = df_win[win_feats]
     y_win  = df_win["home_win"].values.astype(int)
 
     win_model, win_m, win_oof = _walk_forward_classifier(
         X_win, y_win, df_win[["season", *(["start_date"] if "start_date" in df_win else [])]]
     )
-    market_home = _market_home_probability(df_win)
-    priced_win = np.isfinite(market_home) if market_home is not None else np.zeros(len(df_win), dtype=bool)
+    win_temporal = df_win[["season", *(["start_date"] if "start_date" in df_win else [])]]
+    moneyline_features = moneyline_calibration_features(market_home)
+    priced_win = np.isfinite(market_home)
+    moneyline_oof, moneyline_folds = walk_forward_market_residual(
+        moneyline_features, y_win, market_home, win_temporal
+    )
+    # A priced fold with insufficient earlier prices uses the raw baseline.
     win_oof[priced_win & np.isfinite(win_oof)] = market_home[priced_win & np.isfinite(win_oof)]
-    win_model = MarketBaselineClassifier(
+    corrected_win = np.isfinite(moneyline_oof) & np.isfinite(win_oof)
+    win_oof[corrected_win] = np.clip(moneyline_oof[corrected_win], 1e-6, 1 - 1e-6)
+    correction, shrinkage, shrinkage_n = (
+        fit_market_residual(moneyline_features, y_win, market_home, win_temporal, kind="ridge")
+        if priced_win.any() else (None, 0.0, 0)
+    )
+    win_model = MarketResidualClassifier(
         fallback_model=win_model,
         feature_names=tuple(win_feats),
+        residual_model=correction,
+        shrinkage=shrinkage,
     )
     oos_mask = np.isfinite(win_oof)
     win_fold_metrics = _probability_fold_metrics(
@@ -190,10 +207,13 @@ def train_all(force: bool = False) -> dict:
     )
     win_m = probability_metrics(
         y_win[oos_mask], win_oof[oos_mask],
-        baseline_probabilities=market_home[oos_mask] if market_home is not None else None,
+        baseline_probabilities=market_home[oos_mask],
     ) | {
         "folds": win_fold_metrics, "n_samples": int(oos_mask.sum()),
-        "strategy": "no_vig_market_when_available_structural_fallback",
+        "strategy": "nested_shrunk_moneyline_calibration",
+        "market_residual_folds": moneyline_folds,
+        "final_residual_shrinkage": shrinkage,
+        "final_residual_shrinkage_oos_n": shrinkage_n,
         "market_anchored_n": int((priced_win & oos_mask).sum()),
     }
     joblib.dump(win_model, WIN_MODEL_PATH)
@@ -216,14 +236,16 @@ def train_all(force: bool = False) -> dict:
     residual_oof, residual_folds = walk_forward_market_residual(
         X_sp, y_sp, market_margin,
         df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
-        kind="ridge",
+        kind="extra_trees",
     )
     residual_valid = np.isfinite(residual_oof) & np.isfinite(spread_oof)
+    priced_spread = np.isfinite(market_margin) & np.isfinite(spread_oof)
+    spread_oof[priced_spread] = market_margin[priced_spread]
     spread_oof[residual_valid] = residual_oof[residual_valid]
     residual_model, residual_shrinkage, residual_shrinkage_n = fit_market_residual(
         X_sp, y_sp, market_margin,
         df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
-        kind="ridge",
+        kind="extra_trees",
     )
     spread_model = MarketAnchoredRegressor(
         residual_model=residual_model,
@@ -235,24 +257,27 @@ def train_all(force: bool = False) -> dict:
     )
     sp_oos = np.isfinite(structural_spread_oof)
     spread_fold_metrics = _regression_fold_metrics(
-        y_sp, structural_spread_oof,
+        y_sp, spread_oof,
         df_sp[["season", *(["start_date"] if "start_date" in df_sp else [])]],
         baseline=market_margin,
     )
     sp_m = regression_metrics(
-        y_sp[sp_oos], structural_spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
+        y_sp[sp_oos], spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
     ) | {
         "folds": spread_fold_metrics, "n_samples": int(sp_oos.sum()),
-        "strategy": "structural_xgb_with_market_residual_shadow",
+        "strategy": "nested_shrunk_market_residual_extra_trees",
         "market_anchored_n": int(residual_valid.sum()),
+        "priced_residual_std": regression_metrics(
+            y_sp[priced_spread], spread_oof[priced_spread]
+        ).get("residual_std"),
         "residual_folds": residual_folds,
         "final_residual_shrinkage": residual_shrinkage,
         "final_residual_shrinkage_oos_n": residual_shrinkage_n,
-        "market_residual_metrics": regression_metrics(
-            y_sp[sp_oos], spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
+        "structural_metrics": regression_metrics(
+            y_sp[sp_oos], structural_spread_oof[sp_oos], baseline_predictions=market_margin[sp_oos]
         ),
     }
-    joblib.dump(spread_model, SPREAD_MODEL_PATH)
+    joblib.dump(spread_model, SPREAD_MODEL_PATH, compress=3)
     metrics["spread_model"] = sp_m
     logger.info(f"  spread model — rmse={sp_m.get('rmse', '?'):.2f}   oos_n={sp_m['n_samples']:,}")
 
@@ -387,7 +412,7 @@ def train_all(force: bool = False) -> dict:
     )
 
     # ── ATS backtest ────────────────────────────────────────────────────────
-    metrics["ats"] = _ats_record_oos(df_sp, structural_spread_oof)
+    metrics["ats"] = _ats_record_oos(df_sp, spread_oof)
     logger.info(
         f"  ATS record — {metrics['ats']['wins']}W "
         f"{metrics['ats']['losses']}L  "
@@ -410,7 +435,7 @@ def train_all(force: bool = False) -> dict:
         dict(zip(df_win["game_id"], win_oof))
     )
     backtest["predicted_spread_oos"] = backtest["game_id"].map(
-        dict(zip(df_sp["game_id"], structural_spread_oof))
+        dict(zip(df_sp["game_id"], spread_oof))
     )
     backtest["predicted_total_oos"] = backtest["game_id"].map(
         dict(zip(df_tot["game_id"], total_oof))
@@ -420,8 +445,16 @@ def train_all(force: bool = False) -> dict:
     )
     save_parquet(backtest, "model_backtest", layer="features")
 
+    from utils.prospective_ledger import LEDGER_PATH, prospective_clv_summary
+    from utils.release import market_release_statuses
+
+    prospective_ledger = (
+        pd.read_parquet(LEDGER_PATH) if LEDGER_PATH.exists() else pd.DataFrame()
+    )
+    metrics["prospective_clv"] = prospective_clv_summary(prospective_ledger)
     metrics["release_gates"] = evaluate_release_gates(metrics)
     metrics["release_decision"] = promotion_decision(metrics["release_gates"])
+    metrics["market_release_status"] = market_release_statuses(metrics)
     git_sha = os.environ.get("GITHUB_SHA")
     manifest_specs = (
         ("win_probability", df_win, WIN_FEATURES, win_m, "P(home win), calibrated probability in [0,1]"),
@@ -523,13 +556,14 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     # Add absent columns as NaN. XGBoost learns a missing-value direction and
     # sklearn pipelines apply their persisted median/indicator transformer.
     df = df.copy()
+    df["market_home_prob"] = _market_home_probability(df)
     for f in list(dict.fromkeys(
         WIN_FEATURES + SPREAD_FEATURES + TOTAL_FEATURES + TOTAL_COVER_FEATURES
     )):
         if f not in df.columns:
             df[f] = np.nan
 
-    if win_m is None and "market_home_prob" in df.columns:
+    if win_m is None:
         # A market-anchored model can still produce its contract value when an
         # older structural fallback artifact is unreadable.
         df["win_prob"] = pd.to_numeric(
@@ -551,13 +585,7 @@ def predict_batch(df: pd.DataFrame) -> pd.DataFrame:
     else:
         try:
             X = df[SPREAD_FEATURES]
-            if hasattr(spread_m, "predict_structural"):
-                # The research UI needs to show the independent structural
-                # forecast; the market-anchored version is retained in the
-                # model wrapper for validation and release-gate accounting.
-                df["predicted_spread"] = spread_m.predict_structural(X)
-            else:
-                df["predicted_spread"] = _reg_predict(spread_m, X)
+            df["predicted_spread"] = _reg_predict(spread_m, X)
         except Exception:
             df["predicted_spread"] = float("nan")
 
@@ -643,16 +671,13 @@ def _predict_row(row: pd.Series) -> Prediction:
     total_m  = joblib.load(TOTAL_MODEL_PATH)
 
     w_x = pd.DataFrame([{f: _get_val(row, f, np.nan) for f in WIN_FEATURES}])
+    w_x["market_home_prob"] = _market_home_probability(row.to_frame().T)
     s_x = pd.DataFrame([{f: _get_val(row, f, np.nan) for f in SPREAD_FEATURES}])
     t_x = pd.DataFrame([{f: _get_val(row, f, np.nan) for f in TOTAL_FEATURES}])
 
     return Prediction(
         win_prob=float(_clf_predict_proba(win_m, w_x)[0]),
-        predicted_spread=float(
-            spread_m.predict_structural(s_x)[0]
-            if hasattr(spread_m, "predict_structural")
-            else _reg_predict(spread_m, s_x)[0]
-        ),
+        predicted_spread=float(_reg_predict(spread_m, s_x)[0]),
         predicted_total=float(_reg_predict(total_m, t_x)[0]),
     )
 
@@ -990,23 +1015,25 @@ def _walk_forward_regressor(
     return final, {"folds": fold_metrics}, oof
 
 
-def _market_home_probability(frame: pd.DataFrame) -> np.ndarray | None:
+def _market_home_probability(frame: pd.DataFrame) -> np.ndarray:
     if "market_home_prob" in frame.columns:
         consensus = pd.to_numeric(
             frame["market_home_prob"], errors="coerce"
         ).to_numpy(dtype=float)
-        if np.isfinite(consensus).any():
-            return consensus
-    if not {"home_moneyline", "away_moneyline"}.issubset(frame.columns):
-        return None
+        valid = (consensus > 0) & (consensus < 1)
+        return np.where(valid, consensus, np.nan)
     probabilities = np.full(len(frame), np.nan, dtype=float)
+    if not {"home_moneyline", "away_moneyline"}.issubset(frame.columns):
+        return probabilities
     for position, (home_odds, away_odds) in enumerate(
         zip(frame["home_moneyline"], frame["away_moneyline"])
     ):
         if pd.isna(home_odds) or pd.isna(away_odds):
             continue
         try:
-            probabilities[position] = remove_vig([float(home_odds), float(away_odds)])[0]
+            odds = np.asarray([home_odds, away_odds], dtype=float)
+            if np.isfinite(odds).all() and (np.abs(odds) >= 100).all():
+                probabilities[position] = remove_vig(odds)[0]
         except (TypeError, ValueError):
             continue
     return probabilities

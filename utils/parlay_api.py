@@ -16,7 +16,7 @@ import requests
 
 from utils.config import get_secret
 from utils.logger import get_logger
-from utils.odds_api import match_scheduled_game
+from utils.odds_api import match_market_event
 
 logger = get_logger(__name__)
 
@@ -148,10 +148,13 @@ def to_cfbd_line_payload(
     for event in events:
         home = event.get("home_team") or event.get("home")
         away = event.get("away_team") or event.get("away")
-        game = match_scheduled_game(schedule, home, away, event.get("commence_time"))
-        if game is None:
+        match = match_market_event(schedule, home, away, event.get("commence_time"))
+        if match is None:
             logger.warning("Skipping unmatched/ambiguous ParlayAPI event: %s at %s", away, home)
             continue
+        game, reversed_teams = match
+        if reversed_teams:
+            home, away = away, home
 
         bookmakers = event.get("bookmakers") or event.get("sources") or []
         if isinstance(bookmakers, dict):

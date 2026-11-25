@@ -1,6 +1,7 @@
 """Benchmark market-anchored candidates using the production walk-forward folds."""
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import sys
 
@@ -11,6 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from utils.challenger_models import (  # noqa: E402
+    cross_market_win_probabilities,
     walk_forward_market_calibration,
     walk_forward_market_residual,
     walk_forward_market_structural,
@@ -19,6 +21,7 @@ from utils.evaluation import probability_metrics, regression_metrics  # noqa: E4
 from utils.feature_engine import WIN_FEATURES, SPREAD_FEATURES, TOTAL_FEATURES  # noqa: E402
 from utils.market import remove_vig  # noqa: E402
 from utils.storage import load_parquet  # noqa: E402
+from utils.temporal import walk_forward_season_splits  # noqa: E402
 
 
 def _market_home(frame: pd.DataFrame) -> np.ndarray:
@@ -30,7 +33,23 @@ def _market_home(frame: pd.DataFrame) -> np.ndarray:
 
 
 def main() -> None:
-    frame = load_parquet("feature_matrix", layer="features").drop_duplicates("game_id")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--feature-matrix", type=Path, help="Use a point-in-time feature Parquet instead of the repository artifact.")
+    parser.add_argument("--cross-market-only", action="store_true", help="Benchmark only the cross-market moneyline challenger.")
+    args = parser.parse_args()
+    frame = pd.read_parquet(args.feature_matrix) if args.feature_matrix else load_parquet("feature_matrix", layer="features")
+    frame = frame.drop_duplicates("game_id")
+    priced = frame.dropna(subset=["home_win", "season"]).reset_index(drop=True)
+    priced["market_home_prob"] = pd.to_numeric(priced["market_home_prob"], errors="coerce")
+    for fold in walk_forward_season_splits(priced[["season", "start_date"]], min_train_seasons=2):
+        train, test = priced.iloc[fold.train_index], priced.iloc[fold.test_index]
+        forecast = cross_market_win_probabilities(train, test)
+        print("win_cross_market", fold.test_season, probability_metrics(
+            test["home_win"], forecast, baseline_probabilities=test["market_home_prob"]
+        ))
+    if args.cross_market_only:
+        return
+
     frame = frame.dropna(subset=["home_win", "home_margin", "total_points", "season"]).copy()
     temporal = frame[["season", "start_date"]].reset_index(drop=True)
     market_home = _market_home(frame)
