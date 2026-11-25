@@ -12,11 +12,18 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from scripts import export_best_bets
 from utils.advanced_features import build_context_features
 from utils.betting import generate_moneyline_pick, generate_spread_pick
 from utils.contracts import safe_merge, validate_feature_matrix, validate_games
 from utils.feature_observations import attach_game_observations
-from utils.prospective_ledger import select_quote_as_of
+from utils.prospective_ledger import (
+    PROSPECTIVE_STRATEGIES,
+    append_shadow_signals,
+    enrich_ledger_with_closing_and_results,
+    prospective_clv_summary,
+    select_quote_as_of,
+)
 from utils.evaluation import (
     calibration_table,
     conformal_interval,
@@ -62,6 +69,55 @@ import utils.cfbd_client as cfbd_client
 import utils.ui_components as ui_components
 
 
+class ProspectiveClosingEvidenceTests(unittest.TestCase):
+    def test_first_entry_is_frozen_and_only_later_same_source_close_counts(self):
+        entry = pd.Timestamp("2026-09-10T12:00:00Z")
+        kickoff = entry + pd.Timedelta(hours=6)
+        books = [{
+            "game_id": game, "market": market, "side": side, "sportsbook": "book",
+            "odds_source": "feed", "kickoff": kickoff, "prediction_time": entry,
+            "source_snapshot_at": entry, "taken_line": line, "taken_odds": -110,
+            "strategy_version": PROSPECTIVE_STRATEGIES[(market, None)],
+        } for game, market, side, line in [(1, "spread", "away", 3.0), (2, "moneyline", "home", None)]]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.parquet"
+            with patch("utils.prospective_ledger.LEDGER_PATH", path):
+                append_shadow_signals(books, metadata={})
+                append_shadow_signals([{
+                    **books[0], "side": "home", "taken_line": -3.5,
+                    "prediction_time": entry + pd.Timedelta(minutes=30),
+                }], metadata={})
+                ledger = pd.read_parquet(path)
+
+        self.assertEqual(len(ledger), 2)
+        self.assertEqual(ledger.loc[ledger["game_id"].eq(1), "side"].item(), "away")
+
+        quotes = pd.DataFrame([
+            {
+                "game_id": game, "market": market, "side": side, "sportsbook": "book",
+                "source": source, "captured_at": at, "is_live": live, "line": line, "odds": odds,
+            }
+            for game, market, side, source, at, live, line, odds in [
+                (1, "spread", "away", "feed", entry, False, 3, -110),
+                (1, "spread", "away", "feed", entry + pd.Timedelta(hours=2), False, 2, -110),
+                (1, "spread", "away", "other", entry + pd.Timedelta(hours=3), False, 1, -110),
+                (1, "spread", "away", "feed", entry + pd.Timedelta(hours=4), True, 1, -110),
+                (1, "spread", "away", "feed", kickoff, False, 0, -110),
+                (2, "moneyline", "home", "feed", entry, False, None, -110),
+            ]
+        ])
+        finals = pd.DataFrame({"game_id": [1, 2], "home_score": [24, 31], "away_score": [21, 14]})
+        settled = enrich_ledger_with_closing_and_results(ledger, quotes, finals).set_index("game_id")
+        self.assertEqual(settled.loc[1, "clv"], 1.0)
+        self.assertEqual(settled.loc[1, "result"], "P")
+        self.assertTrue(pd.isna(settled.loc[2, "closing_snapshot_at"]))
+        self.assertEqual(settled.loc[2, "result"], "W")
+        summary = prospective_clv_summary(settled.reset_index())
+        self.assertEqual(summary["spread:all"]["n"], 1)
+        self.assertFalse(summary["spread:all"]["passed"])
+        self.assertEqual(summary["moneyline:all"]["n"], 0)
+
+
 class _ConstantClassifier:
     def predict_proba(self, frame):
         return np.tile([0.4, 0.6], (len(frame), 1))
@@ -79,6 +135,7 @@ class IngestionTests(unittest.TestCase):
             "season": [2026],
             "home_team": ["Kansas"],
             "away_team": ["Missouri"],
+            "start_date": ["2026-09-12T18:00:00Z"],
         })
         snapshots = pd.DataFrame([
             {
@@ -109,6 +166,22 @@ class IngestionTests(unittest.TestCase):
                 "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
                 "captured_at": "2026-09-12T12:01:00Z", "line": 20, "odds": -110, "source": "parlay_api",
             },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "spread", "side": "home",
+                "captured_at": "2026-09-12T18:00:00Z", "line": 40, "odds": -110, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book A", "market": "total", "side": "over",
+                "captured_at": "2026-09-12T17:00:00Z", "line": 71, "odds": -110, "source": "cfbd", "is_live": True,
+            },
+            {
+                "game_id": 101, "sportsbook": "Book B", "market": "moneyline", "side": "home",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": 700, "source": "cfbd",
+            },
+            {
+                "game_id": 101, "sportsbook": "Book B", "market": "moneyline", "side": "away",
+                "captured_at": "2026-09-12T12:00:00Z", "line": np.nan, "odds": -900, "source": "therundown",
+            },
         ])
 
         result = build_market_consensus_from_snapshots(snapshots, games, season=2026)
@@ -116,8 +189,8 @@ class IngestionTests(unittest.TestCase):
         self.assertEqual(result.loc[0, "game_id"], 101)
         self.assertEqual(result.loc[0, "market_spread"], 4.5)
         self.assertEqual(result.loc[0, "market_total"], 51.5)
-        self.assertEqual(result.loc[0, "home_moneyline"], 170)
-        self.assertEqual(result.loc[0, "away_moneyline"], -208)
+        self.assertEqual(result.loc[0, "moneyline_book_count"], 1)
+        self.assertAlmostEqual(result.loc[0, "market_home_prob"], remove_vig([170, -208])[0])
 
     def test_cfbd_key_normalizes_bearer_prefix_and_rejects_empty(self):
         with patch.object(cfbd_client, "get_secret", return_value="Bearer token-value"):
@@ -744,6 +817,24 @@ class EvaluationAndRiskTests(unittest.TestCase):
         gates = {gate["name"]: gate for gate in evaluate_release_gates(metrics)}
         self.assertFalse(gates["spread_market_baseline"]["passed"])
         self.assertTrue(gates["total_market_baseline"]["passed"])
+
+    def test_clv_cannot_promote_a_totals_candidate_without_retrospective_skill(self):
+        metrics = {
+            "prospective_clv": {
+                "moneyline:all": {"passed": True},
+                "spread:all": {"passed": True},
+                "total:over": {"passed": True},
+            },
+            "total_cover_model": {
+                "strategy_release": {"eligible_sides": ["over"], "retrospective_gates_passed": False}
+            },
+        }
+        gate = next(gate for gate in evaluate_release_gates(metrics) if gate["name"] == "closing_line_value")
+        self.assertFalse(gate["passed"])
+        self.assertFalse(gate["actual"]["total:over"]["retrospective_eligible"])
+        metrics["total_cover_model"]["strategy_release"]["retrospective_gates_passed"] = True
+        gate = next(gate for gate in evaluate_release_gates(metrics) if gate["name"] == "closing_line_value")
+        self.assertTrue(gate["passed"])
 
 
 class JointScoreTests(unittest.TestCase):

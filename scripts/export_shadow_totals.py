@@ -1,7 +1,7 @@
 """Export closing-time total signals for prospective validation, never wagering."""
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import sys
@@ -11,8 +11,10 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from utils.models import load_metrics, models_trained, predict_batch  # noqa: E402
-from utils.prospective_ledger import append_shadow_signals, select_quote_as_of  # noqa: E402
+from scripts.export_best_bets import _load_current_quotes, _price_for_pick  # noqa: E402
+from utils.market import expected_value  # noqa: E402
+from utils.models import MODEL_VERSION, load_metrics, models_trained, predict_batch  # noqa: E402
+from utils.prospective_ledger import PROSPECTIVE_STRATEGIES, append_shadow_signals  # noqa: E402
 from utils.release import load_current_release  # noqa: E402
 
 OUT_PATH = ROOT / "data_files" / "shadow_total_signals.json"
@@ -43,10 +45,14 @@ def main() -> None:
         _write([], "Required model artifacts are unavailable")
         return
     metrics = load_metrics()
+    if metrics.get("model_version") != MODEL_VERSION:
+        _write([], "The prospective strategy is waiting for matching model artifacts")
+        return
     model_metrics = metrics.get("total_cover_model", {})
-    release = model_metrics.get("strategy_release", {})
-    if release.get("status") not in {"shadow", "promote"}:
-        _write([], "Total-side model has not passed retrospective gates")
+    strategy_release = model_metrics.get("strategy_release", {})
+    eligible_sides = set(strategy_release.get("eligible_sides", []))
+    if "over" not in eligible_sides:
+        _write([], "No totals research side met the retrospective selection criteria")
         return
     feature_path = ROOT / "data_files" / "features" / "feature_matrix.parquet"
     if not feature_path.exists():
@@ -58,7 +64,7 @@ def main() -> None:
     frame = pd.read_parquet(feature_path).drop_duplicates("game_id", keep="last")
     frame["start_date"] = pd.to_datetime(frame["start_date"], errors="coerce", utc=True)
     eligible = frame[
-        frame["start_date"].between(now, cutoff, inclusive="both")
+        frame["start_date"].between(now, cutoff, inclusive="right")
         & frame["total_points"].isna()
         & frame["market_total"].notna()
     ].copy()
@@ -67,12 +73,10 @@ def main() -> None:
         return
 
     scored = predict_batch(eligible)
-    snapshots_path = ROOT / "data_files" / "processed" / "line_snapshots.parquet"
-    snapshots = pd.read_parquet(snapshots_path) if snapshots_path.exists() else pd.DataFrame()
+    snapshots = _load_current_quotes(now)
     threshold = float(
         model_metrics.get("strategy", {}).get("probability_edge_threshold", 0.075)
     )
-    eligible_sides = set(release.get("eligible_sides", []))
     scored["probability_edge"] = (scored["total_over_prob"] - 0.5).abs()
     scored = scored[
         scored["total_over_prob"].notna()
@@ -83,16 +87,19 @@ def main() -> None:
     for _, row in scored.iterrows():
         over = float(row["total_over_prob"]) > 0.5
         side = "over" if over else "under"
-        if side not in eligible_sides:
+        strategy = PROSPECTIVE_STRATEGIES.get(("total", side))
+        if side not in eligible_sides or strategy is None:
             continue
-        quote = select_quote_as_of(
+        line = float(row["market_total"])
+        quote = _price_for_pick(
             snapshots,
             game_id=int(row["game_id"]),
             market="total",
             side=side,
-            as_of=now,
+            line=line,
         )
-        if quote is None or pd.isna(quote.get("line")):
+        probability = float(row["total_over_prob"] if over else 1 - row["total_over_prob"])
+        if quote is None or expected_value(probability, quote["odds"]) < 0.02:
             continue
         signals.append(
             {
@@ -100,17 +107,21 @@ def main() -> None:
                 "game": f"{row['away_team']} @ {row['home_team']}",
                 "kickoff": row["start_date"].isoformat(),
                 "side": side,
-                "market_total": float(row["market_total"]),
+                "market": "total",
+                "strategy_version": strategy,
+                "market_total": line,
                 "prediction_time": now.isoformat(),
                 "sportsbook": str(quote["sportsbook"]),
-                "taken_line": float(quote["line"]),
-                "taken_odds": float(quote["odds"]) if pd.notna(quote.get("odds")) else None,
+                "taken_line": line,
+                "taken_odds": quote["odds"],
                 "source_snapshot_at": pd.Timestamp(quote["captured_at"]).isoformat(),
+                "odds_source": quote["source"],
                 "ingestion_run_id": quote.get("ingestion_run_id"),
                 "over_probability": round(float(row["total_over_prob"]), 6),
-                "selected_probability": round(
-                    float(row["total_over_prob"] if over else 1 - row["total_over_prob"]), 6
-                ),
+                "selected_probability": round(probability, 6),
+                "model_probability": round(probability, 6),
+                "market_probability": quote["market_probability"],
+                "expected_value": expected_value(probability, quote["odds"]),
                 "probability_edge": round(float(row["probability_edge"]), 6),
                 "opening_total": (
                     float(row["market_total_open"])
@@ -130,13 +141,13 @@ def main() -> None:
     metadata = {
         "release_id": release.get("release_id"),
         "model_version": metrics.get("model_version"),
-        "strategy_version": "total-over-v2.2-locked",
+        "strategy_version": PROSPECTIVE_STRATEGIES[("total", "over")],
     }
     append_shadow_signals(signals, metadata=metadata)
     _write(
         signals,
-        "Prospective validation only; prices and CLV must pass before promotion",
-        metadata=metadata,
+        "Prospective research only. Both retrospective and closing-price criteria must pass.",
+        metadata={**metadata, "strategy_release_status": strategy_release.get("status", "hold")},
     )
 
 

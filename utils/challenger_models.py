@@ -438,6 +438,34 @@ class MarketBaselineClassifier:
         return np.column_stack([1 - home_probability, home_probability])
 
 
+def moneyline_calibration_features(market_probability: np.ndarray) -> pd.DataFrame:
+    """Represent the probability and signed curvature of its log odds."""
+    market = np.asarray(market_probability, dtype=float)
+    market_logit = logit(market)
+    return pd.DataFrame({
+        "market_probability": market,
+        "signed_squared_logit": market_logit * np.abs(market_logit),
+    })
+
+
+@dataclass
+class MarketResidualClassifier(MarketBaselineClassifier):
+    """Apply a nested-shrunk probability correction only where prices exist."""
+
+    residual_model: object = None
+    shrinkage: float = 0.0
+
+    def predict_proba(self, X) -> np.ndarray:
+        frame = X if isinstance(X, pd.DataFrame) else pd.DataFrame(X, columns=self.feature_names)
+        probability = super().predict_proba(frame)[:, 1]
+        market = pd.to_numeric(frame[self.market_feature], errors="coerce").to_numpy(float)
+        valid = np.isfinite(market)
+        if valid.any() and self.residual_model is not None:
+            correction = self.residual_model.predict(moneyline_calibration_features(market[valid]))
+            probability[valid] = np.clip(market[valid] + self.shrinkage * correction, 1e-6, 1 - 1e-6)
+        return np.column_stack([1 - probability, probability])
+
+
 @dataclass
 class MarketCalibratedClassifier:
     market_model: object

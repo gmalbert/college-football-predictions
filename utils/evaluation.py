@@ -14,7 +14,7 @@ from sklearn.metrics import brier_score_loss, log_loss, mean_absolute_error, mea
 class ReleaseGate:
     name: str
     passed: bool
-    actual: float | int | str | None
+    actual: float | int | str | dict | None
     threshold: float | int | str
     reason: str
 
@@ -255,7 +255,18 @@ def evaluate_release_gates(
     probability = metrics.get("win_model", {})
     spread = metrics.get("spread_model", {})
     total = metrics.get("total_model", {})
-    betting = metrics.get("betting", metrics.get("ats", {}))
+    prospective_clv = metrics.get("prospective_clv", {})
+    clv_keys = ("moneyline:all", "spread:all", "total:over")
+    clv_market_evidence = {key: dict(prospective_clv.get(key, {})) for key in clv_keys}
+    totals_strategy = metrics.get("total_cover_model", {}).get("strategy_release", {})
+    totals_eligible = (
+        "over" in totals_strategy.get("eligible_sides", [])
+        and bool(totals_strategy.get("retrospective_gates_passed"))
+    )
+    clv_market_evidence["total:over"]["retrospective_eligible"] = totals_eligible
+    clv_passed = totals_eligible and all(
+        bool(value.get("passed")) for value in clv_market_evidence.values()
+    )
     gates = [
         ReleaseGate(
             "out_of_sample_games",
@@ -304,10 +315,10 @@ def evaluate_release_gates(
         ),
         ReleaseGate(
             "closing_line_value",
-            float(betting.get("positive_clv_rate", -np.inf)) >= min_positive_clv_rate,
-            betting.get("positive_clv_rate"),
-            min_positive_clv_rate,
-            "A live strategy should beat later market prices more often than not.",
+            clv_passed,
+            clv_market_evidence,
+            "For each market: ≥150 prospective signals across ≥8 weeks, mean CLV 95% CI above 0, and positive-CLV rate 95% CI above 50%.",
+            "Require preregistered prospective, week-clustered CLV evidence for each market and an eligible totals side.",
         ),
     ]
     return [asdict(gate) for gate in gates]

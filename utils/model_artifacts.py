@@ -43,7 +43,7 @@ SPREAD_MODEL_PATH = MODELS_DIR / "spread_model.joblib"
 TOTAL_MODEL_PATH = MODELS_DIR / "total_model.joblib"
 TOTAL_COVER_MODEL_PATH = MODELS_DIR / "total_cover_model.joblib"
 METRICS_PATH = MODELS_DIR / "model_metrics.json"
-MODEL_VERSION = "2.2.0"
+MODEL_VERSION = "2.3.0"
 
 # Written by scripts/export_model_diagnostics.py in the weekly workflow, so the
 # Model Performance page can render its calibration and importance charts

@@ -77,6 +77,15 @@ class TestPublicBestBetsExport(unittest.TestCase):
             ):
                 export_best_bets.main()
                 payload = json.loads(output.read_text(encoding="utf-8"))
+                metrics["model_version"] = export_best_bets.MODEL_VERSION
+                metrics["release_decision"] = {"decision": "hold"}
+                with patch.object(export_best_bets, "append_shadow_signals") as append:
+                    export_best_bets.main(record_prospective=True)
+                    signals = append.call_args.args[0]
+                    self.assertEqual([signal["market"] for signal in signals], ["spread"])
+                    self.assertEqual(signals[0]["taken_line"], -21.5)
+                    self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["bets"], [])
+                metrics["release_decision"] = {"decision": "promote"}
                 # An opposing quote from a different provider cannot complete the pair.
                 quotes.loc[quotes["side"].eq("away"), "source"] = "odds_api"
                 quotes.to_parquet(snapshot)
